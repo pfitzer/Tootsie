@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Tootsie</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="close">Schließen</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="share">Teilen</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="loading">Lädt…</string>
+    <string name="error">Fehler</string>
+
+    <!-- Authentication -->
+    <string name="login">Anmelden</string>
+    <string name="logout">Abmelden</string>
+    <string name="instance_url">Instanz-URL</string>
+    <string name="instance_url_hint">z.B. mastodon.social</string>
+    <string name="login_to_mastodon">Bei Mastodon anmelden</string>
+
+    <!-- Timeline -->
+    <string name="home_timeline">Startseite</string>
+    <string name="local_timeline">Lokal</string>
+    <string name="federated_timeline">Föderation</string>
+    <string name="notifications">Benachrichtigungen</string>
+
+    <!-- Status Actions -->
+    <string name="reply">Antworten</string>
+    <string name="boost">Teilen</string>
+    <string name="favorite">Favorisieren</string>
+    <string name="bookmark">Lesezeichen</string>
+    <string name="share_status">Teilen</string>
+
+    <!-- Compose -->
+    <string name="compose">Verfassen</string>
+    <string name="compose_post">Beitrag verfassen</string>
+    <string name="whats_happening">Was gibt\'s Neues?</string>
+    <string name="publish">Veröffentlichen</string>
+    <string name="content_warning">Inhaltswarnung</string>
+    <string name="add_media">Medien hinzufügen</string>
+    <string name="poll">Umfrage</string>
+
+    <!-- Post Visibility -->
+    <string name="visibility_public">Öffentlich</string>
+    <string name="visibility_unlisted">Nicht gelistet</string>
+    <string name="visibility_private">Nur Follower</string>
+    <string name="visibility_direct">Direkt</string>
+
+    <!-- Profile -->
+    <string name="profile">Profil</string>
+    <string name="edit_profile">Profil bearbeiten</string>
+    <string name="followers">Follower</string>
+    <string name="following">Gefolgt</string>
+    <string name="posts">Beiträge</string>
+
+    <!-- Search -->
+    <string name="search">Suchen</string>
+    <string name="search_hint">Suche nach Benutzern, Hashtags oder Beiträgen</string>
+
+    <!-- Settings -->
+    <string name="settings">Einstellungen</string>
+    <string name="theme">Theme</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="theme_system">System-Standard</string>
+    <string name="language">Sprache</string>
+
+    <!-- Accounts -->
+    <string name="accounts">Konten</string>
+    <string name="add_account">Konto hinzufügen</string>
+    <string name="switch_account">Konto wechseln</string>
+
+    <!-- Errors -->
+    <string name="error_network">Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.</string>
+    <string name="error_generic">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</string>
+    <string name="error_authentication">Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an.</string>
+</resources>
