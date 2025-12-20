@@ -49,24 +49,24 @@ object NetworkModule {
 
     /**
      * Provides token provider function for AuthInterceptor.
-     * Returns null for now; will be implemented with DataStore later.
      */
     @Provides
     @Singleton
-    fun provideTokenProvider(): suspend () -> String? {
-        // TODO: Implement with DataStore in next step
-        return { null }
+    fun provideTokenProvider(
+        preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+    ): suspend () -> String? {
+        return { preferencesManager.getAccessToken() }
     }
 
     /**
      * Provides instance provider function for InstanceInterceptor.
-     * Returns default instance for now; will be implemented with DataStore later.
      */
     @Provides
     @Singleton
-    fun provideInstanceProvider(): suspend () -> String? {
-        // TODO: Implement with DataStore in next step
-        return { "mastodon.social" }
+    fun provideInstanceProvider(
+        preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+    ): suspend () -> String? {
+        return { preferencesManager.getInstanceUrl() ?: "mastodon.social" }
     }
 
     /**
