@@ -1,7 +1,11 @@
 package com.pfitzer.tootsie.di
 
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
+import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
+import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AuthRepository
+import com.pfitzer.tootsie.domain.repository.StatusRepository
+import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,10 +29,21 @@ abstract class RepositoryModule {
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
 
-    // Additional repository bindings will be added in later phases:
-    // - TimelineRepository
-    // - StatusRepository
-    // - AccountRepository
-    // - NotificationRepository
-    // etc.
+    /**
+     * Binds TimelineRepositoryImpl to TimelineRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTimelineRepository(
+        timelineRepositoryImpl: TimelineRepositoryImpl
+    ): TimelineRepository
+
+    /**
+     * Binds StatusRepositoryImpl to StatusRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindStatusRepository(
+        statusRepositoryImpl: StatusRepositoryImpl
+    ): StatusRepository
 }

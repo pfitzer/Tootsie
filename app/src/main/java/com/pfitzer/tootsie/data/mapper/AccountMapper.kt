@@ -87,7 +87,7 @@ fun AccountDto.toEntity(
 /**
  * Maps CustomEmojiDto to CustomEmoji (domain).
  */
-private fun com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto.toDomain(): CustomEmoji {
+fun com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto.toDomain(): CustomEmoji {
     return CustomEmoji(
         shortcode = shortcode,
         url = url,
@@ -99,7 +99,7 @@ private fun com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto.toDomain(): Custo
 /**
  * Maps FieldDto to Field (domain).
  */
-private fun com.pfitzer.tootsie.data.remote.dto.FieldDto.toDomain(): Field {
+fun com.pfitzer.tootsie.data.remote.dto.FieldDto.toDomain(): Field {
     return Field(
         name = name,
         value = value,

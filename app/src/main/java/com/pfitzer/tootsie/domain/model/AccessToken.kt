@@ -16,6 +16,6 @@ data class AccessToken(
 data class AppCredentials(
     val clientId: String,
     val clientSecret: String,
-    val redirectUri: String = "urn:ietf:wg:oauth:2.0:oob", // For OAuth flow
+    val redirectUri: String = "tootsie://oauth", // Custom deep link for OAuth callback
     val name: String = "Tootsie"
 )

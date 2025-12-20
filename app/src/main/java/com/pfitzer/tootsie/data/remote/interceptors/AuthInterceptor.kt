@@ -1,6 +1,5 @@
 package com.pfitzer.tootsie.data.remote.interceptors
 
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -11,7 +10,7 @@ import javax.inject.Inject
  * Retrieves the access token from DataStore and adds it as a Bearer token.
  */
 class AuthInterceptor @Inject constructor(
-    private val tokenProvider: suspend () -> String?
+    private val tokenProvider: TokenProvider
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -28,7 +27,7 @@ class AuthInterceptor @Inject constructor(
 
         // Get access token (blocking call in interceptor)
         val token = runBlocking {
-            tokenProvider()
+            tokenProvider.getToken()
         }
 
         // Add Authorization header if token is available

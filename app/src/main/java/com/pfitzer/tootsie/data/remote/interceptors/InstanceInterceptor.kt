@@ -11,7 +11,7 @@ import javax.inject.Inject
  * This allows the app to connect to different Mastodon instances.
  */
 class InstanceInterceptor @Inject constructor(
-    private val instanceProvider: suspend () -> String?
+    private val instanceUrlProvider: InstanceUrlProvider
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -19,7 +19,7 @@ class InstanceInterceptor @Inject constructor(
 
         // Get current instance URL
         val instance = runBlocking {
-            instanceProvider()
+            instanceUrlProvider.getInstanceUrl()
         } ?: "mastodon.social" // Default instance
 
         // Build new URL with the correct instance

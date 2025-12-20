@@ -1,10 +1,14 @@
 package com.pfitzer.tootsie.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.remote.api.AuthApiService
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.data.remote.interceptors.AuthInterceptor
 import com.pfitzer.tootsie.data.remote.interceptors.InstanceInterceptor
+import com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProvider
+import com.pfitzer.tootsie.data.remote.interceptors.TokenProvider
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +19,30 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
-import javax.inject.Qualifier
+import javax.inject.Inject
 import javax.inject.Singleton
+
+/**
+ * Hilt module that binds provider interfaces.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class NetworkBindsModule {
+
+    /**
+     * Binds TokenProvider implementation.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTokenProvider(impl: TokenProviderImpl): TokenProvider
+
+    /**
+     * Binds InstanceUrlProvider implementation.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindInstanceUrlProvider(impl: InstanceUrlProviderImpl): InstanceUrlProvider
+}
 
 /**
  * Hilt module that provides network-related dependencies.
@@ -45,28 +71,6 @@ object NetworkModule {
         return HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY // Log full request/response
         }
-    }
-
-    /**
-     * Provides token provider function for AuthInterceptor.
-     */
-    @Provides
-    @Singleton
-    fun provideTokenProvider(
-        preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager
-    ): suspend () -> String? {
-        return { preferencesManager.getAccessToken() }
-    }
-
-    /**
-     * Provides instance provider function for InstanceInterceptor.
-     */
-    @Provides
-    @Singleton
-    fun provideInstanceProvider(
-        preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager
-    ): suspend () -> String? {
-        return { preferencesManager.getInstanceUrl() ?: "mastodon.social" }
     }
 
     /**
@@ -124,5 +128,27 @@ object NetworkModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+}
+
+/**
+ * Implementation of TokenProvider.
+ */
+class TokenProviderImpl @Inject constructor(
+    private val preferencesManager: PreferencesManager
+) : TokenProvider {
+    override suspend fun getToken(): String? {
+        return preferencesManager.getAccessToken()
+    }
+}
+
+/**
+ * Implementation of InstanceUrlProvider.
+ */
+class InstanceUrlProviderImpl @Inject constructor(
+    private val preferencesManager: PreferencesManager
+) : InstanceUrlProvider {
+    override suspend fun getInstanceUrl(): String? {
+        return preferencesManager.getInstanceUrl() ?: "mastodon.social"
     }
 }
