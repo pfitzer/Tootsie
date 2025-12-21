@@ -37,37 +37,37 @@ class AuthRepositoryImpl @Inject constructor(
     private val tokenProvider: TokenProvider
 ) : AuthRepository {
 
-    init {
-        // Initialize providers with stored values from DataStore
-        // This is called once when the repository is created by Hilt
-        // Using runBlocking(Dispatchers.IO) to avoid blocking main thread
-        runBlocking(Dispatchers.IO) {
-            Log.d(TAG, "init - Loading stored values into providers...")
+    /**
+     * Initialize providers with stored credentials.
+     * Must be called before making any API requests that require authentication.
+     * This is separated from init block to avoid blocking during dependency injection.
+     */
+    suspend fun initializeProviders() {
+        Log.d(TAG, "initializeProviders() - Loading stored values from DataStore...")
 
-            val storedToken = preferencesManager.getAccessToken()
-            val storedInstance = preferencesManager.getInstanceUrl()
+        val storedToken = preferencesManager.getAccessToken()
+        val storedInstance = preferencesManager.getInstanceUrl()
 
-            Log.d(TAG, "init - Stored token present: ${storedToken != null}")
-            Log.d(TAG, "init - Stored instance: $storedInstance")
+        Log.d(TAG, "initializeProviders() - Stored token present: ${storedToken != null}")
+        Log.d(TAG, "initializeProviders() - Stored instance: $storedInstance")
 
-            // Set token in provider if it exists
-            if (storedToken != null) {
-                tokenProvider.setToken(storedToken)
-                Log.d(TAG, "init - Token loaded into provider")
-            } else {
-                Log.w(TAG, "init - No token found in DataStore")
-            }
-
-            // Set instance URL in provider if it exists
-            if (storedInstance != null) {
-                instanceUrlProvider.setInstanceUrl(storedInstance)
-                Log.d(TAG, "init - Instance URL loaded into provider: $storedInstance")
-            } else {
-                Log.w(TAG, "init - No instance URL found in DataStore, using default: mastodon.social")
-            }
-
-            Log.d(TAG, "init - Providers initialization complete")
+        // Set token in provider if it exists
+        if (storedToken != null) {
+            tokenProvider.setToken(storedToken)
+            Log.d(TAG, "initializeProviders() - Token loaded into provider")
+        } else {
+            Log.w(TAG, "initializeProviders() - No token found in DataStore")
         }
+
+        // Set instance URL in provider if it exists
+        if (storedInstance != null) {
+            instanceUrlProvider.setInstanceUrl(storedInstance)
+            Log.d(TAG, "initializeProviders() - Instance URL loaded into provider: $storedInstance")
+        } else {
+            Log.w(TAG, "initializeProviders() - No instance URL found, using default: mastodon.social")
+        }
+
+        Log.d(TAG, "initializeProviders() - Providers initialization complete")
     }
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
