@@ -14,6 +14,7 @@ import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.util.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -39,8 +40,8 @@ class AuthRepositoryImpl @Inject constructor(
     init {
         // Initialize providers with stored values from DataStore
         // This is called once when the repository is created by Hilt
-        // Using runBlocking to ensure providers are initialized before any API calls
-        runBlocking {
+        // Using runBlocking(Dispatchers.IO) to avoid blocking main thread
+        runBlocking(Dispatchers.IO) {
             Log.d(TAG, "init - Loading stored values into providers...")
 
             val storedToken = preferencesManager.getAccessToken()
