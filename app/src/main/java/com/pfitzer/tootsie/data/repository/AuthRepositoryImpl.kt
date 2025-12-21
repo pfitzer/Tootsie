@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.AuthApiService
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
+import com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProvider
 import com.pfitzer.tootsie.domain.model.AccessToken
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
@@ -28,7 +29,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val authApiService: AuthApiService,
     private val mastodonApiService: MastodonApiService,
     private val accountDao: AccountDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val instanceUrlProvider: InstanceUrlProvider
 ) : AuthRepository {
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
@@ -37,6 +39,11 @@ class AuthRepositoryImpl @Inject constructor(
             // Save instance URL for future API calls
             Log.d(TAG, "Saving instance URL to preferences")
             preferencesManager.saveInstanceUrl(instanceUrl)
+
+            // CRITICAL: Set instance URL in provider for OkHttp interceptor
+            // This must be synchronous to avoid deadlocks in the interceptor
+            instanceUrlProvider.setInstanceUrl(instanceUrl)
+            Log.d(TAG, "Instance URL set in provider: $instanceUrl")
 
             // Register app with the instance
             // Use deep link redirect URI for OAuth callback
@@ -70,6 +77,7 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             // Ensure instance URL is set
             preferencesManager.saveInstanceUrl(instanceUrl)
+            instanceUrlProvider.setInstanceUrl(instanceUrl)
 
             // Exchange authorization code for access token
             // Must match the redirect URI used during registration

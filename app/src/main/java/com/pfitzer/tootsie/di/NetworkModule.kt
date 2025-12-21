@@ -41,7 +41,7 @@ abstract class NetworkBindsModule {
      */
     @Binds
     @Singleton
-    abstract fun bindInstanceUrlProvider(impl: InstanceUrlProviderImpl): InstanceUrlProvider
+    abstract fun bindInstanceUrlProvider(impl: com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProviderImpl): InstanceUrlProvider
 }
 
 /**
@@ -142,13 +142,3 @@ class TokenProviderImpl @Inject constructor(
     }
 }
 
-/**
- * Implementation of InstanceUrlProvider.
- */
-class InstanceUrlProviderImpl @Inject constructor(
-    private val preferencesManager: PreferencesManager
-) : InstanceUrlProvider {
-    override suspend fun getInstanceUrl(): String? {
-        return preferencesManager.getInstanceUrl() ?: "mastodon.social"
-    }
-}

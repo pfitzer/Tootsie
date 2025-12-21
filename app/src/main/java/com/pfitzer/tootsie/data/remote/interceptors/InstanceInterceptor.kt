@@ -21,10 +21,8 @@ class InstanceInterceptor @Inject constructor(
         val originalRequest = chain.request()
         Log.d(TAG, "intercept() - Original URL: ${originalRequest.url}")
 
-        // Get current instance URL
-        val instance = runBlocking {
-            instanceUrlProvider.getInstanceUrl()
-        } ?: "mastodon.social" // Default instance
+        // Get current instance URL synchronously
+        val instance = instanceUrlProvider.getInstanceUrlSync() ?: "mastodon.social"
         Log.d(TAG, "intercept() - Instance from provider: $instance")
 
         // Build new URL with the correct instance
