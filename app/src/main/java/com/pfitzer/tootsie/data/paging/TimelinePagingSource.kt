@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.pfitzer.tootsie.data.local.dao.StatusDao
@@ -9,6 +10,8 @@ import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Status
 import retrofit2.HttpException
 import java.io.IOException
+
+private const val TAG = "TimelinePagingSource"
 
 /**
  * PagingSource for Timeline data.
@@ -24,20 +27,32 @@ class TimelinePagingSource(
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
         return try {
             val maxId = params.key // For pagination, load older posts
+            Log.d(TAG, "load() called - timelineType=$timelineType, maxId=$maxId, loadSize=${params.loadSize}")
 
             // Fetch from API
             val statusDtos = when (timelineType) {
-                "home" -> mastodonApi.getHomeTimeline(
-                    maxId = maxId,
-                    limit = params.loadSize
-                )
-                "public" -> mastodonApi.getPublicTimeline(
-                    local = local,
-                    maxId = maxId,
-                    limit = params.loadSize
-                )
-                else -> emptyList()
+                "home" -> {
+                    Log.d(TAG, "Fetching home timeline from API...")
+                    mastodonApi.getHomeTimeline(
+                        maxId = maxId,
+                        limit = params.loadSize
+                    )
+                }
+                "public" -> {
+                    Log.d(TAG, "Fetching public timeline from API...")
+                    mastodonApi.getPublicTimeline(
+                        local = local,
+                        maxId = maxId,
+                        limit = params.loadSize
+                    )
+                }
+                else -> {
+                    Log.w(TAG, "Unknown timeline type: $timelineType")
+                    emptyList()
+                }
             }
+
+            Log.d(TAG, "API returned ${statusDtos.size} statuses")
 
             // Cache to database
             if (statusDtos.isNotEmpty()) {
@@ -55,6 +70,7 @@ class TimelinePagingSource(
                 statuses.last().id
             }
 
+            Log.d(TAG, "Returning ${statuses.size} statuses, nextKey=$nextKey")
             LoadResult.Page(
                 data = statuses,
                 prevKey = null, // Only load older posts (forward pagination)
@@ -62,11 +78,14 @@ class TimelinePagingSource(
             )
         } catch (e: IOException) {
             // Network error - try loading from cache
+            Log.e(TAG, "Network error loading timeline", e)
             tryLoadFromCache(params)
         } catch (e: HttpException) {
             // HTTP error - try loading from cache
+            Log.e(TAG, "HTTP error loading timeline: ${e.code()} ${e.message()}", e)
             tryLoadFromCache(params)
         } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error loading timeline", e)
             LoadResult.Error(e)
         }
     }
