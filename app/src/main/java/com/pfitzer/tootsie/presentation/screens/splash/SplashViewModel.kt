@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.domain.usecase.auth.CheckLoginStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 private const val TAG = "SplashViewModel"
@@ -41,7 +43,10 @@ class SplashViewModel @Inject constructor(
             Log.d(TAG, "checkAuthStatus() - Initializing providers...")
 
             // Initialize providers with stored credentials before checking auth status
-            authRepository.initializeProviders()
+            // Use IO dispatcher to avoid DataStore deadlock on main thread
+            withContext(Dispatchers.IO) {
+                authRepository.initializeProviders()
+            }
 
             Log.d(TAG, "checkAuthStatus() - Checking login status...")
             val isLoggedIn = checkLoginStatusUseCase().first()
