@@ -14,8 +14,12 @@ import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.util.Result
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,6 +38,34 @@ class AuthRepositoryImpl @Inject constructor(
     private val instanceUrlProvider: InstanceUrlProvider,
     private val tokenProvider: TokenProvider
 ) : AuthRepository {
+
+    // Repository-scoped coroutine scope for initialization
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    init {
+        // Initialize providers with stored values from DataStore
+        // This is called once when the repository is created by Hilt
+        repositoryScope.launch {
+            val storedToken = preferencesManager.getAccessToken()
+            val storedInstance = preferencesManager.getInstanceUrl()
+
+            Log.d(TAG, "init - Loading stored values into providers")
+            Log.d(TAG, "init - Stored token present: ${storedToken != null}")
+            Log.d(TAG, "init - Stored instance: $storedInstance")
+
+            // Set token in provider if it exists
+            if (storedToken != null) {
+                tokenProvider.setToken(storedToken)
+                Log.d(TAG, "init - Token loaded into provider")
+            }
+
+            // Set instance URL in provider if it exists
+            if (storedInstance != null) {
+                instanceUrlProvider.setInstanceUrl(storedInstance)
+                Log.d(TAG, "init - Instance URL loaded into provider: $storedInstance")
+            }
+        }
+    }
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
         Log.d(TAG, "registerApp() called with instanceUrl: $instanceUrl")
