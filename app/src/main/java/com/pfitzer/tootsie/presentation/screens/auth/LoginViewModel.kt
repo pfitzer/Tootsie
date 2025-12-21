@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.AppCredentials
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "LoginViewModel"
 
 /**
  * ViewModel for Login Screen.
@@ -51,7 +54,10 @@ class LoginViewModel @Inject constructor(
      * Start the login flow - register app and open browser for OAuth.
      */
     private fun startLogin() {
+        Log.d(TAG, "startLogin() called with instance: ${_uiState.value.instanceUrl}")
+
         if (_uiState.value.instanceUrl.isBlank()) {
+            Log.w(TAG, "Instance URL is blank")
             _uiState.update {
                 it.copy(errorMessage = "Please enter a Mastodon instance URL")
             }
@@ -59,12 +65,14 @@ class LoginViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, loginStep = LoginStep.REGISTERING_APP) }
+            Log.d(TAG, "Starting app registration")
 
             // Step 1: Register app with instance
             when (val result = registerAppUseCase(_uiState.value.instanceUrl)) {
                 is Result.Success -> {
                     val appCredentials = result.data
+                    Log.d(TAG, "App registration successful: clientId=${appCredentials.clientId}")
                     _uiState.update { it.copy(appCredentials = appCredentials) }
 
                     // Step 2: Build authorization URL
@@ -72,6 +80,7 @@ class LoginViewModel @Inject constructor(
                         instanceUrl = _uiState.value.instanceUrl,
                         appCredentials = appCredentials
                     )
+                    Log.d(TAG, "Authorization URL generated: $authUrl")
 
                     _uiState.update {
                         it.copy(
@@ -80,13 +89,16 @@ class LoginViewModel @Inject constructor(
                             loginStep = LoginStep.AWAITING_AUTHORIZATION
                         )
                     }
+                    Log.d(TAG, "UI state updated with authorization URL")
                 }
 
                 is Result.Error -> {
+                    Log.e(TAG, "App registration failed: ${result.message}", result.exception)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Failed to connect to instance: ${result.message}"
+                            errorMessage = "Failed to connect to instance: ${result.message}",
+                            loginStep = LoginStep.INITIAL
                         )
                     }
                 }
@@ -101,8 +113,11 @@ class LoginViewModel @Inject constructor(
      * Exchange code for access token and verify credentials.
      */
     private fun handleAuthorizationCode(code: String) {
+        Log.d(TAG, "handleAuthorizationCode() called with code: ${code.take(10)}...")
+
         val appCredentials = _uiState.value.appCredentials
         if (appCredentials == null) {
+            Log.e(TAG, "App credentials not found when handling authorization code")
             _uiState.update {
                 it.copy(errorMessage = "App credentials not found. Please try logging in again.")
             }
@@ -113,6 +128,7 @@ class LoginViewModel @Inject constructor(
             _uiState.update {
                 it.copy(isLoading = true, loginStep = LoginStep.EXCHANGING_TOKEN)
             }
+            Log.d(TAG, "Exchanging authorization code for token")
 
             // Step 3: Exchange authorization code for access token
             when (val tokenResult = exchangeCodeForTokenUseCase(
@@ -121,9 +137,13 @@ class LoginViewModel @Inject constructor(
                 authorizationCode = code
             )) {
                 is Result.Success -> {
+                    Log.d(TAG, "Token exchange successful, verifying credentials")
+                    _uiState.update { it.copy(loginStep = LoginStep.VERIFYING_CREDENTIALS) }
+
                     // Step 4: Verify credentials and get user account
                     when (val credentialsResult = verifyCredentialsUseCase()) {
                         is Result.Success -> {
+                            Log.d(TAG, "Credentials verified successfully, login complete")
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
@@ -134,10 +154,12 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Result.Error -> {
+                            Log.e(TAG, "Credential verification failed: ${credentialsResult.message}", credentialsResult.exception)
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    errorMessage = "Failed to verify credentials: ${credentialsResult.message}"
+                                    errorMessage = "Failed to verify credentials: ${credentialsResult.message}",
+                                    loginStep = LoginStep.INITIAL
                                 )
                             }
                         }
@@ -147,10 +169,12 @@ class LoginViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
+                    Log.e(TAG, "Token exchange failed: ${tokenResult.message}", tokenResult.exception)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Failed to exchange authorization code: ${tokenResult.message}"
+                            errorMessage = "Failed to exchange authorization code: ${tokenResult.message}",
+                            loginStep = LoginStep.INITIAL
                         )
                     }
                 }
