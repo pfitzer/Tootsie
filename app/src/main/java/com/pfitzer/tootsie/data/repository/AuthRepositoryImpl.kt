@@ -34,9 +34,11 @@ class AuthRepositoryImpl @Inject constructor(
             preferencesManager.saveInstanceUrl(instanceUrl)
 
             // Register app with the instance
+            // Use deep link redirect URI for OAuth callback
+            val redirectUri = "tootsie://oauth"
             val response = authApiService.registerApp(
                 clientName = "Tootsie",
-                redirectUris = "urn:ietf:wg:oauth:2.0:oob",
+                redirectUris = redirectUri,
                 scopes = "read write follow push",
                 website = null
             )
@@ -61,10 +63,12 @@ class AuthRepositoryImpl @Inject constructor(
             preferencesManager.saveInstanceUrl(instanceUrl)
 
             // Exchange authorization code for access token
+            // Must match the redirect URI used during registration
+            val redirectUri = "tootsie://oauth"
             val response = authApiService.getAccessToken(
                 clientId = clientId,
                 clientSecret = clientSecret,
-                redirectUri = "urn:ietf:wg:oauth:2.0:oob",
+                redirectUri = redirectUri,
                 code = code,
                 grantType = "authorization_code",
                 scope = "read write follow push"

@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.pfitzer.tootsie.presentation.screens.auth.LoginScreen
+import com.pfitzer.tootsie.presentation.screens.compose.ComposeScreen
+import com.pfitzer.tootsie.presentation.screens.home.HomeScreen
 import com.pfitzer.tootsie.presentation.screens.splash.SplashScreen
 
 /**
@@ -88,13 +90,26 @@ fun TootsieNavHost(
 
         // Home screen - main timeline
         composable(route = TootsieDestinations.Home.route) {
-            // HomeScreen will be implemented in Phase 3
-            // Placeholder for now
+            HomeScreen(
+                onNavigateToCompose = {
+                    navController.navigate(TootsieDestinations.Compose.route)
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                }
+            )
         }
 
         // Compose screen - create new post
         composable(route = TootsieDestinations.Compose.route) {
-            // ComposeScreen will be implemented in Phase 3
+            ComposeScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         // Profile screen

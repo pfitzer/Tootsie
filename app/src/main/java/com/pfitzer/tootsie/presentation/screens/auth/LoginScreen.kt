@@ -60,8 +60,13 @@ fun LoginScreen(
     // Open browser for OAuth when authorization URL is ready
     LaunchedEffect(uiState.authorizationUrl) {
         uiState.authorizationUrl?.let { url ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            context.startActivity(intent)
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                viewModel.onAction(LoginAction.DismissError)
+            }
         }
     }
 
