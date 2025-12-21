@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -63,10 +64,7 @@ class PreferencesManager @Inject constructor(
      * Get access token (suspend function for one-time read).
      */
     suspend fun getAccessToken(): String? {
-        val preferences = dataStore.data.map { it[KEY_ACCESS_TOKEN] }
-        var token: String? = null
-        preferences.collect { token = it }
-        return token
+        return dataStore.data.map { it[KEY_ACCESS_TOKEN] }.first()
     }
 
     /**
@@ -123,10 +121,7 @@ class PreferencesManager @Inject constructor(
      * Get instance URL (suspend function for one-time read).
      */
     suspend fun getInstanceUrl(): String? {
-        val preferences = dataStore.data.map { it[KEY_INSTANCE_URL] }
-        var url: String? = null
-        preferences.collect { url = it }
-        return url
+        return dataStore.data.map { it[KEY_INSTANCE_URL] }.first()
     }
 
     /**
