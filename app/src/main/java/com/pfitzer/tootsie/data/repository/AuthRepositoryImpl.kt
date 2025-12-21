@@ -8,6 +8,7 @@ import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.AuthApiService
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProvider
+import com.pfitzer.tootsie.data.remote.interceptors.TokenProvider
 import com.pfitzer.tootsie.domain.model.AccessToken
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
@@ -30,7 +31,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val mastodonApiService: MastodonApiService,
     private val accountDao: AccountDao,
     private val preferencesManager: PreferencesManager,
-    private val instanceUrlProvider: InstanceUrlProvider
+    private val instanceUrlProvider: InstanceUrlProvider,
+    private val tokenProvider: TokenProvider
 ) : AuthRepository {
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
@@ -93,8 +95,13 @@ class AuthRepositoryImpl @Inject constructor(
 
             val accessToken = response.toDomain()
 
-            // Save access token
+            // Save access token to DataStore
             preferencesManager.saveAccessToken(accessToken.accessToken)
+
+            // CRITICAL: Set token in provider for OkHttp interceptor
+            // This must be synchronous to avoid deadlocks in the interceptor
+            tokenProvider.setToken(accessToken.accessToken)
+            Log.d(TAG, "Access token set in provider")
 
             Result.Success(accessToken)
         } catch (e: Exception) {
@@ -143,6 +150,10 @@ class AuthRepositoryImpl @Inject constructor(
 
             // Clear preferences
             preferencesManager.clearAuthData()
+
+            // Clear token from provider
+            tokenProvider.clearToken()
+            Log.d(TAG, "Token cleared from provider")
 
             // Delete account from database if exists
             activeAccount?.let {

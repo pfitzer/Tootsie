@@ -132,13 +132,20 @@ object NetworkModule {
 }
 
 /**
- * Implementation of TokenProvider.
+ * Thread-safe implementation of TokenProvider.
+ * Stores access token in memory for fast, synchronous access.
  */
-class TokenProviderImpl @Inject constructor(
-    private val preferencesManager: PreferencesManager
-) : TokenProvider {
-    override suspend fun getToken(): String? {
-        return preferencesManager.getAccessToken()
+class TokenProviderImpl @Inject constructor() : TokenProvider {
+    private val accessToken = java.util.concurrent.atomic.AtomicReference<String?>(null)
+
+    override fun getTokenSync(): String? = accessToken.get()
+
+    override fun setToken(token: String?) {
+        accessToken.set(token)
+    }
+
+    override fun clearToken() {
+        accessToken.set(null)
     }
 }
 

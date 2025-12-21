@@ -1,13 +1,15 @@
 package com.pfitzer.tootsie.data.remote.interceptors
 
-import kotlinx.coroutines.runBlocking
+import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
+private const val TAG = "AuthInterceptor"
+
 /**
  * OkHttp interceptor that adds authentication headers to API requests.
- * Retrieves the access token from DataStore and adds it as a Bearer token.
+ * Retrieves the access token synchronously from memory to avoid blocking.
  */
 class AuthInterceptor @Inject constructor(
     private val tokenProvider: TokenProvider
@@ -22,13 +24,13 @@ class AuthInterceptor @Inject constructor(
             url.contains("/oauth/token") ||
             url.contains("/api/v1/instance")
         ) {
+            Log.d(TAG, "intercept() - Skipping auth for: $url")
             return chain.proceed(originalRequest)
         }
 
-        // Get access token (blocking call in interceptor)
-        val token = runBlocking {
-            tokenProvider.getToken()
-        }
+        // Get access token synchronously (no blocking)
+        val token = tokenProvider.getTokenSync()
+        Log.d(TAG, "intercept() - Token present: ${token != null}")
 
         // Add Authorization header if token is available
         val request = if (token != null) {
