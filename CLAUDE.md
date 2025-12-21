@@ -4,12 +4,38 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Foundation Setup
+**Current Phase**: Phase 1 Complete - Core Infrastructure ✅
 **Version**: 1.0.0-alpha (pre-release)
-**Project State**: New project - implementation starting from scratch
+**Project State**: Core authentication and timeline viewing implemented
 
-### Technical Analysis
-This is a greenfield Android project. While CLAUDE.md lists ambitious features, the codebase currently contains only an empty Android Studio template with no implementation. All features listed (multi-account support, Jetpack Compose UI, Mastodon API integration) need to be built from the ground up.
+### Completed Features ✅
+- **OAuth 2.0 Authentication**: Full OAuth flow with dynamic app registration
+- **Multi-Instance Support**: Users can connect to any Mastodon instance
+- **Timeline Viewing**: Home and public timeline display with Paging 3
+- **Offline Caching**: Timeline posts cached in Room database
+- **Authentication Persistence**: Token and credentials stored securely in DataStore
+- **Clean Architecture**: Repository pattern, use cases, ViewModels all implemented
+- **Provider Pattern**: Thread-safe synchronous access to auth state for interceptors
+
+### Current Implementation Status
+Phase 1 (Core Infrastructure) is complete with:
+- ✅ Hilt dependency injection configured
+- ✅ Room database for local persistence
+- ✅ DataStore for preferences and settings
+- ✅ Retrofit + OkHttp for API communication
+- ✅ OAuth authentication flow working
+- ✅ Timeline fetching and display
+- ✅ Jetpack Compose UI foundation
+- ✅ Navigation with NavHost
+- ✅ Paging 3 for infinite scroll
+
+### Next Steps
+Phase 2 will focus on:
+- Post interactions (favorite, boost, reply)
+- Compose/create posts
+- User profiles
+- Notifications
+- Search functionality
 
 ---
 
@@ -195,6 +221,235 @@ Targeting Mastodon API v1 and v2 (compatible with Mastodon 3.0+)
 4. **Push Notifications**: Requires both FCM and Mastodon push subscription API
 5. **Character Counting**: Mastodon has specific rules (URLs = 23 chars, etc.)
 6. **Instance Diversity**: Different instances may have custom features/limits
+
+---
+
+## Lessons Learned
+
+### Critical Architecture Patterns Discovered During Development
+
+#### 1. DataStore Flow Consumption Pattern ⚠️ CRITICAL
+
+**Problem**: Using `.collect {}` on `DataStore.data` Flow causes infinite blocking.
+
+**Why**: `DataStore.data` is a **hot Flow** that continuously emits values and never completes. Using `.collect {}` on it blocks forever waiting for more emissions.
+
+**Solution**: Always use `.first()` for one-time reads from DataStore:
+
+```kotlin
+// ❌ WRONG - Blocks forever
+suspend fun getAccessToken(): String? {
+    val preferences = dataStore.data.map { it[KEY_ACCESS_TOKEN] }
+    var token: String? = null
+    preferences.collect { token = it }  // Infinite blocking!
+    return token
+}
+
+// ✅ CORRECT - Gets first emission and completes
+suspend fun getAccessToken(): String? {
+    return dataStore.data.map { it[KEY_ACCESS_TOKEN] }.first()
+}
+```
+
+**Key Takeaway**: For one-time DataStore reads, use `.first()`. Only use `.collect {}` when you want to continuously observe changes (e.g., in UI layer with `collectAsState()`).
+
+---
+
+#### 2. OkHttp Interceptor Threading Constraints ⚠️ CRITICAL
+
+**Problem**: Using `runBlocking` or suspend functions in OkHttp interceptors causes deadlocks.
+
+**Why**:
+- OkHttp interceptors run on worker threads from a limited thread pool
+- `runBlocking` blocks the thread while waiting for coroutine completion
+- If the coroutine needs resources from the same thread pool, deadlock occurs
+- DataStore operations on Main dispatcher compound the problem
+
+**Solution**: Use synchronous in-memory caching with the Provider pattern:
+
+```kotlin
+// ❌ WRONG - Causes deadlock
+class AuthInterceptor(private val dataStore: DataStore<Preferences>) : Interceptor {
+    override fun intercept(chain: Chain): Response {
+        val token = runBlocking {
+            dataStore.data.map { it[KEY_TOKEN] }.first()  // Deadlock!
+        }
+        // ...
+    }
+}
+
+// ✅ CORRECT - Synchronous access with in-memory cache
+interface TokenProvider {
+    fun getTokenSync(): String?
+    fun setToken(token: String?)
+}
+
+class TokenProviderImpl : TokenProvider {
+    private val token = AtomicReference<String?>(null)
+    override fun getTokenSync(): String? = token.get()
+    override fun setToken(token: String?) { this.token.set(token) }
+}
+
+class AuthInterceptor(private val tokenProvider: TokenProvider) : Interceptor {
+    override fun intercept(chain: Chain): Response {
+        val token = tokenProvider.getTokenSync()  // Fast, non-blocking
+        // ...
+    }
+}
+```
+
+**Key Takeaway**: Never use `runBlocking` or suspend functions in OkHttp interceptors. Use the Provider pattern with `AtomicReference` for thread-safe, synchronous access.
+
+---
+
+#### 3. Provider Initialization Lifecycle ⚠️ IMPORTANT
+
+**Problem**: Initializing providers too early (in init blocks or during Hilt construction) causes deadlocks or failures.
+
+**Why**:
+- Hilt dependency construction happens during app startup
+- DataStore may not be fully initialized yet
+- Init blocks with blocking code freeze the app before it starts
+
+**Solution**: Explicit initialization in ViewModel after app starts:
+
+```kotlin
+// ❌ WRONG - Init block runs during Hilt construction
+@Singleton
+class AuthRepositoryImpl @Inject constructor(
+    private val preferencesManager: PreferencesManager,
+    private val tokenProvider: TokenProvider
+) {
+    init {
+        runBlocking {  // Blocks app startup!
+            val token = preferencesManager.getAccessToken()
+            tokenProvider.setToken(token)
+        }
+    }
+}
+
+// ✅ CORRECT - Explicit initialization in ViewModel
+@Singleton
+class AuthRepositoryImpl @Inject constructor(...) {
+    suspend fun initializeProviders() {
+        val token = preferencesManager.getAccessToken()
+        tokenProvider.setToken(token)
+        // ...
+    }
+}
+
+@HiltViewModel
+class SplashViewModel @Inject constructor(
+    private val authRepository: AuthRepositoryImpl
+) : ViewModel() {
+    init {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                authRepository.initializeProviders()
+            }
+            // ... continue with auth check
+        }
+    }
+}
+```
+
+**Key Takeaway**: Don't initialize providers in repository init blocks. Use explicit initialization methods called from ViewModels with proper dispatcher context.
+
+---
+
+#### 4. Coroutine Dispatcher Selection for DataStore
+
+**Problem**: Reading from DataStore on Main dispatcher can cause deadlocks in certain contexts.
+
+**Why**: DataStore uses the IO dispatcher internally, but coordinating with Main dispatcher can cause issues when the caller is blocking or in a constrained context.
+
+**Solution**: Always use `Dispatchers.IO` when reading from DataStore in initialization code:
+
+```kotlin
+// ❌ RISKY - May deadlock depending on context
+viewModelScope.launch {  // Defaults to Dispatchers.Main
+    authRepository.initializeProviders()  // Reads from DataStore
+}
+
+// ✅ SAFE - Explicitly uses IO dispatcher
+viewModelScope.launch {
+    withContext(Dispatchers.IO) {
+        authRepository.initializeProviders()  // Safe DataStore access
+    }
+}
+```
+
+**Key Takeaway**: Wrap DataStore operations in `withContext(Dispatchers.IO)` to ensure they run on the correct dispatcher, especially during initialization.
+
+---
+
+#### 5. AtomicReference for Thread-Safe Caching
+
+**Problem**: Multiple threads accessing shared state (tokens, URLs) in providers.
+
+**Solution**: Use `AtomicReference` for thread-safe reads/writes without locks:
+
+```kotlin
+class TokenProviderImpl : TokenProvider {
+    private val token = AtomicReference<String?>(null)
+
+    override fun getTokenSync(): String? = token.get()  // Thread-safe read
+    override fun setToken(token: String?) {
+        this.token.set(token)  // Thread-safe write
+    }
+}
+```
+
+**Key Takeaway**: `AtomicReference` provides lock-free thread safety for simple get/set operations, perfect for caching authentication state.
+
+---
+
+#### 6. Debugging Threading Issues
+
+**Techniques that helped identify the deadlock issues**:
+
+1. **Comprehensive Logging**: Add logs before and after every async operation:
+   ```kotlin
+   Log.d(TAG, "Starting operation X...")
+   val result = suspendOperation()
+   Log.d(TAG, "Completed operation X: $result")
+   ```
+   If you see "Starting" but never "Completed", you've found the hanging point.
+
+2. **Thread Name Logging**: Log the current thread to identify dispatcher issues:
+   ```kotlin
+   Log.d(TAG, "Running on thread: ${Thread.currentThread().name}")
+   ```
+
+3. **Check for `.collect()` on Infinite Flows**: Search codebase for patterns like:
+   ```kotlin
+   flow.collect { }  // Without proper scope or termination
+   ```
+
+4. **Verify Interceptor Constraints**: Never use blocking operations in OkHttp interceptors.
+
+5. **Monitor Logcat for Hang Patterns**: If logs stop suddenly with no error, it's likely a deadlock or infinite wait.
+
+**Key Takeaway**: When debugging hangs, add granular logging around all async operations and thread transitions. The absence of expected log messages reveals the exact blocking point.
+
+---
+
+### Implementation Patterns Summary
+
+**For Authentication/Network Layer**:
+- ✅ Use Provider pattern with `AtomicReference` for synchronous access in interceptors
+- ✅ Initialize providers explicitly from ViewModels, not in init blocks
+- ✅ Always use `.first()` for one-time DataStore reads
+- ✅ Wrap DataStore operations in `withContext(Dispatchers.IO)`
+- ❌ Never use `runBlocking` in OkHttp interceptors
+- ❌ Never use `.collect {}` on infinite Flows for one-time reads
+
+**For DataStore Operations**:
+- ✅ Use `.first()` for one-time reads
+- ✅ Use Flow properties for reactive observations in UI
+- ✅ Run reads on `Dispatchers.IO` during initialization
+- ❌ Never use `.collect {}` without proper scope/termination
+- ❌ Don't read from DataStore in init blocks or Hilt construction
 
 ---
 
