@@ -2,6 +2,7 @@ package com.pfitzer.tootsie.presentation.screens.auth
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -22,6 +23,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.common.LoadingButton
+
+private const val TAG = "LoginScreen"
 
 /**
  * Login Screen - OAuth2 authentication flow.
@@ -60,11 +63,14 @@ fun LoginScreen(
     // Open browser for OAuth when authorization URL is ready
     LaunchedEffect(uiState.authorizationUrl) {
         uiState.authorizationUrl?.let { url ->
+            Log.d(TAG, "Opening browser with URL: $url")
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
+                Log.d(TAG, "Browser opened successfully")
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to open browser", e)
                 viewModel.onAction(LoginAction.DismissError)
             }
         }
@@ -136,6 +142,25 @@ fun LoginScreen(
             // Login Step Indicator
             if (uiState.loginStep != LoginStep.INITIAL) {
                 LoginStepIndicator(step = uiState.loginStep)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Manual browser open button (if waiting for authorization)
+            if (uiState.loginStep == LoginStep.AWAITING_AUTHORIZATION && uiState.authorizationUrl != null) {
+                Button(
+                    onClick = {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uiState.authorizationUrl))
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            // Ignore
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Open Browser to Authorize")
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
