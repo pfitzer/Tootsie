@@ -1,9 +1,12 @@
 package com.pfitzer.tootsie.domain.usecase.auth
 
+import android.util.Log
 import com.pfitzer.tootsie.domain.model.AppCredentials
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.util.Result
 import javax.inject.Inject
+
+private const val TAG = "RegisterAppUseCase"
 
 /**
  * Use case for registering the Tootsie app with a Mastodon instance.
@@ -22,10 +25,22 @@ class RegisterAppUseCase @Inject constructor(
      * @return Result containing AppCredentials on success, or error
      */
     suspend operator fun invoke(instanceUrl: String): Result<AppCredentials> {
+        Log.d(TAG, "invoke() called with instanceUrl: $instanceUrl")
+
         // Normalize instance URL (remove trailing slash, ensure https)
         val normalizedUrl = normalizeInstanceUrl(instanceUrl)
+        Log.d(TAG, "Normalized URL: $normalizedUrl")
 
-        return authRepository.registerApp(normalizedUrl)
+        Log.d(TAG, "Calling authRepository.registerApp()")
+        val result = authRepository.registerApp(normalizedUrl)
+
+        when (result) {
+            is Result.Success -> Log.d(TAG, "registerApp() returned Success")
+            is Result.Error -> Log.e(TAG, "registerApp() returned Error: ${result.message}")
+            is Result.Loading -> Log.d(TAG, "registerApp() returned Loading")
+        }
+
+        return result
     }
 
     /**

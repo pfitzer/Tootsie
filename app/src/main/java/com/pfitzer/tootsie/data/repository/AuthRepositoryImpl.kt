@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.repository
 
+import android.util.Log
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.mapper.toDomain
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val TAG = "AuthRepositoryImpl"
+
 /**
  * Implementation of AuthRepository.
  * Handles authentication operations with Mastodon API and local storage.
@@ -29,13 +32,17 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
+        Log.d(TAG, "registerApp() called with instanceUrl: $instanceUrl")
         return try {
             // Save instance URL for future API calls
+            Log.d(TAG, "Saving instance URL to preferences")
             preferencesManager.saveInstanceUrl(instanceUrl)
 
             // Register app with the instance
             // Use deep link redirect URI for OAuth callback
             val redirectUri = "tootsie://oauth"
+            Log.d(TAG, "Making API call to register app with redirect URI: $redirectUri")
+
             val response = authApiService.registerApp(
                 clientName = "Tootsie",
                 redirectUris = redirectUri,
@@ -43,8 +50,10 @@ class AuthRepositoryImpl @Inject constructor(
                 website = null
             )
 
+            Log.d(TAG, "API call successful, received client_id: ${response.clientId}")
             Result.Success(response.toDomain())
         } catch (e: Exception) {
+            Log.e(TAG, "registerApp() failed with exception", e)
             Result.Error(
                 message = "Failed to register app: ${e.message}",
                 exception = e
