@@ -32,8 +32,18 @@ sealed class TootsieDestinations(val route: String) {
 
     /**
      * Compose screen - create new status/post.
+     * Optionally takes replyToId parameter for replying to a status.
      */
-    data object Compose : TootsieDestinations("compose")
+    data object Compose : TootsieDestinations("compose?replyToId={replyToId}") {
+        fun createRoute(replyToId: String? = null): String {
+            return if (replyToId != null) {
+                "compose?replyToId=$replyToId"
+            } else {
+                "compose"
+            }
+        }
+        const val ARG_REPLY_TO_ID = "replyToId"
+    }
 
     /**
      * Profile screen - user profile.

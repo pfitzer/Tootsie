@@ -25,6 +25,7 @@ import com.pfitzer.tootsie.presentation.util.htmlToPlainText
  * @param onFavoriteClick Callback when favorite button is clicked
  * @param onBoostClick Callback when boost button is clicked
  * @param onReplyClick Callback when reply button is clicked
+ * @param onBookmarkClick Callback when bookmark button is clicked
  * @param modifier Optional modifier
  */
 @Composable
@@ -35,6 +36,7 @@ fun StatusCard(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
+    onBookmarkClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // If this is a boost/reblog, show the boosted status
@@ -100,7 +102,8 @@ fun StatusCard(
                 status = displayStatus,
                 onFavoriteClick = { onFavoriteClick(displayStatus) },
                 onBoostClick = { onBoostClick(displayStatus) },
-                onReplyClick = { onReplyClick(displayStatus) }
+                onReplyClick = { onReplyClick(displayStatus) },
+                onBookmarkClick = { onBookmarkClick(displayStatus) }
             )
         }
     }

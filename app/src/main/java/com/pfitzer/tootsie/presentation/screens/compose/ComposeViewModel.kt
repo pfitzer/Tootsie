@@ -1,8 +1,8 @@
 package com.pfitzer.tootsie.presentation.screens.compose
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,10 +18,13 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ComposeViewModel @Inject constructor(
-    private val statusRepository: StatusRepository
+    private val postStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.PostStatusUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ComposeUiState())
+    private val replyToId: String? = savedStateHandle["replyToId"]
+
+    private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
 
     /**
@@ -85,9 +88,10 @@ class ComposeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isPosting = true, errorMessage = null) }
 
-            val result = statusRepository.postStatus(
+            val result = postStatusUseCase(
                 content = content,
                 visibility = _uiState.value.visibility.value,
+                inReplyToId = replyToId,
                 spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() }
             )
 
@@ -131,10 +135,12 @@ data class ComposeUiState(
     val showContentWarning: Boolean = false,
     val isPosting: Boolean = false,
     val isPosted: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val replyToId: String? = null
 ) {
     val characterCount: Int get() = content.length
-    val canPost: Boolean get() = content.isNotBlank() && !isPosting
+    val canPost: Boolean get() = content.isNotBlank() && !isPosting && characterCount <= 500
+    val isReply: Boolean get() = replyToId != null
 }
 
 /**

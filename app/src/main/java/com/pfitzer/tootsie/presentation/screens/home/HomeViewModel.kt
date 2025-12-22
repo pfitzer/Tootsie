@@ -20,7 +20,13 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val timelineRepository: TimelineRepository,
-    private val statusRepository: StatusRepository
+    private val statusRepository: StatusRepository,
+    private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
+    private val unreblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -42,6 +48,8 @@ class HomeViewModel @Inject constructor(
             is HomeAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
             is HomeAction.BoostStatus -> boostStatus(action.status)
             is HomeAction.UnboostStatus -> unboostStatus(action.status)
+            is HomeAction.BookmarkStatus -> bookmarkStatus(action.status)
+            is HomeAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
             is HomeAction.RefreshTimeline -> refreshTimeline()
             is HomeAction.DismissError -> dismissError()
         }
@@ -52,9 +60,9 @@ class HomeViewModel @Inject constructor(
      */
     private fun favoriteStatus(status: Status) {
         viewModelScope.launch {
-            when (statusRepository.favoriteStatus(status.id)) {
+            when (favoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically
+                    // Success - Paging will refresh automatically via Room Flow
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -71,9 +79,9 @@ class HomeViewModel @Inject constructor(
      */
     private fun unfavoriteStatus(status: Status) {
         viewModelScope.launch {
-            when (statusRepository.unfavoriteStatus(status.id)) {
+            when (unfavoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically
+                    // Success - Paging will refresh automatically via Room Flow
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -90,9 +98,9 @@ class HomeViewModel @Inject constructor(
      */
     private fun boostStatus(status: Status) {
         viewModelScope.launch {
-            when (statusRepository.reblogStatus(status.id)) {
+            when (reblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically
+                    // Success - Paging will refresh automatically via Room Flow
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -109,13 +117,51 @@ class HomeViewModel @Inject constructor(
      */
     private fun unboostStatus(status: Status) {
         viewModelScope.launch {
-            when (statusRepository.unreblogStatus(status.id)) {
+            when (unreblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically
+                    // Success - Paging will refresh automatically via Room Flow
                 }
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to unboost post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Bookmark a status.
+     */
+    private fun bookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (bookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    // Success - Paging will refresh automatically via Room Flow
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to bookmark post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unbookmark a status.
+     */
+    private fun unbookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (unbookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    // Success - Paging will refresh automatically via Room Flow
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to unbookmark post")
                     }
                 }
                 is Result.Loading -> Unit
@@ -158,6 +204,8 @@ sealed class HomeAction {
     data class UnfavoriteStatus(val status: Status) : HomeAction()
     data class BoostStatus(val status: Status) : HomeAction()
     data class UnboostStatus(val status: Status) : HomeAction()
+    data class BookmarkStatus(val status: Status) : HomeAction()
+    data class UnbookmarkStatus(val status: Status) : HomeAction()
     data object RefreshTimeline : HomeAction()
     data object DismissError : HomeAction()
 }

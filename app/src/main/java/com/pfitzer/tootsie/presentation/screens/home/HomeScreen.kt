@@ -23,7 +23,8 @@ import com.pfitzer.tootsie.presentation.components.status.StatusCard
 /**
  * Home Screen - displays the user's home timeline.
  *
- * @param onNavigateToCompose Callback to navigate to compose screen
+ * @param onNavigateToCompose Callback to navigate to compose screen (new post)
+ * @param onNavigateToReply Callback to navigate to compose screen for reply with status ID
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
  * @param viewModel ViewModel for managing home screen state
@@ -32,6 +33,7 @@ import com.pfitzer.tootsie.presentation.components.status.StatusCard
 @Composable
 fun HomeScreen(
     onNavigateToCompose: () -> Unit,
+    onNavigateToReply: (String) -> Unit,
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -84,9 +86,15 @@ fun HomeScreen(
                         viewModel.onAction(HomeAction.BoostStatus(status))
                     }
                 },
+                onBookmarkClick = { status ->
+                    if (status.bookmarked) {
+                        viewModel.onAction(HomeAction.UnbookmarkStatus(status))
+                    } else {
+                        viewModel.onAction(HomeAction.BookmarkStatus(status))
+                    }
+                },
                 onReplyClick = { status ->
-                    // TODO: Navigate to compose with reply context
-                    onNavigateToCompose()
+                    onNavigateToReply(status.id)
                 },
                 onRefresh = {
                     viewModel.onAction(HomeAction.RefreshTimeline)
@@ -117,6 +125,7 @@ private fun TimelineList(
     onAvatarClick: (String) -> Unit,
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
+    onBookmarkClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onRefresh: () -> Unit,
     isRefreshing: Boolean,
@@ -147,6 +156,7 @@ private fun TimelineList(
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
+                    onBookmarkClick = onBookmarkClick,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }

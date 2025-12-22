@@ -19,6 +19,7 @@ import com.pfitzer.tootsie.domain.model.Status
  * @param onFavoriteClick Callback when favorite button is clicked
  * @param onBoostClick Callback when boost button is clicked
  * @param onReplyClick Callback when reply button is clicked
+ * @param onBookmarkClick Callback when bookmark button is clicked
  * @param modifier Optional modifier
  */
 @Composable
@@ -27,6 +28,7 @@ fun StatusActions(
     onFavoriteClick: () -> Unit,
     onBoostClick: () -> Unit,
     onReplyClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -63,14 +65,14 @@ fun StatusActions(
             activeColor = MaterialTheme.colorScheme.primary
         )
 
-        // Bookmark (placeholder)
+        // Bookmark (using different star color to distinguish from favorite)
         ActionButton(
             icon = if (status.bookmarked) Icons.Filled.Star else Icons.Outlined.Star,
             count = null,
             isActive = status.bookmarked,
-            onClick = { /* TODO: Implement bookmark */ },
+            onClick = onBookmarkClick,
             contentDescription = if (status.bookmarked) "Remove bookmark" else "Bookmark",
-            activeColor = MaterialTheme.colorScheme.secondary
+            activeColor = MaterialTheme.colorScheme.tertiary
         )
     }
 }

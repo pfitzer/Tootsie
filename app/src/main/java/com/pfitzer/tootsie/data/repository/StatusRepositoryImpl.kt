@@ -145,4 +145,13 @@ class StatusRepositoryImpl @Inject constructor(
             Result.Error(e.message ?: "Failed to unbookmark status")
         }
     }
+
+    override suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context> {
+        return try {
+            val contextDto = mastodonApi.getContext(statusId)
+            Result.Success(contextDto.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to load conversation context")
+        }
+    }
 }

@@ -98,4 +98,13 @@ interface StatusRepository {
      * @return Updated status
      */
     suspend fun unbookmarkStatus(statusId: String): Result<Status>
+
+    /**
+     * Get conversation context for a status.
+     * Returns ancestors (posts before) and descendants (replies).
+     *
+     * @param statusId Status ID
+     * @return Context with ancestors and descendants
+     */
+    suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context>
 }

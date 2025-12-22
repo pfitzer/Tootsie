@@ -174,6 +174,15 @@ interface MastodonApiService {
     @POST("api/v1/statuses/{id}/unbookmark")
     suspend fun unbookmarkStatus(@Path("id") id: String): StatusDto
 
+    /**
+     * Get conversation context for a status.
+     * Returns ancestors (posts before) and descendants (replies after).
+     *
+     * @param id Status ID
+     */
+    @GET("api/v1/statuses/{id}/context")
+    suspend fun getContext(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.ContextDto
+
     // ========== Instance Endpoints ==========
 
     /**

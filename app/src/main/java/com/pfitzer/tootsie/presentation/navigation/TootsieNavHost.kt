@@ -92,7 +92,10 @@ fun TootsieNavHost(
         composable(route = TootsieDestinations.Home.route) {
             HomeScreen(
                 onNavigateToCompose = {
-                    navController.navigate(TootsieDestinations.Compose.route)
+                    navController.navigate(TootsieDestinations.Compose.createRoute())
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
                 },
                 onNavigateToStatus = { statusId ->
                     navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
@@ -103,8 +106,17 @@ fun TootsieNavHost(
             )
         }
 
-        // Compose screen - create new post
-        composable(route = TootsieDestinations.Compose.route) {
+        // Compose screen - create new post or reply
+        composable(
+            route = TootsieDestinations.Compose.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.Compose.ARG_REPLY_TO_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) {
             ComposeScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -136,12 +148,21 @@ fun TootsieNavHost(
                     type = NavType.StringType
                 }
             )
-        ) { backStackEntry ->
-            val statusId = backStackEntry.arguments?.getString(
-                TootsieDestinations.StatusDetail.ARG_STATUS_ID
-            ) ?: return@composable
-
-            // StatusDetailScreen will be implemented in Phase 3
+        ) {
+            com.pfitzer.tootsie.presentation.screens.statusdetail.StatusDetailScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToCompose = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                }
+            )
         }
 
         // Search screen

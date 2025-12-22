@@ -8,6 +8,7 @@ import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Status
+import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -95,20 +96,28 @@ class TimelinePagingSource(
      */
     private suspend fun tryLoadFromCache(params: LoadParams<String>): LoadResult<String, Status> {
         return try {
-            val cachedStatuses = statusDao.getStatusesFlow(
+            Log.d(TAG, "Attempting to load from cache...")
+            // Collect the first emission from the Flow
+            val cachedEntities = statusDao.getStatusesFlow(
                 timelineType = timelineType,
                 limit = params.loadSize
-            )
+            ).first()
+
+            Log.d(TAG, "Found ${cachedEntities.size} cached statuses")
+
+            // Convert entities to domain models
+            val cachedStatuses = cachedEntities.map { it.toDomain() }
 
             // For offline support, return cached data
             // Note: This is a simplified approach - a production app would use
             // RemoteMediator for more sophisticated caching
             LoadResult.Page(
-                data = emptyList(), // Simplified for now
+                data = cachedStatuses,
                 prevKey = null,
-                nextKey = null
+                nextKey = if (cachedStatuses.isNotEmpty()) cachedStatuses.last().id else null
             )
         } catch (e: Exception) {
+            Log.e(TAG, "Error loading from cache", e)
             LoadResult.Error(e)
         }
     }

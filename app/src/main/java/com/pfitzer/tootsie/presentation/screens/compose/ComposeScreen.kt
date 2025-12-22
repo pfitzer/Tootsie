@@ -37,7 +37,7 @@ fun ComposeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Compose") },
+                title = { Text(if (uiState.isReply) "Reply" else "Compose") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
