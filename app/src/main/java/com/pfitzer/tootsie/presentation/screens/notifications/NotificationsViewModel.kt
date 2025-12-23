@@ -1,0 +1,119 @@
+package com.pfitzer.tootsie.presentation.screens.notifications
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.pfitzer.tootsie.domain.model.Notification
+import com.pfitzer.tootsie.domain.usecase.notification.ClearAllNotificationsUseCase
+import com.pfitzer.tootsie.domain.usecase.notification.DismissNotificationUseCase
+import com.pfitzer.tootsie.domain.usecase.notification.GetNotificationsUseCase
+import com.pfitzer.tootsie.util.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * ViewModel for Notifications Screen.
+ * Manages notification data and user actions.
+ */
+@HiltViewModel
+class NotificationsViewModel @Inject constructor(
+    private val getNotificationsUseCase: GetNotificationsUseCase,
+    private val dismissNotificationUseCase: DismissNotificationUseCase,
+    private val clearAllNotificationsUseCase: ClearAllNotificationsUseCase
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(NotificationsUiState())
+    val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
+
+    /**
+     * Paging data flow for notifications.
+     */
+    val notificationsPagingData: Flow<PagingData<Notification>> = getNotificationsUseCase()
+        .cachedIn(viewModelScope)
+
+    /**
+     * Handle user actions.
+     */
+    fun onAction(action: NotificationsAction) {
+        when (action) {
+            is NotificationsAction.DismissNotification -> dismissNotification(action.notificationId)
+            is NotificationsAction.ClearAll -> clearAllNotifications()
+            is NotificationsAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Dismiss a single notification.
+     */
+    private fun dismissNotification(notificationId: String) {
+        viewModelScope.launch {
+            when (val result = dismissNotificationUseCase(notificationId)) {
+                is Result.Success -> {
+                    // Success - paging will refresh automatically
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to dismiss notification")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Clear all notifications.
+     */
+    private fun clearAllNotifications() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isClearingAll = true) }
+
+            when (val result = clearAllNotificationsUseCase()) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(isClearingAll = false) }
+                    // Paging will refresh automatically
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isClearingAll = false,
+                            errorMessage = "Failed to clear notifications"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Dismiss error message.
+     */
+    private fun dismissError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+}
+
+/**
+ * UI state for Notifications Screen.
+ */
+data class NotificationsUiState(
+    val isClearingAll: Boolean = false,
+    val errorMessage: String? = null
+)
+
+/**
+ * User actions for Notifications Screen.
+ */
+sealed class NotificationsAction {
+    data class DismissNotification(val notificationId: String) : NotificationsAction()
+    data object ClearAll : NotificationsAction()
+    data object DismissError : NotificationsAction()
+}

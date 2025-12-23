@@ -19,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ComposeViewModel @Inject constructor(
     private val postStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.PostStatusUseCase,
+    private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -26,6 +27,33 @@ class ComposeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
+
+    init {
+        // Load reply context if replying to a status
+        if (replyToId != null) {
+            loadReplyContext(replyToId)
+        }
+    }
+
+    /**
+     * Load the status being replied to, to extract account information.
+     */
+    private fun loadReplyContext(statusId: String) {
+        viewModelScope.launch {
+            when (val result = statusRepository.getStatus(statusId)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(replyToAccount = result.data.account.acct)
+                    }
+                }
+                is Result.Error -> {
+                    // If we can't load the status, we can still reply
+                    // Just won't show the account name
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
 
     /**
      * Handle user actions.
@@ -136,7 +164,8 @@ data class ComposeUiState(
     val isPosting: Boolean = false,
     val isPosted: Boolean = false,
     val errorMessage: String? = null,
-    val replyToId: String? = null
+    val replyToId: String? = null,
+    val replyToAccount: String? = null
 ) {
     val characterCount: Int get() = content.length
     val canPost: Boolean get() = content.isNotBlank() && !isPosting && characterCount <= 500

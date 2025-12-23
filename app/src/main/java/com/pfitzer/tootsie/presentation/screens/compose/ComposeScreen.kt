@@ -71,6 +71,16 @@ fun ComposeScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            // Reply context (if replying)
+            if (uiState.isReply && uiState.replyToAccount != null) {
+                Text(
+                    text = "Replying to @${uiState.replyToAccount}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             // Content warning (if enabled)
             if (uiState.showContentWarning) {
                 OutlinedTextField(

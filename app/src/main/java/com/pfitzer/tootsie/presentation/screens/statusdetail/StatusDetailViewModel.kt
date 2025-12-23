@@ -23,6 +23,12 @@ import javax.inject.Inject
 class StatusDetailViewModel @Inject constructor(
     private val statusRepository: StatusRepository,
     private val getStatusContextUseCase: GetStatusContextUseCase,
+    private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
+    private val unreblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -84,17 +90,138 @@ class StatusDetailViewModel @Inject constructor(
     }
 
     /**
-     * Refresh the status and context.
+     * Handle user actions.
      */
     fun onAction(action: StatusDetailAction) {
         when (action) {
             is StatusDetailAction.Refresh -> loadStatusAndContext()
             is StatusDetailAction.DismissError -> dismissError()
+            is StatusDetailAction.FavoriteStatus -> favoriteStatus(action.status)
+            is StatusDetailAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
+            is StatusDetailAction.BoostStatus -> boostStatus(action.status)
+            is StatusDetailAction.UnboostStatus -> unboostStatus(action.status)
+            is StatusDetailAction.BookmarkStatus -> bookmarkStatus(action.status)
+            is StatusDetailAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
         }
     }
 
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    /**
+     * Favorite a status.
+     */
+    private fun favoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (favoriteStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    // Success - status will refresh via repository
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to favorite post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unfavorite a status.
+     */
+    private fun unfavoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (unfavoriteStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to unfavorite post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Boost a status.
+     */
+    private fun boostStatus(status: Status) {
+        viewModelScope.launch {
+            when (reblogStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to boost post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unboost a status.
+     */
+    private fun unboostStatus(status: Status) {
+        viewModelScope.launch {
+            when (unreblogStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to unboost post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Bookmark a status.
+     */
+    private fun bookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (bookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to bookmark post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unbookmark a status.
+     */
+    private fun unbookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (unbookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to unbookmark post")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
     }
 }
 
@@ -115,4 +242,10 @@ data class StatusDetailUiState(
 sealed class StatusDetailAction {
     data object Refresh : StatusDetailAction()
     data object DismissError : StatusDetailAction()
+    data class FavoriteStatus(val status: Status) : StatusDetailAction()
+    data class UnfavoriteStatus(val status: Status) : StatusDetailAction()
+    data class BoostStatus(val status: Status) : StatusDetailAction()
+    data class UnboostStatus(val status: Status) : StatusDetailAction()
+    data class BookmarkStatus(val status: Status) : StatusDetailAction()
+    data class UnbookmarkStatus(val status: Status) : StatusDetailAction()
 }

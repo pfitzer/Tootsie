@@ -45,6 +45,101 @@ interface MastodonApiService {
         @Field("note") note: String? = null
     ): AccountDto
 
+    /**
+     * Get statuses posted by an account.
+     *
+     * @param id Account ID
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     * @param excludeReplies Skip statuses that are replies to other statuses
+     * @param excludeReblogs Skip statuses that are reblogs of other statuses
+     * @param onlyMedia Only return statuses that have media attachments
+     * @param pinned Only return statuses that are pinned
+     */
+    @GET("api/v1/accounts/{id}/statuses")
+    suspend fun getAccountStatuses(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("exclude_replies") excludeReplies: Boolean = false,
+        @Query("exclude_reblogs") excludeReblogs: Boolean = false,
+        @Query("only_media") onlyMedia: Boolean = false,
+        @Query("pinned") pinned: Boolean = false
+    ): List<StatusDto>
+
+    /**
+     * Get accounts following the given account.
+     *
+     * @param id Account ID
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param limit Maximum number of results
+     */
+    @GET("api/v1/accounts/{id}/followers")
+    suspend fun getFollowers(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): List<AccountDto>
+
+    /**
+     * Get accounts that the given account is following.
+     *
+     * @param id Account ID
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param limit Maximum number of results
+     */
+    @GET("api/v1/accounts/{id}/following")
+    suspend fun getFollowing(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): List<AccountDto>
+
+    // ========== Relationship Endpoints ==========
+
+    /**
+     * Get relationship with a single account.
+     *
+     * @param id Account IDs (can be multiple, separated by comma in query)
+     */
+    @GET("api/v1/accounts/relationships")
+    suspend fun getRelationships(
+        @Query("id[]") id: List<String>
+    ): List<com.pfitzer.tootsie.data.remote.dto.RelationshipDto>
+
+    /**
+     * Follow an account.
+     *
+     * @param id Account ID to follow
+     * @param notify Receive notifications when this account posts a status
+     * @param reblogs Show reblogs from this account
+     */
+    @FormUrlEncoded
+    @POST("api/v1/accounts/{id}/follow")
+    suspend fun followAccount(
+        @Path("id") id: String,
+        @Field("notify") notify: Boolean = false,
+        @Field("reblogs") reblogs: Boolean = true
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Unfollow an account.
+     *
+     * @param id Account ID to unfollow
+     */
+    @POST("api/v1/accounts/{id}/unfollow")
+    suspend fun unfollowAccount(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
     // ========== Timeline Endpoints ==========
 
     /**
@@ -182,6 +277,50 @@ interface MastodonApiService {
      */
     @GET("api/v1/statuses/{id}/context")
     suspend fun getContext(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.ContextDto
+
+    // ========== Notification Endpoints ==========
+
+    /**
+     * Get notifications for the authenticated user.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     * @param excludeTypes Array of notification types to exclude
+     * @param accountId Only show notifications from this account
+     */
+    @GET("api/v1/notifications")
+    suspend fun getNotifications(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("exclude_types[]") excludeTypes: List<String>? = null,
+        @Query("account_id") accountId: String? = null
+    ): List<com.pfitzer.tootsie.data.remote.dto.NotificationDto>
+
+    /**
+     * Get a single notification by ID.
+     *
+     * @param id Notification ID
+     */
+    @GET("api/v1/notifications/{id}")
+    suspend fun getNotification(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.NotificationDto
+
+    /**
+     * Dismiss a single notification.
+     *
+     * @param id Notification ID to dismiss
+     */
+    @POST("api/v1/notifications/{id}/dismiss")
+    suspend fun dismissNotification(@Path("id") id: String)
+
+    /**
+     * Clear all notifications.
+     */
+    @POST("api/v1/notifications/clear")
+    suspend fun clearAllNotifications()
 
     // ========== Instance Endpoints ==========
 

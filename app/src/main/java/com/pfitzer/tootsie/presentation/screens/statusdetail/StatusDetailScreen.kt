@@ -76,8 +76,29 @@ fun StatusDetailScreen(
                         onStatusClick = onNavigateToStatus,
                         onAvatarClick = onNavigateToProfile,
                         onReplyClick = { status ->
-                    onNavigateToCompose(status.id)
-                }
+                            onNavigateToCompose(status.id)
+                        },
+                        onFavoriteClick = { status ->
+                            if (status.favourited) {
+                                viewModel.onAction(StatusDetailAction.UnfavoriteStatus(status))
+                            } else {
+                                viewModel.onAction(StatusDetailAction.FavoriteStatus(status))
+                            }
+                        },
+                        onBoostClick = { status ->
+                            if (status.reblogged) {
+                                viewModel.onAction(StatusDetailAction.UnboostStatus(status))
+                            } else {
+                                viewModel.onAction(StatusDetailAction.BoostStatus(status))
+                            }
+                        },
+                        onBookmarkClick = { status ->
+                            if (status.bookmarked) {
+                                viewModel.onAction(StatusDetailAction.UnbookmarkStatus(status))
+                            } else {
+                                viewModel.onAction(StatusDetailAction.BookmarkStatus(status))
+                            }
+                        }
                     )
                 }
                 uiState.errorMessage != null -> {
@@ -104,6 +125,9 @@ private fun ConversationThread(
     onStatusClick: (String) -> Unit,
     onAvatarClick: (String) -> Unit,
     onReplyClick: (Status) -> Unit,
+    onFavoriteClick: (Status) -> Unit,
+    onBoostClick: (Status) -> Unit,
+    onBookmarkClick: (Status) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -116,10 +140,10 @@ private fun ConversationThread(
                 status = status,
                 onStatusClick = onStatusClick,
                 onAvatarClick = onAvatarClick,
-                onFavoriteClick = {}, // Simplified for now
-                onBoostClick = {},
+                onFavoriteClick = onFavoriteClick,
+                onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
-                onBookmarkClick = {},
+                onBookmarkClick = onBookmarkClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .alpha(0.7f) // Slightly dimmed
@@ -140,10 +164,10 @@ private fun ConversationThread(
                     status = mainStatus,
                     onStatusClick = onStatusClick,
                     onAvatarClick = onAvatarClick,
-                    onFavoriteClick = {}, // Simplified for now
-                    onBoostClick = {},
+                    onFavoriteClick = onFavoriteClick,
+                    onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
-                    onBookmarkClick = {}
+                    onBookmarkClick = onBookmarkClick
                 )
             }
         }
@@ -154,10 +178,10 @@ private fun ConversationThread(
                 status = status,
                 onStatusClick = onStatusClick,
                 onAvatarClick = onAvatarClick,
-                onFavoriteClick = {}, // Simplified for now
-                onBoostClick = {},
+                onFavoriteClick = onFavoriteClick,
+                onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
-                onBookmarkClick = {},
+                onBookmarkClick = onBookmarkClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .alpha(0.8f) // Slightly dimmed

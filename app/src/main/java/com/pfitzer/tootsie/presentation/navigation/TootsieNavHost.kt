@@ -1,15 +1,23 @@
 package com.pfitzer.tootsie.presentation.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.pfitzer.tootsie.presentation.components.navigation.BottomNavigationBar
 import com.pfitzer.tootsie.presentation.screens.auth.LoginScreen
 import com.pfitzer.tootsie.presentation.screens.compose.ComposeScreen
 import com.pfitzer.tootsie.presentation.screens.home.HomeScreen
+import com.pfitzer.tootsie.presentation.screens.notifications.NotificationsScreen
+import com.pfitzer.tootsie.presentation.screens.profile.ProfileScreen
+import com.pfitzer.tootsie.presentation.screens.search.SearchScreen
 import com.pfitzer.tootsie.presentation.screens.splash.SplashScreen
 
 /**
@@ -30,11 +38,72 @@ fun TootsieNavHost(
     authorizationCode: String? = null,
     onAuthCodeConsumed: () -> Unit = {}
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = startDestination,
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Determine if we should show bottom navigation
+    val showBottomBar = when {
+        currentRoute == null -> false
+        currentRoute.startsWith("home") -> true
+        currentRoute.startsWith("search") -> true
+        currentRoute.startsWith("notifications") -> true
+        // Show bottom bar for own profile (route without accountId param)
+        currentRoute == "profile" -> true
+        else -> false
+    }
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigationBar(
+                    currentRoute = currentRoute,
+                    onNavigateToHome = {
+                        navController.navigate(TootsieDestinations.Home.route) {
+                            popUpTo(TootsieDestinations.Home.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToSearch = {
+                        navController.navigate(TootsieDestinations.Search.route) {
+                            popUpTo(TootsieDestinations.Home.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToNotifications = {
+                        navController.navigate(TootsieDestinations.Notifications.route) {
+                            popUpTo(TootsieDestinations.Home.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToProfile = {
+                        // Navigate to own profile - we'll use a special "me" identifier
+                        navController.navigate("profile") {
+                            popUpTo(TootsieDestinations.Home.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        },
         modifier = modifier
-    ) {
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(paddingValues)
+        ) {
         // Splash screen - initial screen that checks auth status
         composable(route = TootsieDestinations.Splash.route) {
             SplashScreen(
@@ -124,7 +193,12 @@ fun TootsieNavHost(
             )
         }
 
-        // Profile screen
+        // Own profile screen (from bottom nav)
+        composable(route = "profile") {
+            ProfileScreen()
+        }
+
+        // Other user's profile screen (with account ID)
         composable(
             route = TootsieDestinations.Profile.route,
             arguments = listOf(
@@ -137,7 +211,12 @@ fun TootsieNavHost(
                 TootsieDestinations.Profile.ARG_ACCOUNT_ID
             ) ?: return@composable
 
-            // ProfileScreen will be implemented in Phase 3
+            ProfileScreen(
+                accountId = accountId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         // Status detail screen
@@ -167,17 +246,25 @@ fun TootsieNavHost(
 
         // Search screen
         composable(route = TootsieDestinations.Search.route) {
-            // SearchScreen will be implemented in Phase 3
+            SearchScreen()
         }
 
         // Notifications screen
         composable(route = TootsieDestinations.Notifications.route) {
-            // NotificationsScreen will be implemented in Phase 3
+            NotificationsScreen(
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                }
+            )
         }
 
         // Settings screen
         composable(route = TootsieDestinations.Settings.route) {
             // SettingsScreen will be implemented in Phase 3
+        }
         }
     }
 }
