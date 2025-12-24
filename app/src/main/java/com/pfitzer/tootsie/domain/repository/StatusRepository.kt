@@ -1,8 +1,10 @@
 package com.pfitzer.tootsie.domain.repository
 
+import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 /**
  * Repository interface for status (post) operations.
@@ -98,6 +100,20 @@ interface StatusRepository {
      * @return Updated status
      */
     suspend fun unbookmarkStatus(statusId: String): Result<Status>
+
+    /**
+     * Upload a media file (image, video, audio).
+     *
+     * @param file The file to upload
+     * @param description Alt text description for accessibility (optional)
+     * @param focus Focus point for cropping (x,y coordinates from -1 to 1, optional)
+     * @return Uploaded MediaAttachment with ID for attaching to posts
+     */
+    suspend fun uploadMedia(
+        file: File,
+        description: String? = null,
+        focus: Pair<Float, Float>? = null
+    ): Result<MediaAttachment>
 
     /**
      * Get conversation context for a status.

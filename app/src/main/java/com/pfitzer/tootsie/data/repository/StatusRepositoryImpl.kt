@@ -4,11 +4,20 @@ import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
+import com.pfitzer.tootsie.data.remote.dto.StatusDto
+import com.pfitzer.tootsie.domain.model.MediaAttachment
+import com.pfitzer.tootsie.domain.model.MediaMeta
+import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -146,10 +155,80 @@ class StatusRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun uploadMedia(
+        file: File,
+        description: String?,
+        focus: Pair<Float, Float>?
+    ): Result<MediaAttachment> {
+        return try {
+            // Determine MIME type from file extension
+            val mimeType = when (file.extension.lowercase()) {
+                "jpg", "jpeg" -> "image/jpeg"
+                "png" -> "image/png"
+                "gif" -> "image/gif"
+                "webp" -> "image/webp"
+                "mp4" -> "video/mp4"
+                "webm" -> "video/webm"
+                "m4v" -> "video/mp4"
+                "mov" -> "video/quicktime"
+                "mp3" -> "audio/mpeg"
+                "ogg" -> "audio/ogg"
+                "wav" -> "audio/wav"
+                else -> "application/octet-stream"
+            }
+
+            // Create multipart file part
+            val requestFile = file.asRequestBody(mimeType.toMediaTypeOrNull())
+            val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+            // Create optional parts
+            val descriptionPart = description?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val focusPart = focus?.let { (x, y) ->
+                "$x,$y".toRequestBody("text/plain".toMediaTypeOrNull())
+            }
+
+            // Upload media
+            val mediaDto = mastodonApi.uploadMedia(
+                file = filePart,
+                description = descriptionPart,
+                focus = focusPart
+            )
+
+            // Map to domain model manually to avoid overload resolution issues
+            val mediaAttachment = MediaAttachment(
+                id = mediaDto.id,
+                type = when (mediaDto.type.lowercase()) {
+                    "image" -> MediaType.IMAGE
+                    "video" -> MediaType.VIDEO
+                    "gifv" -> MediaType.GIFV
+                    "audio" -> MediaType.AUDIO
+                    else -> MediaType.UNKNOWN
+                },
+                url = mediaDto.url,
+                previewUrl = mediaDto.previewUrl,
+                description = mediaDto.description,
+                blurhash = mediaDto.blurhash,
+                meta = mediaDto.meta?.original?.let {
+                    MediaMeta(
+                        width = it.width,
+                        height = it.height,
+                        duration = it.duration,
+                        aspect = it.aspect
+                    )
+                }
+            )
+
+            Result.Success(mediaAttachment)
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to upload media")
+        }
+    }
+
     override suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context> {
         return try {
             val contextDto = mastodonApi.getContext(statusId)
-            Result.Success(contextDto.toDomain())
+            val context: com.pfitzer.tootsie.domain.model.Context = contextDto.toDomain()
+            Result.Success(context)
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to load conversation context")
         }

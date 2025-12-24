@@ -2,12 +2,17 @@ package com.pfitzer.tootsie.data.remote.api
 
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.data.remote.dto.InstanceDto
+import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -277,6 +282,25 @@ interface MastodonApiService {
      */
     @GET("api/v1/statuses/{id}/context")
     suspend fun getContext(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.ContextDto
+
+    // ========== Media Endpoints ==========
+
+    /**
+     * Upload a media file (image, video, audio).
+     * Uses Mastodon API v2 which returns an immediate MediaAttachment.
+     *
+     * @param file The media file to upload (multipart)
+     * @param description Alt text description for accessibility (optional)
+     * @param focus Focus point for cropping (x,y coordinates from -1 to 1, optional)
+     * @return MediaAttachmentDto with the uploaded media information
+     */
+    @Multipart
+    @POST("api/v2/media")
+    suspend fun uploadMedia(
+        @Part file: MultipartBody.Part,
+        @Part("description") description: RequestBody? = null,
+        @Part("focus") focus: RequestBody? = null
+    ): MediaAttachmentDto
 
     // ========== Notification Endpoints ==========
 

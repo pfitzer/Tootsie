@@ -1,8 +1,10 @@
 package com.pfitzer.tootsie.presentation.screens.compose
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 /**
@@ -19,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ComposeViewModel @Inject constructor(
     private val postStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.PostStatusUseCase,
+    private val uploadMediaUseCase: com.pfitzer.tootsie.domain.usecase.status.UploadMediaUseCase,
     private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -64,6 +68,9 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.UpdateVisibility -> updateVisibility(action.visibility)
             is ComposeAction.UpdateContentWarning -> updateContentWarning(action.warning)
             is ComposeAction.ToggleContentWarning -> toggleContentWarning()
+            is ComposeAction.AddMedia -> uploadMedia(action.file)
+            is ComposeAction.RemoveMedia -> removeMedia(action.attachmentId)
+            is ComposeAction.UpdateMediaDescription -> updateMediaDescription(action.attachmentId, action.description)
             is ComposeAction.Post -> postStatus()
             is ComposeAction.DismissError -> dismissError()
         }
@@ -103,12 +110,81 @@ class ComposeViewModel @Inject constructor(
     }
 
     /**
+     * Upload a media file.
+     */
+    private fun uploadMedia(file: File) {
+        // Don't allow more than 4 attachments
+        if (_uiState.value.mediaAttachments.size >= 4) {
+            _uiState.update { it.copy(errorMessage = "Maximum 4 media attachments allowed") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isUploadingMedia = true, errorMessage = null) }
+
+            val result = uploadMediaUseCase(file = file)
+
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isUploadingMedia = false,
+                            mediaAttachments = it.mediaAttachments + result.data
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isUploadingMedia = false,
+                            errorMessage = "Failed to upload media: ${result.message}"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Remove a media attachment.
+     */
+    private fun removeMedia(attachmentId: String) {
+        _uiState.update {
+            it.copy(
+                mediaAttachments = it.mediaAttachments.filter { attachment ->
+                    attachment.id != attachmentId
+                }
+            )
+        }
+    }
+
+    /**
+     * Update alt text description for a media attachment.
+     */
+    private fun updateMediaDescription(attachmentId: String, description: String) {
+        _uiState.update {
+            it.copy(
+                mediaAttachments = it.mediaAttachments.map { attachment ->
+                    if (attachment.id == attachmentId) {
+                        attachment.copy(description = description)
+                    } else {
+                        attachment
+                    }
+                }
+            )
+        }
+    }
+
+    /**
      * Post the status.
      */
     private fun postStatus() {
         val content = _uiState.value.content.trim()
+        val hasMedia = _uiState.value.mediaAttachments.isNotEmpty()
 
-        if (content.isBlank()) {
+        // Allow posting if there's content OR media (can post media-only)
+        if (content.isBlank() && !hasMedia) {
             _uiState.update { it.copy(errorMessage = "Post cannot be empty") }
             return
         }
@@ -116,10 +192,13 @@ class ComposeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isPosting = true, errorMessage = null) }
 
+            val mediaIds = _uiState.value.mediaAttachments.map { it.id }
+
             val result = postStatusUseCase(
                 content = content,
                 visibility = _uiState.value.visibility.value,
                 inReplyToId = replyToId,
+                mediaIds = mediaIds.takeIf { it.isNotEmpty() },
                 spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() }
             )
 
@@ -161,6 +240,8 @@ data class ComposeUiState(
     val visibility: StatusVisibility = StatusVisibility.PUBLIC,
     val contentWarning: String = "",
     val showContentWarning: Boolean = false,
+    val mediaAttachments: List<MediaAttachment> = emptyList(),
+    val isUploadingMedia: Boolean = false,
     val isPosting: Boolean = false,
     val isPosted: Boolean = false,
     val errorMessage: String? = null,
@@ -168,8 +249,10 @@ data class ComposeUiState(
     val replyToAccount: String? = null
 ) {
     val characterCount: Int get() = content.length
-    val canPost: Boolean get() = content.isNotBlank() && !isPosting && characterCount <= 500
+    val hasMedia: Boolean get() = mediaAttachments.isNotEmpty()
+    val canPost: Boolean get() = (content.isNotBlank() || hasMedia) && !isPosting && !isUploadingMedia && characterCount <= 500
     val isReply: Boolean get() = replyToId != null
+    val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia
 }
 
 /**
@@ -180,6 +263,9 @@ sealed class ComposeAction {
     data class UpdateVisibility(val visibility: StatusVisibility) : ComposeAction()
     data class UpdateContentWarning(val warning: String) : ComposeAction()
     data object ToggleContentWarning : ComposeAction()
+    data class AddMedia(val file: File) : ComposeAction()
+    data class RemoveMedia(val attachmentId: String) : ComposeAction()
+    data class UpdateMediaDescription(val attachmentId: String, val description: String) : ComposeAction()
     data object Post : ComposeAction()
     data object DismissError : ComposeAction()
 }

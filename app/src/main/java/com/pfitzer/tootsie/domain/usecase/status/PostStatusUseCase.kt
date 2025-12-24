@@ -18,6 +18,7 @@ class PostStatusUseCase @Inject constructor(
      * @param content The text content of the status
      * @param visibility Visibility level string (public, unlisted, private, direct)
      * @param inReplyToId Optional ID of status being replied to
+     * @param mediaIds Optional list of media attachment IDs
      * @param sensitive Whether content should be marked as sensitive
      * @param spoilerText Optional content warning text
      * @return Result containing the newly created Status
@@ -26,6 +27,7 @@ class PostStatusUseCase @Inject constructor(
         content: String,
         visibility: String = "public",
         inReplyToId: String? = null,
+        mediaIds: List<String>? = null,
         sensitive: Boolean = false,
         spoilerText: String? = null
     ): Result<Status> {
@@ -33,7 +35,7 @@ class PostStatusUseCase @Inject constructor(
             content = content,
             visibility = visibility,
             inReplyToId = inReplyToId,
-            mediaIds = null, // Text-only for Phase 2a
+            mediaIds = mediaIds,
             sensitive = sensitive,
             spoilerText = spoilerText
         )
