@@ -43,7 +43,14 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Debounced Search**: Real-time search with 300ms debounce for performance
 - **Filter Results**: Filter by type (All, Accounts, Posts, Hashtags)
 - **WebFinger Support**: Lookup remote accounts via WebFinger protocol
-- **Result Navigation**: Navigate to profiles and status details from search results
+- **Full Navigation**:
+  - Click accounts to view their profiles
+  - Click posts to view full status details with conversation threading
+  - Click hashtags to search for all posts with that tag
+- **Smart Hashtag Filtering**: Clicking a hashtag automatically filters to show only posts
+- **Search Result Cards**: Rich preview cards showing avatars, follower counts, and post content
+- **Empty States**: Helpful messaging when no results found or search hasn't started
+- **Error Handling**: Graceful error messages with retry capability
 
 ### Current Implementation Status
 Phase 2 (Core Features) is complete with:
@@ -55,6 +62,20 @@ Phase 2 (Core Features) is complete with:
 - ✅ Content warnings and visibility controls
 - ✅ Media preview and management
 - ✅ Conversation threading
+
+### Recent Updates (December 2024)
+
+**Search Navigation & UX Improvements:**
+- ✅ Fixed navigation: Accounts, posts, and hashtags now clickable
+- ✅ Smart hashtag filtering: Clicking hashtags shows only posts with that tag
+- ✅ Proper filter state: Filter chip automatically switches when clicking hashtags
+- ✅ Complete navigation flow: Search → Profile, Search → Status Detail, Search → Hashtag posts
+
+**Media Upload UI:**
+- ✅ Complete UI implementation with image picker integration
+- ✅ Media preview grid with edit and remove controls
+- ✅ Alt text dialog for accessibility
+- ✅ Email icon for attach button (Material Icons compatibility)
 
 ### Next Steps
 Phase 3 will focus on:
