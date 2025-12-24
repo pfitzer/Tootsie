@@ -169,10 +169,12 @@ private fun TimelineList(
     isRefreshing: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // Determine if we're actually refreshing based on paging state
+    val isActuallyRefreshing = timelinePagingItems.loadState.refresh is LoadState.Loading
+
     PullToRefreshBox(
-        isRefreshing = isRefreshing,
+        isRefreshing = isActuallyRefreshing,
         onRefresh = {
-            onRefresh()
             timelinePagingItems.refresh()
         },
         modifier = modifier.fillMaxSize()
@@ -181,8 +183,8 @@ private fun TimelineList(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-        // Handle refresh state
-        if (timelinePagingItems.loadState.refresh is LoadState.Loading && !isRefreshing) {
+        // Initial loading state (when no items are loaded yet)
+        if (timelinePagingItems.loadState.refresh is LoadState.Loading && timelinePagingItems.itemCount == 0) {
             item {
                 LoadingIndicator()
             }
@@ -216,7 +218,7 @@ private fun TimelineList(
         }
 
         // Handle errors
-        if (timelinePagingItems.loadState.refresh is LoadState.Error) {
+        if (timelinePagingItems.loadState.refresh is LoadState.Error && timelinePagingItems.itemCount == 0) {
             item {
                 ErrorState(
                     message = "Failed to load timeline",
