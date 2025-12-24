@@ -1,17 +1,30 @@
 package com.pfitzer.tootsie.presentation.screens.compose
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.compose.AltTextDialog
+import com.pfitzer.tootsie.presentation.components.compose.MediaPreviewGrid
+import com.pfitzer.tootsie.util.toFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Compose Screen - for creating new posts.
@@ -26,12 +39,49 @@ fun ComposeScreen(
     viewModel: ComposeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // Alt text dialog state
+    var showAltTextDialog by remember { mutableStateOf(false) }
+    var selectedMediaForAltText by remember { mutableStateOf<MediaAttachment?>(null) }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        uri?.let {
+            coroutineScope.launch {
+                // Convert URI to File in background thread
+                val file = withContext(Dispatchers.IO) {
+                    it.toFile(context)
+                }
+                file?.let { f ->
+                    viewModel.onAction(ComposeAction.AddMedia(f))
+                }
+            }
+        }
+    }
 
     // Navigate back when post is successful
     LaunchedEffect(uiState.isPosted) {
         if (uiState.isPosted) {
             onNavigateBack()
         }
+    }
+
+    // Alt text dialog
+    if (showAltTextDialog && selectedMediaForAltText != null) {
+        AltTextDialog(
+            media = selectedMediaForAltText!!,
+            onDismiss = {
+                showAltTextDialog = false
+                selectedMediaForAltText = null
+            },
+            onSave = { attachmentId, description ->
+                viewModel.onAction(ComposeAction.UpdateMediaDescription(attachmentId, description))
+            }
+        )
     }
 
     Scaffold(
@@ -110,6 +160,24 @@ fun ComposeScreen(
                 minLines = 5
             )
 
+            // Media preview grid
+            if (uiState.mediaAttachments.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                MediaPreviewGrid(
+                    mediaAttachments = uiState.mediaAttachments,
+                    onRemoveMedia = { attachmentId ->
+                        viewModel.onAction(ComposeAction.RemoveMedia(attachmentId))
+                    },
+                    onEditAltText = { media ->
+                        selectedMediaForAltText = media
+                        showAltTextDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 200.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Character counter
@@ -131,26 +199,70 @@ fun ComposeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Visibility selector
-                VisibilityDropdown(
-                    selectedVisibility = uiState.visibility,
-                    onVisibilitySelected = {
-                        viewModel.onAction(ComposeAction.UpdateVisibility(it))
-                    }
-                )
-
-                // Content warning toggle
-                IconButton(
-                    onClick = { viewModel.onAction(ComposeAction.ToggleContentWarning) }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = "Content warning",
-                        tint = if (uiState.showContentWarning) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                    // Visibility selector
+                    VisibilityDropdown(
+                        selectedVisibility = uiState.visibility,
+                        onVisibilitySelected = {
+                            viewModel.onAction(ComposeAction.UpdateVisibility(it))
                         }
+                    )
+
+                    // Attach media button
+                    IconButton(
+                        onClick = {
+                            imagePickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        enabled = uiState.canAddMedia
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Email,
+                            contentDescription = "Attach media",
+                            tint = if (uiState.canAddMedia) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                            }
+                        )
+                    }
+
+                    // Content warning toggle
+                    IconButton(
+                        onClick = { viewModel.onAction(ComposeAction.ToggleContentWarning) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Content warning",
+                            tint = if (uiState.showContentWarning) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Upload progress indicator
+            if (uiState.isUploadingMedia) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Uploading media...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
