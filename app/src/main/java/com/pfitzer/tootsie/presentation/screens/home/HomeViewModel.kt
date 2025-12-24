@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import com.pfitzer.tootsie.util.Result
@@ -21,6 +23,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val timelineRepository: TimelineRepository,
     private val statusRepository: StatusRepository,
+    private val preferencesManager: PreferencesManager,
     private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
     private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
     private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
@@ -33,10 +36,22 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     /**
-     * Paging data flow for timeline.
+     * Timeline filter from preferences.
      */
-    val timelinePagingData: Flow<PagingData<Status>> = timelineRepository
-        .getHomeTimeline()
+    val timelineFilter: StateFlow<TimelineFilter> = preferencesManager.timelineFilter
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TimelineFilter.DEFAULT
+        )
+
+    /**
+     * Paging data flow for timeline with filter applied.
+     */
+    val timelinePagingData: Flow<PagingData<Status>> = timelineFilter
+        .flatMapLatest { filter ->
+            timelineRepository.getHomeTimeline(filter)
+        }
         .cachedIn(viewModelScope)
 
     /**
@@ -52,6 +67,7 @@ class HomeViewModel @Inject constructor(
             is HomeAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
             is HomeAction.RefreshTimeline -> refreshTimeline()
             is HomeAction.DismissError -> dismissError()
+            is HomeAction.UpdateFilter -> updateFilter(action.filter)
         }
     }
 
@@ -186,6 +202,19 @@ class HomeViewModel @Inject constructor(
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
+    /**
+     * Update timeline filter.
+     */
+    private fun updateFilter(filter: TimelineFilter) {
+        viewModelScope.launch {
+            preferencesManager.saveTimelineFilter(
+                hideBoosts = filter.hideBoosts,
+                hideReplies = filter.hideReplies,
+                showOnlyMedia = filter.showOnlyMedia
+            )
+        }
+    }
 }
 
 /**
@@ -208,4 +237,5 @@ sealed class HomeAction {
     data class UnbookmarkStatus(val status: Status) : HomeAction()
     data object RefreshTimeline : HomeAction()
     data object DismissError : HomeAction()
+    data class UpdateFilter(val filter: TimelineFilter) : HomeAction()
 }

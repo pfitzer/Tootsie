@@ -40,6 +40,11 @@ class PreferencesManager @Inject constructor(
 
         // Feature Flags
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+
+        // Timeline Filters
+        private val KEY_TIMELINE_HIDE_BOOSTS = booleanPreferencesKey("timeline_hide_boosts")
+        private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
+        private val KEY_TIMELINE_SHOW_ONLY_MEDIA = booleanPreferencesKey("timeline_show_only_media")
     }
 
     // ========== Authentication ==========
@@ -202,6 +207,37 @@ class PreferencesManager @Inject constructor(
      */
     val isOnboardingCompleted: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[KEY_ONBOARDING_COMPLETED] ?: false
+    }
+
+    // ========== Timeline Filters ==========
+
+    /**
+     * Save timeline filter preferences.
+     */
+    suspend fun saveTimelineFilter(hideBoosts: Boolean, hideReplies: Boolean, showOnlyMedia: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_TIMELINE_HIDE_BOOSTS] = hideBoosts
+            preferences[KEY_TIMELINE_HIDE_REPLIES] = hideReplies
+            preferences[KEY_TIMELINE_SHOW_ONLY_MEDIA] = showOnlyMedia
+        }
+    }
+
+    /**
+     * Get timeline filter as Flow.
+     */
+    val timelineFilter: Flow<com.pfitzer.tootsie.domain.model.TimelineFilter> = dataStore.data.map { preferences ->
+        com.pfitzer.tootsie.domain.model.TimelineFilter(
+            hideBoosts = preferences[KEY_TIMELINE_HIDE_BOOSTS] ?: false,
+            hideReplies = preferences[KEY_TIMELINE_HIDE_REPLIES] ?: false,
+            showOnlyMedia = preferences[KEY_TIMELINE_SHOW_ONLY_MEDIA] ?: false
+        )
+    }
+
+    /**
+     * Get timeline filter (suspend function for one-time read).
+     */
+    suspend fun getTimelineFilter(): com.pfitzer.tootsie.domain.model.TimelineFilter {
+        return timelineFilter.first()
     }
 
     // ========== Utility ==========

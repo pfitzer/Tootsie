@@ -72,6 +72,16 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Resume Editing**: Click any draft to continue where you left off
 - **Navigation**: Easy access to drafts from compose screen toolbar
 
+**Phase 3c - Advanced Timeline Filters:**
+- **Hide Boosts**: Filter out all reblogged posts from timeline
+- **Hide Replies**: Filter out all reply posts from timeline
+- **Show Only Media**: Display only posts that contain media attachments
+- **Filter Persistence**: Filter preferences saved in DataStore, persist across app restarts
+- **Visual Indicator**: Badge on filter button shows when filters are active
+- **Real-time Filtering**: Timeline automatically refreshes when filters change
+- **Filter Dialog**: Clean UI with switches for each filter option
+- **Performance**: Filtering happens in paging layer, maintains smooth scrolling
+
 ### Current Implementation Status
 **Phase 2 (Core Features)** - Complete ✅
 - ✅ Post interactions (favorite, boost, reply, bookmark)
@@ -86,12 +96,22 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 **Phase 3 (Advanced Features)** - In Progress
 - ✅ Video & audio upload support (Phase 3a complete)
 - ✅ Draft post saving with auto-save (Phase 3b complete)
+- ✅ Advanced timeline filters (Phase 3c complete)
 - 🔨 Multi-account support (upcoming)
-- 🔨 Advanced timeline filters (upcoming)
 
 ### Recent Updates (December 2024)
 
-**Phase 3b - Draft Post Saving (NEW!):**
+**Phase 3c - Advanced Timeline Filters (NEW!):**
+- ✅ Hide boosts toggle (filters reblogged posts)
+- ✅ Hide replies toggle (filters reply posts)
+- ✅ Show only media toggle (filters non-media posts)
+- ✅ Filter persistence across app restarts
+- ✅ Visual badge indicator for active filters
+- ✅ Real-time timeline refresh on filter changes
+- ✅ Filter dialog with switches
+- ✅ Filtering in paging layer for performance
+
+**Phase 3b - Draft Post Saving:**
 - ✅ Auto-save every 5 seconds while composing
 - ✅ Draft persistence in Room database
 - ✅ Drafts screen with preview cards
@@ -124,7 +144,6 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 ### Next Steps
 Remaining Phase 3 features:
 - Multi-account support
-- Advanced timeline filters
 - Custom emoji support
 - Push notifications (FCM integration)
 - Accessibility improvements

@@ -8,6 +8,7 @@ import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.TimelineFilter
 import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
@@ -22,7 +23,8 @@ class TimelinePagingSource(
     private val mastodonApi: MastodonApiService,
     private val statusDao: StatusDao,
     private val timelineType: String,
-    private val local: Boolean = false
+    private val local: Boolean = false,
+    private val filter: TimelineFilter = TimelineFilter.DEFAULT
 ) : PagingSource<String, Status>() {
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
@@ -64,16 +66,19 @@ class TimelinePagingSource(
             // Convert to domain models
             val statuses = statusDtos.map { it.toDomain() }
 
-            // Determine next page key (ID of oldest status)
+            // Apply filters
+            val filteredStatuses = applyFilter(statuses)
+
+            // Determine next page key (ID of oldest status in unfiltered list)
             val nextKey = if (statuses.isEmpty()) {
                 null
             } else {
                 statuses.last().id
             }
 
-            Log.d(TAG, "Returning ${statuses.size} statuses, nextKey=$nextKey")
+            Log.d(TAG, "Returning ${filteredStatuses.size} statuses (${statuses.size} before filtering), nextKey=$nextKey")
             LoadResult.Page(
-                data = statuses,
+                data = filteredStatuses,
                 prevKey = null, // Only load older posts (forward pagination)
                 nextKey = nextKey
             )
@@ -108,11 +113,14 @@ class TimelinePagingSource(
             // Convert entities to domain models
             val cachedStatuses = cachedEntities.map { it.toDomain() }
 
+            // Apply filters
+            val filteredCachedStatuses = applyFilter(cachedStatuses)
+
             // For offline support, return cached data
             // Note: This is a simplified approach - a production app would use
             // RemoteMediator for more sophisticated caching
             LoadResult.Page(
-                data = cachedStatuses,
+                data = filteredCachedStatuses,
                 prevKey = null,
                 nextKey = if (cachedStatuses.isNotEmpty()) cachedStatuses.last().id else null
             )
@@ -125,5 +133,33 @@ class TimelinePagingSource(
     override fun getRefreshKey(state: PagingState<String, Status>): String? {
         // Return null to always start from the beginning when refreshing
         return null
+    }
+
+    /**
+     * Apply timeline filters to a list of statuses.
+     */
+    private fun applyFilter(statuses: List<Status>): List<Status> {
+        if (!filter.hasActiveFilters) {
+            return statuses
+        }
+
+        return statuses.filter { status ->
+            // Filter boosts (reblogs)
+            if (filter.hideBoosts && status.reblog != null) {
+                return@filter false
+            }
+
+            // Filter replies
+            if (filter.hideReplies && status.inReplyToId != null) {
+                return@filter false
+            }
+
+            // Filter posts without media
+            if (filter.showOnlyMedia && status.mediaAttachments.isEmpty()) {
+                return@filter false
+            }
+
+            true
+        }
     }
 }

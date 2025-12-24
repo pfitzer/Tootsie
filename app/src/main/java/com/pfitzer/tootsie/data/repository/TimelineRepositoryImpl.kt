@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.paging.TimelinePagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class TimelineRepositoryImpl @Inject constructor(
     private val statusDao: StatusDao
 ) : TimelineRepository {
 
-    override fun getHomeTimeline(): Flow<PagingData<Status>> {
+    override fun getHomeTimeline(filter: TimelineFilter): Flow<PagingData<Status>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -34,13 +35,14 @@ class TimelineRepositoryImpl @Inject constructor(
                 TimelinePagingSource(
                     mastodonApi = mastodonApi,
                     statusDao = statusDao,
-                    timelineType = "home"
+                    timelineType = "home",
+                    filter = filter
                 )
             }
         ).flow
     }
 
-    override fun getPublicTimeline(local: Boolean): Flow<PagingData<Status>> {
+    override fun getPublicTimeline(local: Boolean, filter: TimelineFilter): Flow<PagingData<Status>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -53,7 +55,8 @@ class TimelineRepositoryImpl @Inject constructor(
                     mastodonApi = mastodonApi,
                     statusDao = statusDao,
                     timelineType = "public",
-                    local = local
+                    local = local,
+                    filter = filter
                 )
             }
         ).flow

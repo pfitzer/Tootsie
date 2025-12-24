@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,6 +23,7 @@ import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
+import com.pfitzer.tootsie.presentation.components.timeline.TimelineFilterDialog
 
 /**
  * Home Screen - displays the user's home timeline.
@@ -39,12 +44,43 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val timelineFilter by viewModel.timelineFilter.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData.collectAsLazyPagingItems()
+
+    var showFilterDialog by remember { mutableStateOf(false) }
+
+    // Filter dialog
+    if (showFilterDialog) {
+        TimelineFilterDialog(
+            currentFilter = timelineFilter,
+            onDismiss = { showFilterDialog = false },
+            onApply = { newFilter ->
+                viewModel.onAction(HomeAction.UpdateFilter(newFilter))
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Home") },
+                actions = {
+                    // Filter button with indicator
+                    IconButton(onClick = { showFilterDialog = true }) {
+                        Badge(
+                            containerColor = if (timelineFilter.hasActiveFilters) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Filter timeline"
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
