@@ -80,6 +80,7 @@ Phase 2 (Core Features) is complete with:
 ### Next Steps
 Phase 3 will focus on:
 - Multi-account support
+- Video & audio upload support (backend ready, UI needs picker & preview updates)
 - Advanced timeline filters
 - Draft post saving
 - Custom emoji support
