@@ -33,16 +33,22 @@ sealed class TootsieDestinations(val route: String) {
     /**
      * Compose screen - create new status/post.
      * Optionally takes replyToId parameter for replying to a status.
+     * Optionally takes draftId parameter for resuming a draft.
      */
-    data object Compose : TootsieDestinations("compose?replyToId={replyToId}") {
-        fun createRoute(replyToId: String? = null): String {
-            return if (replyToId != null) {
-                "compose?replyToId=$replyToId"
-            } else {
+    data object Compose : TootsieDestinations("compose?replyToId={replyToId}&draftId={draftId}") {
+        fun createRoute(replyToId: String? = null, draftId: Long? = null): String {
+            val params = buildList {
+                if (replyToId != null) add("replyToId=$replyToId")
+                if (draftId != null) add("draftId=$draftId")
+            }
+            return if (params.isEmpty()) {
                 "compose"
+            } else {
+                "compose?${params.joinToString("&")}"
             }
         }
         const val ARG_REPLY_TO_ID = "replyToId"
+        const val ARG_DRAFT_ID = "draftId"
     }
 
     /**
@@ -71,6 +77,11 @@ sealed class TootsieDestinations(val route: String) {
      * Notifications screen - user notifications.
      */
     data object Notifications : TootsieDestinations("notifications")
+
+    /**
+     * Drafts screen - view and manage saved drafts.
+     */
+    data object Drafts : TootsieDestinations("drafts")
 
     /**
      * Settings screen - app settings and preferences.

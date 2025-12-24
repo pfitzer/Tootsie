@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.pfitzer.tootsie.data.local.TootsieDatabase
 import com.pfitzer.tootsie.data.local.dao.AccountDao
+import com.pfitzer.tootsie.data.local.dao.DraftDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import dagger.Module
@@ -62,5 +63,14 @@ object DatabaseModule {
     @Singleton
     fun provideTimelineRemoteKeysDao(database: TootsieDatabase): TimelineRemoteKeysDao {
         return database.timelineRemoteKeysDao()
+    }
+
+    /**
+     * Provides DraftDao from the database.
+     */
+    @Provides
+    @Singleton
+    fun provideDraftDao(database: TootsieDatabase): DraftDao {
+        return database.draftDao()
     }
 }

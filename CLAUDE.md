@@ -61,6 +61,17 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Format Support**: 11 total file formats (4 image, 4 video, 3 audio)
 - **Unified Upload**: Same upload flow and alt text support for all media types
 
+**Phase 3b - Draft Post Saving:**
+- **Auto-save**: Drafts automatically saved every 5 seconds while typing
+- **Draft Management**: View, resume, and delete saved drafts
+- **Draft Persistence**: Drafts stored in Room database with full content preservation
+- **Smart Triggering**: Auto-save triggered on content, media, visibility, or content warning changes
+- **Draft Cleanup**: Automatically deleted when post is successfully published
+- **Draft Metadata**: Stores content, media IDs, visibility, content warnings, reply context
+- **Drafts Screen**: Dedicated UI showing draft previews with timestamps and metadata badges
+- **Resume Editing**: Click any draft to continue where you left off
+- **Navigation**: Easy access to drafts from compose screen toolbar
+
 ### Current Implementation Status
 **Phase 2 (Core Features)** - Complete ✅
 - ✅ Post interactions (favorite, boost, reply, bookmark)
@@ -74,13 +85,23 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 **Phase 3 (Advanced Features)** - In Progress
 - ✅ Video & audio upload support (Phase 3a complete)
+- ✅ Draft post saving with auto-save (Phase 3b complete)
 - 🔨 Multi-account support (upcoming)
 - 🔨 Advanced timeline filters (upcoming)
-- 🔨 Draft post saving (upcoming)
 
 ### Recent Updates (December 2024)
 
-**Phase 3a - Video & Audio Upload (NEW!):**
+**Phase 3b - Draft Post Saving (NEW!):**
+- ✅ Auto-save every 5 seconds while composing
+- ✅ Draft persistence in Room database
+- ✅ Drafts screen with preview cards
+- ✅ Resume editing from drafts list
+- ✅ Auto-delete on successful post
+- ✅ Metadata badges (CW, Media)
+- ✅ Relative timestamps (e.g., "5m ago")
+- ✅ Navigation from compose toolbar
+
+**Phase 3a - Video & Audio Upload:**
 - ✅ Video upload support: mp4, webm, m4v, mov
 - ✅ Audio upload support: mp3, ogg, wav
 - ✅ Media type visual indicators (VIDEO/AUDIO/GIF badges)
@@ -104,7 +125,6 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 Remaining Phase 3 features:
 - Multi-account support
 - Advanced timeline filters
-- Draft post saving
 - Custom emoji support
 - Push notifications (FCM integration)
 - Accessibility improvements

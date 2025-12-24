@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,12 +31,14 @@ import kotlinx.coroutines.withContext
  * Compose Screen - for creating new posts.
  *
  * @param onNavigateBack Callback to navigate back
+ * @param onNavigateToDrafts Callback to navigate to drafts screen
  * @param viewModel ViewModel for managing compose state
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposeScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToDrafts: () -> Unit = {},
     viewModel: ComposeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,6 +100,14 @@ fun ComposeScreen(
                     }
                 },
                 actions = {
+                    // Drafts button
+                    IconButton(onClick = onNavigateToDrafts) {
+                        Icon(
+                            imageVector = Icons.Default.List,
+                            contentDescription = "View drafts"
+                        )
+                    }
+
                     // Post button
                     TextButton(
                         onClick = { viewModel.onAction(ComposeAction.Post) },

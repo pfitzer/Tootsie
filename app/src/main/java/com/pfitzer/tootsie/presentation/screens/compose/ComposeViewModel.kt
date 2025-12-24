@@ -4,14 +4,20 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.domain.model.MediaAttachment
+import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
 
@@ -24,17 +30,26 @@ class ComposeViewModel @Inject constructor(
     private val postStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.PostStatusUseCase,
     private val uploadMediaUseCase: com.pfitzer.tootsie.domain.usecase.status.UploadMediaUseCase,
     private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
+    private val draftRepository: DraftRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val replyToId: String? = savedStateHandle["replyToId"]
+    private val draftId: String? = savedStateHandle["draftId"]
 
     private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
 
+    // Auto-save job for draft saving
+    private var autoSaveJob: Job? = null
+
     init {
+        // Load draft if resuming from drafts
+        if (draftId != null) {
+            loadDraft(draftId.toLongOrNull() ?: 0L)
+        }
         // Load reply context if replying to a status
-        if (replyToId != null) {
+        else if (replyToId != null) {
             loadReplyContext(replyToId)
         }
     }
@@ -73,6 +88,9 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.UpdateMediaDescription -> updateMediaDescription(action.attachmentId, action.description)
             is ComposeAction.Post -> postStatus()
             is ComposeAction.DismissError -> dismissError()
+            is ComposeAction.LoadDraft -> loadDraft(action.draftId)
+            is ComposeAction.SaveDraftNow -> saveDraftNow()
+            is ComposeAction.DeleteDraft -> deleteDraft()
         }
     }
 
@@ -81,6 +99,7 @@ class ComposeViewModel @Inject constructor(
      */
     private fun updateContent(content: String) {
         _uiState.update { it.copy(content = content) }
+        scheduleAutoSave()
     }
 
     /**
@@ -88,6 +107,7 @@ class ComposeViewModel @Inject constructor(
      */
     private fun updateVisibility(visibility: StatusVisibility) {
         _uiState.update { it.copy(visibility = visibility) }
+        scheduleAutoSave()
     }
 
     /**
@@ -95,6 +115,7 @@ class ComposeViewModel @Inject constructor(
      */
     private fun updateContentWarning(warning: String) {
         _uiState.update { it.copy(contentWarning = warning) }
+        scheduleAutoSave()
     }
 
     /**
@@ -132,6 +153,7 @@ class ComposeViewModel @Inject constructor(
                             mediaAttachments = it.mediaAttachments + result.data
                         )
                     }
+                    scheduleAutoSave()
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -157,6 +179,7 @@ class ComposeViewModel @Inject constructor(
                 }
             )
         }
+        scheduleAutoSave()
     }
 
     /**
@@ -210,6 +233,8 @@ class ComposeViewModel @Inject constructor(
                             isPosted = true
                         )
                     }
+                    // Delete the draft since the post was successful
+                    deleteDraft()
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -230,6 +255,147 @@ class ComposeViewModel @Inject constructor(
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
+    /**
+     * Schedule auto-save after a delay.
+     * Cancels any existing auto-save job and starts a new one.
+     */
+    private fun scheduleAutoSave() {
+        // Cancel existing job
+        autoSaveJob?.cancel()
+
+        // Only schedule auto-save if there's content to save
+        if (!_uiState.value.hasDraftContent) {
+            return
+        }
+
+        // Schedule new auto-save after 5 seconds
+        autoSaveJob = viewModelScope.launch {
+            delay(5000) // 5 seconds delay
+            saveDraft()
+        }
+    }
+
+    /**
+     * Save draft immediately (without delay).
+     */
+    private fun saveDraftNow() {
+        autoSaveJob?.cancel()
+        viewModelScope.launch {
+            saveDraft()
+        }
+    }
+
+    /**
+     * Save the current draft to the database.
+     */
+    private suspend fun saveDraft() {
+        val state = _uiState.value
+
+        // Don't save if there's no content
+        if (!state.hasDraftContent) {
+            return
+        }
+
+        _uiState.update { it.copy(isSavingDraft = true) }
+
+        // Convert media IDs to JSON
+        val mediaIdsJson = if (state.mediaAttachments.isNotEmpty()) {
+            Json.encodeToString(state.mediaAttachments.map { it.id })
+        } else {
+            null
+        }
+
+        val draft = DraftEntity(
+            id = state.currentDraftId ?: 0L,
+            content = state.content,
+            mediaIds = mediaIdsJson,
+            visibility = state.visibility.value,
+            sensitive = false, // TODO: Add sensitive toggle to UI
+            spoilerText = state.contentWarning.takeIf { it.isNotBlank() },
+            inReplyToId = state.replyToId,
+            createdAt = state.currentDraftId?.let { state.lastDraftSavedAt } ?: System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
+        )
+
+        when (val result = draftRepository.saveDraft(draft)) {
+            is Result.Success -> {
+                _uiState.update {
+                    it.copy(
+                        currentDraftId = result.data,
+                        isSavingDraft = false,
+                        lastDraftSavedAt = System.currentTimeMillis()
+                    )
+                }
+            }
+            is Result.Error -> {
+                _uiState.update { it.copy(isSavingDraft = false) }
+                // Silently fail - don't interrupt user's compose flow
+            }
+            is Result.Loading -> Unit
+        }
+    }
+
+    /**
+     * Load a draft by ID.
+     */
+    private fun loadDraft(draftId: Long) {
+        viewModelScope.launch {
+            when (val result = draftRepository.getDraft(draftId)) {
+                is Result.Success -> {
+                    val draft = result.data ?: return@launch
+
+                    // Parse media IDs from JSON
+                    val mediaIds = draft.mediaIds?.let {
+                        try {
+                            Json.decodeFromString<List<String>>(it)
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    } ?: emptyList()
+
+                    // TODO: Load media attachments from IDs
+                    // For now, we'll just load the text content
+
+                    _uiState.update {
+                        it.copy(
+                            content = draft.content,
+                            visibility = StatusVisibility.entries.find { v -> v.value == draft.visibility }
+                                ?: StatusVisibility.PUBLIC,
+                            contentWarning = draft.spoilerText ?: "",
+                            showContentWarning = draft.spoilerText != null,
+                            currentDraftId = draft.id,
+                            lastDraftSavedAt = draft.updatedAt
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to load draft") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Delete the current draft.
+     */
+    private fun deleteDraft() {
+        val draftId = _uiState.value.currentDraftId ?: return
+
+        viewModelScope.launch {
+            draftRepository.deleteDraft(draftId)
+            _uiState.update {
+                it.copy(
+                    currentDraftId = null,
+                    lastDraftSavedAt = null
+                )
+            }
+        }
+
+        // Cancel auto-save job
+        autoSaveJob?.cancel()
+    }
 }
 
 /**
@@ -246,13 +412,17 @@ data class ComposeUiState(
     val isPosted: Boolean = false,
     val errorMessage: String? = null,
     val replyToId: String? = null,
-    val replyToAccount: String? = null
+    val replyToAccount: String? = null,
+    val currentDraftId: Long? = null,
+    val isSavingDraft: Boolean = false,
+    val lastDraftSavedAt: Long? = null
 ) {
     val characterCount: Int get() = content.length
     val hasMedia: Boolean get() = mediaAttachments.isNotEmpty()
     val canPost: Boolean get() = (content.isNotBlank() || hasMedia) && !isPosting && !isUploadingMedia && characterCount <= 500
     val isReply: Boolean get() = replyToId != null
     val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia
+    val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank()
 }
 
 /**
@@ -268,6 +438,9 @@ sealed class ComposeAction {
     data class UpdateMediaDescription(val attachmentId: String, val description: String) : ComposeAction()
     data object Post : ComposeAction()
     data object DismissError : ComposeAction()
+    data class LoadDraft(val draftId: Long) : ComposeAction()
+    data object SaveDraftNow : ComposeAction()
+    data object DeleteDraft : ComposeAction()
 }
 
 /**

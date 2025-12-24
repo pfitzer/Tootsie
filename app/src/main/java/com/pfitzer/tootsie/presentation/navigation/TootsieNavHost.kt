@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.pfitzer.tootsie.presentation.components.navigation.BottomNavigationBar
 import com.pfitzer.tootsie.presentation.screens.auth.LoginScreen
 import com.pfitzer.tootsie.presentation.screens.compose.ComposeScreen
+import com.pfitzer.tootsie.presentation.screens.drafts.DraftsScreen
 import com.pfitzer.tootsie.presentation.screens.home.HomeScreen
 import com.pfitzer.tootsie.presentation.screens.notifications.NotificationsScreen
 import com.pfitzer.tootsie.presentation.screens.profile.ProfileScreen
@@ -183,12 +184,20 @@ fun TootsieNavHost(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
+                },
+                navArgument(TootsieDestinations.Compose.ARG_DRAFT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
                 }
             )
         ) {
             ComposeScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToDrafts = {
+                    navController.navigate(TootsieDestinations.Drafts.route)
                 }
             )
         }
@@ -264,6 +273,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                }
+            )
+        }
+
+        // Drafts screen
+        composable(route = TootsieDestinations.Drafts.route) {
+            DraftsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onResumeDraft = { draftId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(draftId = draftId))
                 }
             )
         }

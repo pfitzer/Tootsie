@@ -3,9 +3,11 @@ package com.pfitzer.tootsie.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.pfitzer.tootsie.data.local.dao.AccountDao
+import com.pfitzer.tootsie.data.local.dao.DraftDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import com.pfitzer.tootsie.data.local.entities.AccountEntity
+import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.data.local.entities.StatusEntity
 import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
 
@@ -17,9 +19,10 @@ import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
     entities = [
         AccountEntity::class,
         StatusEntity::class,
-        TimelineRemoteKeys::class
+        TimelineRemoteKeys::class,
+        DraftEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class TootsieDatabase : RoomDatabase() {
@@ -38,6 +41,11 @@ abstract class TootsieDatabase : RoomDatabase() {
      * Provides access to Timeline Remote Keys operations.
      */
     abstract fun timelineRemoteKeysDao(): TimelineRemoteKeysDao
+
+    /**
+     * Provides access to Draft operations.
+     */
+    abstract fun draftDao(): DraftDao
 
     companion object {
         const val DATABASE_NAME = "tootsie_database"
