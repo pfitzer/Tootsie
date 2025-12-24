@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -154,6 +155,7 @@ fun HomeScreen(
 /**
  * Timeline list with pull-to-refresh support.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimelineList(
     timelinePagingItems: LazyPagingItems<Status>,
@@ -167,10 +169,18 @@ private fun TimelineList(
     isRefreshing: Boolean,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            onRefresh()
+            timelinePagingItems.refresh()
+        },
+        modifier = modifier.fillMaxSize()
     ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp)
+        ) {
         // Handle refresh state
         if (timelinePagingItems.loadState.refresh is LoadState.Loading && !isRefreshing) {
             item {
@@ -222,6 +232,7 @@ private fun TimelineList(
                     onRetry = { timelinePagingItems.retry() }
                 )
             }
+        }
         }
     }
 }
