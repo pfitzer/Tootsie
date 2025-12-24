@@ -30,8 +30,11 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Handle hashtag clicks by searching for that hashtag
+    // Handle hashtag clicks by searching for posts with that hashtag
     val onHashtagClick: (String) -> Unit = { hashtagName ->
+        // First set filter to STATUSES to show only posts
+        viewModel.onAction(SearchAction.SelectFilter(SearchFilter.STATUSES))
+        // Then update query to search for the hashtag
         viewModel.onAction(SearchAction.UpdateQuery("#$hashtagName"))
     }
 
