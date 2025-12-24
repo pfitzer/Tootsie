@@ -4,11 +4,13 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Phase 1 Complete - Core Infrastructure ✅
-**Version**: 1.0.0-alpha (pre-release)
-**Project State**: Core authentication and timeline viewing implemented
+**Current Phase**: Phase 2 Complete - Core Features ✅
+**Version**: 1.0.0-beta (pre-release)
+**Project State**: Full-featured Mastodon client with all core functionality
 
 ### Completed Features ✅
+
+**Phase 1 - Core Infrastructure:**
 - **OAuth 2.0 Authentication**: Full OAuth flow with dynamic app registration
 - **Multi-Instance Support**: Users can connect to any Mastodon instance
 - **Timeline Viewing**: Home and public timeline display with Paging 3
@@ -17,25 +19,52 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Clean Architecture**: Repository pattern, use cases, ViewModels all implemented
 - **Provider Pattern**: Thread-safe synchronous access to auth state for interceptors
 
+**Phase 2a - Core Interactions:**
+- **Post Interactions**: Favorite, boost, unbookmark, and bookmark posts
+- **Status Context**: View conversation threads with ancestors and descendants
+- **Reply Functionality**: Reply to posts with in-reply-to support
+
+**Phase 2b - User Profiles & Notifications:**
+- **User Profiles**: View account details, follower/following counts, bio, and posts
+- **Follow/Unfollow**: Follow and unfollow accounts with relationship management
+- **Notifications**: Real-time notifications for mentions, follows, favorites, and boosts
+- **Notification Actions**: Dismiss individual notifications or clear all
+
+**Phase 2c - Content Creation:**
+- **Compose Posts**: Create new posts with character count and validation
+- **Media Upload**: Upload images with alt text (accessibility descriptions)
+- **Image Picker**: Android PhotoPicker integration for selecting media
+- **Media Preview**: Grid view with edit and remove controls
+- **Visibility Controls**: Public, unlisted, private, and direct message options
+- **Content Warnings**: Add content warning text to posts
+
+**Phase 2d - Search:**
+- **Universal Search**: Search for accounts, posts, and hashtags across the Fediverse
+- **Debounced Search**: Real-time search with 300ms debounce for performance
+- **Filter Results**: Filter by type (All, Accounts, Posts, Hashtags)
+- **WebFinger Support**: Lookup remote accounts via WebFinger protocol
+- **Result Navigation**: Navigate to profiles and status details from search results
+
 ### Current Implementation Status
-Phase 1 (Core Infrastructure) is complete with:
-- ✅ Hilt dependency injection configured
-- ✅ Room database for local persistence
-- ✅ DataStore for preferences and settings
-- ✅ Retrofit + OkHttp for API communication
-- ✅ OAuth authentication flow working
-- ✅ Timeline fetching and display
-- ✅ Jetpack Compose UI foundation
-- ✅ Navigation with NavHost
-- ✅ Paging 3 for infinite scroll
+Phase 2 (Core Features) is complete with:
+- ✅ Post interactions (favorite, boost, reply, bookmark)
+- ✅ Compose/create posts with media upload and alt text
+- ✅ User profiles with follow/unfollow
+- ✅ Notifications with dismiss and clear actions
+- ✅ Search functionality (accounts, statuses, hashtags)
+- ✅ Content warnings and visibility controls
+- ✅ Media preview and management
+- ✅ Conversation threading
 
 ### Next Steps
-Phase 2 will focus on:
-- Post interactions (favorite, boost, reply)
-- Compose/create posts
-- User profiles
-- Notifications
-- Search functionality
+Phase 3 will focus on:
+- Multi-account support
+- Advanced timeline filters
+- Draft post saving
+- Custom emoji support
+- Push notifications (FCM integration)
+- Accessibility improvements
+- Performance optimizations
 
 ---
 
