@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.data.remote.api
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.data.remote.dto.InstanceDto
 import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
+import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -354,4 +355,33 @@ interface MastodonApiService {
      */
     @GET("api/v1/instance")
     suspend fun getInstance(): InstanceDto
+
+    // ========== Search Endpoints ==========
+
+    /**
+     * Search for accounts, statuses, and hashtags.
+     * Uses Mastodon API v2 for improved search results.
+     *
+     * @param query Search query string
+     * @param type Type of results to return (accounts, statuses, hashtags) or null for all
+     * @param resolve Attempt WebFinger lookup (for remote accounts)
+     * @param following Only search among accounts the user follows
+     * @param accountId Only search for statuses from this account ID
+     * @param maxId Return results older than this ID
+     * @param minId Return results newer than this ID
+     * @param limit Maximum number of results per category (default 20, max 40)
+     * @param offset Skip this many results (for pagination)
+     */
+    @GET("api/v2/search")
+    suspend fun search(
+        @Query("q") query: String,
+        @Query("type") type: String? = null,
+        @Query("resolve") resolve: Boolean = false,
+        @Query("following") following: Boolean = false,
+        @Query("account_id") accountId: String? = null,
+        @Query("max_id") maxId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): SearchResultsDto
 }

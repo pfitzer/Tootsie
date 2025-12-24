@@ -3,11 +3,13 @@ package com.pfitzer.tootsie.di
 import com.pfitzer.tootsie.data.repository.AccountRepositoryImpl
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
+import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
+import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import dagger.Binds
@@ -68,4 +70,13 @@ abstract class RepositoryModule {
     abstract fun bindNotificationRepository(
         notificationRepositoryImpl: NotificationRepositoryImpl
     ): NotificationRepository
+
+    /**
+     * Binds SearchRepositoryImpl to SearchRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindSearchRepository(
+        searchRepositoryImpl: SearchRepositoryImpl
+    ): SearchRepository
 }
