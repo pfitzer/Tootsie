@@ -246,7 +246,14 @@ fun TootsieNavHost(
 
         // Search screen
         composable(route = TootsieDestinations.Search.route) {
-            SearchScreen()
+            SearchScreen(
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToStatusDetail = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                }
+            )
         }
 
         // Notifications screen

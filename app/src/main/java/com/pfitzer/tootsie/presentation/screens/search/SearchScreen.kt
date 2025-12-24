@@ -30,6 +30,11 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Handle hashtag clicks by searching for that hashtag
+    val onHashtagClick: (String) -> Unit = { hashtagName ->
+        viewModel.onAction(SearchAction.UpdateQuery("#$hashtagName"))
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,6 +89,7 @@ fun SearchScreen(
                         uiState = uiState,
                         onAccountClick = onNavigateToProfile,
                         onStatusClick = onNavigateToStatusDetail,
+                        onHashtagClick = onHashtagClick,
                         onStatusAction = { _, _ -> /* TODO: Handle status actions */ }
                     )
                 }
@@ -162,6 +168,7 @@ private fun SearchResults(
     uiState: SearchUiState,
     onAccountClick: (String) -> Unit,
     onStatusClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onStatusAction: (String, String) -> Unit
 ) {
     LazyColumn(
@@ -222,7 +229,10 @@ private fun SearchResults(
                 )
             }
             items(uiState.hashtags) { hashtag ->
-                HashtagCard(hashtag = hashtag)
+                HashtagCard(
+                    hashtag = hashtag,
+                    onClick = { onHashtagClick(hashtag.name) }
+                )
             }
         }
     }
@@ -283,9 +293,11 @@ private fun AccountResultCard(
 @Composable
 private fun HashtagCard(
     hashtag: com.pfitzer.tootsie.domain.model.Hashtag,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
