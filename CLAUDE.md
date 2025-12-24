@@ -4,9 +4,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Phase 2 Complete - Core Features ✅
-**Version**: 1.0.0-beta (pre-release)
-**Project State**: Full-featured Mastodon client with all core functionality
+**Current Phase**: Phase 3 In Progress - Advanced Features 🔨
+**Version**: 1.0.0-rc1 (release candidate)
+**Project State**: Full-featured Mastodon client with video/audio upload support
 
 ### Completed Features ✅
 
@@ -52,8 +52,17 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Empty States**: Helpful messaging when no results found or search hasn't started
 - **Error Handling**: Graceful error messages with retry capability
 
+**Phase 3a - Video & Audio Upload:**
+- **Video Upload**: Upload mp4, webm, m4v, mov files via Android PhotoPicker
+- **Audio Upload**: Upload mp3, ogg, wav files (backend ready, UI supports selection)
+- **Media Type Indicators**: Visual badges showing VIDEO, AUDIO, or GIF labels
+- **Video Preview**: Thumbnail with centered play button overlay
+- **Audio Preview**: Large "AUDIO" text label on colored background
+- **Format Support**: 11 total file formats (4 image, 4 video, 3 audio)
+- **Unified Upload**: Same upload flow and alt text support for all media types
+
 ### Current Implementation Status
-Phase 2 (Core Features) is complete with:
+**Phase 2 (Core Features)** - Complete ✅
 - ✅ Post interactions (favorite, boost, reply, bookmark)
 - ✅ Compose/create posts with media upload and alt text
 - ✅ User profiles with follow/unfollow
@@ -63,7 +72,21 @@ Phase 2 (Core Features) is complete with:
 - ✅ Media preview and management
 - ✅ Conversation threading
 
+**Phase 3 (Advanced Features)** - In Progress
+- ✅ Video & audio upload support (Phase 3a complete)
+- 🔨 Multi-account support (upcoming)
+- 🔨 Advanced timeline filters (upcoming)
+- 🔨 Draft post saving (upcoming)
+
 ### Recent Updates (December 2024)
+
+**Phase 3a - Video & Audio Upload (NEW!):**
+- ✅ Video upload support: mp4, webm, m4v, mov
+- ✅ Audio upload support: mp3, ogg, wav
+- ✅ Media type visual indicators (VIDEO/AUDIO/GIF badges)
+- ✅ Video preview with play button overlay
+- ✅ Audio preview with text label
+- ✅ 11 total supported formats across image/video/audio
 
 **Search Navigation & UX Improvements:**
 - ✅ Fixed navigation: Accounts, posts, and hashtags now clickable
@@ -78,9 +101,8 @@ Phase 2 (Core Features) is complete with:
 - ✅ Email icon for attach button (Material Icons compatibility)
 
 ### Next Steps
-Phase 3 will focus on:
+Remaining Phase 3 features:
 - Multi-account support
-- Video & audio upload support (backend ready, UI needs picker & preview updates)
 - Advanced timeline filters
 - Draft post saving
 - Custom emoji support
