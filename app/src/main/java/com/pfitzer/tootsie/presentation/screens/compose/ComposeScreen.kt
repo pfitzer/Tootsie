@@ -214,14 +214,14 @@ fun ComposeScreen(
                     IconButton(
                         onClick = {
                             imagePickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                             )
                         },
                         enabled = uiState.canAddMedia
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Email,
-                            contentDescription = "Attach media",
+                            contentDescription = "Attach media (image or video)",
                             tint = if (uiState.canAddMedia) {
                                 MaterialTheme.colorScheme.primary
                             } else {
