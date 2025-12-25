@@ -1,16 +1,21 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.util.formatRelativeTime
@@ -26,6 +31,9 @@ import com.pfitzer.tootsie.presentation.util.htmlToPlainText
  * @param onBoostClick Callback when boost button is clicked
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
+ * @param onMentionClick Callback when a mention is clicked (receives accountId)
+ * @param onHashtagClick Callback when a hashtag is clicked (receives tag name)
+ * @param onLinkClick Callback when a link is clicked (receives URL)
  * @param modifier Optional modifier
  */
 @Composable
@@ -37,6 +45,9 @@ fun StatusCard(
     onBoostClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onMentionClick: (String) -> Unit = {},
+    onHashtagClick: (String) -> Unit = {},
+    onLinkClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // If this is a boost/reblog, show the boosted status
@@ -83,8 +94,13 @@ fun StatusCard(
             // Status content
             StatusContent(
                 content = displayStatus.content,
+                mentions = displayStatus.mentions,
+                tags = displayStatus.tags,
                 sensitive = displayStatus.sensitive,
                 spoilerText = displayStatus.spoilerText,
+                onMentionClick = onMentionClick,
+                onHashtagClick = onHashtagClick,
+                onLinkClick = onLinkClick,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
@@ -209,22 +225,28 @@ private fun ContentWarning(
 }
 
 /**
- * Displays status content (text).
+ * Displays status content (text) with rich HTML rendering.
  */
 @Composable
 private fun StatusContent(
     content: String,
+    mentions: List<com.pfitzer.tootsie.domain.model.Mention>,
+    tags: List<com.pfitzer.tootsie.domain.model.Tag>,
     sensitive: Boolean,
     spoilerText: String,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Convert HTML to plain text
-    val plainText = htmlToPlainText(content)
-
-    if (plainText.isNotBlank()) {
-        Text(
-            text = plainText,
-            style = MaterialTheme.typography.bodyLarge,
+    if (content.isNotBlank()) {
+        RichTextContent(
+            content = content,
+            mentions = mentions,
+            tags = tags,
+            onMentionClick = onMentionClick,
+            onHashtagClick = onHashtagClick,
+            onLinkClick = onLinkClick,
             modifier = modifier.fillMaxWidth()
         )
     }
@@ -239,23 +261,232 @@ private fun MediaAttachmentGrid(
     sensitive: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Simplified for now - just show count
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium
+    if (attachments.isEmpty()) return
+
+    when (attachments.size) {
+        1 -> SingleMediaAttachment(attachments[0], modifier)
+        2 -> TwoMediaGrid(attachments, modifier)
+        3 -> ThreeMediaGrid(attachments, modifier)
+        else -> FourPlusMediaGrid(attachments, modifier)
+    }
+}
+
+/**
+ * Display single media attachment.
+ */
+@Composable
+private fun SingleMediaAttachment(
+    attachment: com.pfitzer.tootsie.domain.model.MediaAttachment,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(300.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "${attachments.size} media attachment${if (attachments.size > 1) "s" else ""}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        when (attachment.type) {
+            MediaType.IMAGE, MediaType.GIFV -> {
+                AsyncImage(
+                    model = attachment.previewUrl,
+                    contentDescription = attachment.description ?: "Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            MediaType.VIDEO -> {
+                AsyncImage(
+                    model = attachment.previewUrl,
+                    contentDescription = attachment.description ?: "Video thumbnail",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                // Play button overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play video",
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            MediaType.AUDIO -> {
+                // Audio placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "AUDIO",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            MediaType.UNKNOWN -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "MEDIA",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Display two media attachments side by side.
+ */
+@Composable
+private fun TwoMediaGrid(
+    attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        attachments.take(2).forEach { attachment ->
+            Box(modifier = Modifier.weight(1f)) {
+                AsyncImage(
+                    model = attachment.previewUrl,
+                    contentDescription = attachment.description,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                if (attachment.type == MediaType.VIDEO || attachment.type == MediaType.GIFV) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Display three media attachments in a grid.
+ */
+@Composable
+private fun ThreeMediaGrid(
+    attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // First item takes half width
+        Box(modifier = Modifier.weight(1f)) {
+            AsyncImage(
+                model = attachments[0].previewUrl,
+                contentDescription = attachments[0].description,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
+        }
+        // Other two in a column
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            attachments.drop(1).take(2).forEach { attachment ->
+                Box(modifier = Modifier.weight(1f)) {
+                    AsyncImage(
+                        model = attachment.previewUrl,
+                        contentDescription = attachment.description,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Display four or more media attachments in a 2x2 grid.
+ */
+@Composable
+private fun FourPlusMediaGrid(
+    attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // Top row
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            attachments.take(2).forEach { attachment ->
+                Box(modifier = Modifier.weight(1f)) {
+                    AsyncImage(
+                        model = attachment.previewUrl,
+                        contentDescription = attachment.description,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+        // Bottom row
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            attachments.drop(2).take(2).forEach { attachment ->
+                Box(modifier = Modifier.weight(1f)) {
+                    AsyncImage(
+                        model = attachment.previewUrl,
+                        contentDescription = attachment.description,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    // Show "+N" overlay if more than 4 attachments
+                    if (attachments.size > 4 && attachment == attachments[3]) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "+${attachments.size - 4}",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

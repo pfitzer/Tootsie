@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +26,7 @@ import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.components.timeline.TimelineFilterDialog
+import com.pfitzer.tootsie.util.openInBrowser
 
 /**
  * Home Screen - displays the user's home timeline.
@@ -42,6 +44,7 @@ fun HomeScreen(
     onNavigateToReply: (String) -> Unit,
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
+    onNavigateToSearch: (String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -109,6 +112,11 @@ fun HomeScreen(
                 timelinePagingItems = timelinePagingItems,
                 onStatusClick = onNavigateToStatus,
                 onAvatarClick = onNavigateToProfile,
+                onMentionClick = onNavigateToProfile,  // Mentions navigate to profile
+                onHashtagClick = { tagName ->
+                    // Navigate to search with hashtag query
+                    onNavigateToSearch("#$tagName")
+                },
                 onFavoriteClick = { status ->
                     if (status.favourited) {
                         viewModel.onAction(HomeAction.UnfavoriteStatus(status))
@@ -161,6 +169,8 @@ private fun TimelineList(
     timelinePagingItems: LazyPagingItems<Status>,
     onStatusClick: (String) -> Unit,
     onAvatarClick: (String) -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
@@ -169,6 +179,7 @@ private fun TimelineList(
     isRefreshing: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     // Determine if we're actually refreshing based on paging state
     val isActuallyRefreshing = timelinePagingItems.loadState.refresh is LoadState.Loading
 
@@ -201,6 +212,9 @@ private fun TimelineList(
                     status = status,
                     onStatusClick = onStatusClick,
                     onAvatarClick = onAvatarClick,
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
+                    onLinkClick = { url -> context.openInBrowser(url) },
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,

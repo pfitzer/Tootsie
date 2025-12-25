@@ -172,6 +172,11 @@ fun TootsieNavHost(
                 },
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { hashtagQuery ->
+                    navController.navigate(TootsieDestinations.Search.route)
+                    // Note: In future, could pass hashtag as navigation argument
+                    // For now, user needs to type the hashtag in search
                 }
             )
         }
