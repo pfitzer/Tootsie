@@ -75,7 +75,9 @@ sealed class TootsieDestinations(val route: String) {
     data object Search : TootsieDestinations("search?query={query}") {
         fun createRoute(query: String? = null): String {
             return if (query != null) {
-                "search?query=$query"
+                // URL encode the query to handle special characters like #
+                val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+                "search?query=$encodedQuery"
             } else {
                 "search"
             }

@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.search
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -38,13 +39,21 @@ fun SearchScreen(
 
     // Pre-fill search with initial query if provided (e.g., from hashtag click)
     androidx.compose.runtime.LaunchedEffect(initialQuery) {
-        if (initialQuery != null && initialQuery.isNotBlank()) {
+        Log.d("SearchScreen", "LaunchedEffect triggered with initialQuery: '$initialQuery'")
+        Log.d("SearchScreen", "Current uiState.query: '${uiState.query}'")
+
+        if (initialQuery != null && initialQuery.isNotBlank() && uiState.query != initialQuery) {
+            Log.d("SearchScreen", "Setting search query to: '$initialQuery'")
+
             // If it's a hashtag, filter to show only posts
             if (initialQuery.startsWith("#")) {
+                Log.d("SearchScreen", "Detected hashtag, setting filter to STATUSES")
                 viewModel.onAction(SearchAction.SelectFilter(SearchFilter.STATUSES))
             }
             // Set the query
             viewModel.onAction(SearchAction.UpdateQuery(initialQuery))
+        } else {
+            Log.d("SearchScreen", "Skipping query update - conditions not met")
         }
     }
 
