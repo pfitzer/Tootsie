@@ -1,6 +1,5 @@
 package com.pfitzer.tootsie.presentation.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -175,9 +174,7 @@ fun TootsieNavHost(
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
                 onNavigateToSearch = { hashtagQuery ->
-                    val route = TootsieDestinations.Search.createRoute(query = hashtagQuery)
-                    Log.d("TootsieNavHost", "Navigating to search with query: '$hashtagQuery', route: '$route'")
-                    navController.navigate(route)
+                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
                 }
             )
         }
@@ -286,8 +283,6 @@ fun TootsieNavHost(
             val initialQuery = backStackEntry.arguments?.getString(
                 TootsieDestinations.Search.ARG_QUERY
             )
-
-            Log.d("TootsieNavHost", "Search composable invoked with initialQuery: '$initialQuery'")
 
             SearchScreen(
                 initialQuery = initialQuery,
