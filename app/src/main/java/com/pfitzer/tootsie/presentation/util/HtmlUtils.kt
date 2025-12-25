@@ -80,17 +80,42 @@ fun parseHtmlContent(
             continue
         }
 
+        // Get the visible text of this span
+        val spanText = plainText.substring(spanStart, spanEnd)
+
         // Determine span type by matching against mentions and tags
         val spanType: SpanType
         val spanValue: String
 
-        // Check if this is a mention
+        // Check if this is a mention (by URL or by text starting with @)
         val mention = mentions.firstOrNull { it.url == url }
         if (mention != null) {
             spanType = SpanType.MENTION
             spanValue = mention.id  // Use account ID for navigation
         }
-        // Check if this is a hashtag
+        // Check if text looks like a mention (starts with @)
+        else if (spanText.startsWith("@")) {
+            // Find mention by username
+            val username = spanText.substring(1)  // Remove @ prefix
+            val mentionByUsername = mentions.firstOrNull {
+                it.username == username || it.acct == username
+            }
+            if (mentionByUsername != null) {
+                spanType = SpanType.MENTION
+                spanValue = mentionByUsername.id
+            } else {
+                // Mention not in list, treat as external link
+                spanType = SpanType.LINK
+                spanValue = url
+            }
+        }
+        // Check if this is a hashtag (by URL or by text starting with #)
+        else if (spanText.startsWith("#")) {
+            // Extract tag name (remove # prefix)
+            val tagName = spanText.substring(1)
+            spanType = SpanType.HASHTAG
+            spanValue = tagName
+        }
         else {
             val tag = tags.firstOrNull { it.url == url }
             if (tag != null) {
