@@ -70,8 +70,18 @@ sealed class TootsieDestinations(val route: String) {
 
     /**
      * Search screen - search for users, posts, and hashtags.
+     * Optionally takes initialQuery parameter to pre-fill search.
      */
-    data object Search : TootsieDestinations("search")
+    data object Search : TootsieDestinations("search?query={query}") {
+        fun createRoute(query: String? = null): String {
+            return if (query != null) {
+                "search?query=$query"
+            } else {
+                "search"
+            }
+        }
+        const val ARG_QUERY = "query"
+    }
 
     /**
      * Notifications screen - user notifications.

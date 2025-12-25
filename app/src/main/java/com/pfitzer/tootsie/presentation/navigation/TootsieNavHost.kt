@@ -68,7 +68,7 @@ fun TootsieNavHost(
                         }
                     },
                     onNavigateToSearch = {
-                        navController.navigate(TootsieDestinations.Search.route) {
+                        navController.navigate(TootsieDestinations.Search.createRoute()) {
                             popUpTo(TootsieDestinations.Home.route) {
                                 saveState = true
                             }
@@ -174,9 +174,7 @@ fun TootsieNavHost(
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
                 onNavigateToSearch = { hashtagQuery ->
-                    navController.navigate(TootsieDestinations.Search.route)
-                    // Note: In future, could pass hashtag as navigation argument
-                    // For now, user needs to type the hashtag in search
+                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
                 }
             )
         }
@@ -259,8 +257,22 @@ fun TootsieNavHost(
         }
 
         // Search screen
-        composable(route = TootsieDestinations.Search.route) {
+        composable(
+            route = TootsieDestinations.Search.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.Search.ARG_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val initialQuery = backStackEntry.arguments?.getString(
+                TootsieDestinations.Search.ARG_QUERY
+            )
+
             SearchScreen(
+                initialQuery = initialQuery,
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },

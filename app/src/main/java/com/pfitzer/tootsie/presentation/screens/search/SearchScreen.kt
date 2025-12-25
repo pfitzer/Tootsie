@@ -20,15 +20,33 @@ import com.pfitzer.tootsie.presentation.components.status.StatusCard
 
 /**
  * Search Screen - search for accounts, posts, and hashtags.
+ *
+ * @param initialQuery Optional query to pre-fill the search (e.g., from clicking a hashtag)
+ * @param onNavigateToProfile Callback to navigate to a user profile
+ * @param onNavigateToStatusDetail Callback to navigate to a status detail
+ * @param viewModel ViewModel for managing search state
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    initialQuery: String? = null,
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToStatusDetail: (String) -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Pre-fill search with initial query if provided (e.g., from hashtag click)
+    androidx.compose.runtime.LaunchedEffect(initialQuery) {
+        if (initialQuery != null && initialQuery.isNotBlank()) {
+            // If it's a hashtag, filter to show only posts
+            if (initialQuery.startsWith("#")) {
+                viewModel.onAction(SearchAction.SelectFilter(SearchFilter.STATUSES))
+            }
+            // Set the query
+            viewModel.onAction(SearchAction.UpdateQuery(initialQuery))
+        }
+    }
 
     // Handle hashtag clicks by searching for posts with that hashtag
     val onHashtagClick: (String) -> Unit = { hashtagName ->
