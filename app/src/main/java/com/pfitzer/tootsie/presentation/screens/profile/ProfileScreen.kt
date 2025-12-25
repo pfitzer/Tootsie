@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,13 +23,17 @@ import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
+import com.pfitzer.tootsie.util.openInBrowser
 
 /**
  * Profile Screen - displays user profile information.
  *
  * @param accountId The account ID to display (optional for own profile)
  * @param onNavigateBack Callback to navigate back
+ * @param onNavigateToProfile Callback to navigate to another profile (from mentions)
+ * @param onNavigateToSearch Callback to navigate to search (from hashtags)
  * @param viewModel ViewModel for managing profile state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,10 +41,13 @@ import com.pfitzer.tootsie.presentation.components.status.StatusCard
 fun ProfileScreen(
     accountId: String? = null,
     onNavigateBack: (() -> Unit)? = null,
+    onNavigateToProfile: (String) -> Unit = {},
+    onNavigateToSearch: (String) -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData?.collectAsLazyPagingItems()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -97,6 +105,13 @@ fun ProfileScreen(
                                     } else {
                                         viewModel.onAction(ProfileAction.FollowAccount)
                                     }
+                                },
+                                onMentionClick = onNavigateToProfile,
+                                onHashtagClick = { tagName ->
+                                    onNavigateToSearch("#$tagName")
+                                },
+                                onLinkClick = { url ->
+                                    context.openInBrowser(url)
                                 }
                             )
                         }
@@ -113,7 +128,14 @@ fun ProfileScreen(
                                     StatusCard(
                                         status = status,
                                         onStatusClick = {},
-                                        onAvatarClick = {},
+                                        onAvatarClick = onNavigateToProfile,
+                                        onMentionClick = onNavigateToProfile,
+                                        onHashtagClick = { tagName ->
+                                            onNavigateToSearch("#$tagName")
+                                        },
+                                        onLinkClick = { url ->
+                                            context.openInBrowser(url)
+                                        },
                                         onFavoriteClick = {},
                                         onBoostClick = {},
                                         onReplyClick = {},
@@ -189,6 +211,9 @@ private fun ProfileHeader(
     isOwnProfile: Boolean,
     isProcessingFollow: Boolean,
     onFollowClick: () -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -246,13 +271,16 @@ private fun ProfileHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Bio (note)
+        // Bio (note) - render with HTML parsing
         if (account.note.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = account.note,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+            RichTextContent(
+                content = account.note,
+                mentions = emptyList(), // Account bios don't have structured mention data
+                tags = emptyList(),     // Account bios don't have structured tag data
+                onMentionClick = onMentionClick,
+                onHashtagClick = onHashtagClick,
+                onLinkClick = onLinkClick
             )
         }
 

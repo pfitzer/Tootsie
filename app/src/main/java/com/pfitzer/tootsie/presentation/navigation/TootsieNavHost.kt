@@ -210,7 +210,14 @@ fun TootsieNavHost(
 
         // Own profile screen (from bottom nav)
         composable(route = "profile") {
-            ProfileScreen()
+            ProfileScreen(
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { hashtagQuery ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                }
+            )
         }
 
         // Other user's profile screen (with account ID)
@@ -230,6 +237,12 @@ fun TootsieNavHost(
                 accountId = accountId,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToProfile = { profileAccountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(profileAccountId))
+                },
+                onNavigateToSearch = { hashtagQuery ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
                 }
             )
         }
