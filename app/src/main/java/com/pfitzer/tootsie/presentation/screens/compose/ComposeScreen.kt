@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -231,7 +231,7 @@ fun ComposeScreen(
                         enabled = uiState.canAddMedia
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Email,
+                            imageVector = Icons.Filled.Add,
                             contentDescription = "Attach media (image or video)",
                             tint = if (uiState.canAddMedia) {
                                 MaterialTheme.colorScheme.primary

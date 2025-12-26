@@ -101,7 +101,17 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ### Recent Updates (December 2024)
 
-**Phase 3c - Advanced Timeline Filters (NEW!):**
+**Material Design Icons Implementation:**
+- ✅ Added material-icons-extended library for full icon set (2,500+ icons)
+- ✅ Replaced placeholder icons with semantically correct Material Design icons
+- ✅ AttachFile icon for media attachment button (was Email)
+- ✅ Reply icon for reply actions (was ArrowForward)
+- ✅ Bookmark/BookmarkBorder icons for save actions (was Star)
+- ✅ Proper icon semantics throughout the app
+- ✅ Continuous blue border for replies in conversation threads
+- ✅ Improved reply visualization in status detail screen
+
+**Phase 3c - Advanced Timeline Filters:**
 - ✅ Hide boosts toggle (filters reblogged posts)
 - ✅ Hide replies toggle (filters reply posts)
 - ✅ Show only media toggle (filters non-media posts)
@@ -135,11 +145,20 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Proper filter state: Filter chip automatically switches when clicking hashtags
 - ✅ Complete navigation flow: Search → Profile, Search → Status Detail, Search → Hashtag posts
 
+**HTML Rendering & Rich Content:**
+- ✅ Rich HTML rendering with clickable hashtags, mentions, and links
+- ✅ Hashtag navigation to search with automatic filtering
+- ✅ Mention navigation to user profiles
+- ✅ External link handling with browser integration
+- ✅ Media attachment display (images, videos, audio)
+- ✅ HTML parsing with proper span extraction
+- ✅ Fixed status click functionality in conversation threads
+
 **Media Upload UI:**
 - ✅ Complete UI implementation with image picker integration
 - ✅ Media preview grid with edit and remove controls
 - ✅ Alt text dialog for accessibility
-- ✅ Email icon for attach button (Material Icons compatibility)
+- ✅ AttachFile icon for media attachment (proper Material Design)
 
 ### Next Steps
 Remaining Phase 3 features:
@@ -206,6 +225,7 @@ The app follows Clean Architecture principles with three layers:
 ### UI Framework
 - **Jetpack Compose**: Modern declarative UI
 - **Material Design 3**: Latest Material Design components
+- **Material Icons Extended**: Full Material Design icon set (2,500+ icons)
 - **Navigation Compose**: Type-safe navigation
 - **Coil**: Image loading optimized for Compose
 
