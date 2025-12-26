@@ -101,6 +101,7 @@ fun StatusCard(
                 onMentionClick = onMentionClick,
                 onHashtagClick = onHashtagClick,
                 onLinkClick = onLinkClick,
+                onStatusClick = { onStatusClick(displayStatus.id) },
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
@@ -237,6 +238,7 @@ private fun StatusContent(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onStatusClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (content.isNotBlank()) {
@@ -247,6 +249,7 @@ private fun StatusContent(
             onMentionClick = onMentionClick,
             onHashtagClick = onHashtagClick,
             onLinkClick = onLinkClick,
+            onTextClick = onStatusClick,
             modifier = modifier.fillMaxWidth()
         )
     }

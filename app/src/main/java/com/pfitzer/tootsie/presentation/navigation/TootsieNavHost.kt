@@ -265,6 +265,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToCompose = { statusId ->
                     navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToSearch = { hashtagQuery ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
                 }
             )
         }

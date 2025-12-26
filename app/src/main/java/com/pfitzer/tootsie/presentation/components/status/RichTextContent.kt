@@ -22,6 +22,7 @@ import com.pfitzer.tootsie.presentation.util.parseHtmlContent
  * @param onMentionClick Callback when a mention is clicked (receives accountId)
  * @param onHashtagClick Callback when a hashtag is clicked (receives tag name)
  * @param onLinkClick Callback when an external link is clicked (receives URL)
+ * @param onTextClick Optional callback when non-linked text is clicked (e.g., to view status detail)
  * @param modifier Modifier for the text component
  */
 @Composable
@@ -32,6 +33,7 @@ fun RichTextContent(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onTextClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Parse HTML to extract plain text and clickable spans
@@ -79,14 +81,21 @@ fun RichTextContent(
         modifier = modifier,
         onClick = { offset ->
             // Find which annotation was clicked
+            var clickHandled = false
             parsedContent.clickableSpans.forEach { span ->
                 if (offset in span.start until span.end) {
+                    clickHandled = true
                     when (span.type) {
                         SpanType.MENTION -> onMentionClick(span.value)
                         SpanType.HASHTAG -> onHashtagClick(span.value)
                         SpanType.LINK -> onLinkClick(span.value)
                     }
                 }
+            }
+
+            // If click was not on a link/mention/hashtag, call the text click handler
+            if (!clickHandled && onTextClick != null) {
+                onTextClick()
             }
         }
     )
