@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey
 data class DraftEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val accountId: String = "", // ID of the account that owns this draft (assigned by repository)
     val content: String,
     val mediaIds: String? = null, // JSON array of uploaded media attachment IDs
     val visibility: String = "public", // public, unlisted, private, direct

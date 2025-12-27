@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.paging.TimelinePagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
@@ -20,7 +21,8 @@ import javax.inject.Singleton
 @Singleton
 class TimelineRepositoryImpl @Inject constructor(
     private val mastodonApi: MastodonApiService,
-    private val statusDao: StatusDao
+    private val statusDao: StatusDao,
+    private val accountDao: AccountDao
 ) : TimelineRepository {
 
     override fun getHomeTimeline(filter: TimelineFilter): Flow<PagingData<Status>> {
@@ -35,6 +37,7 @@ class TimelineRepositoryImpl @Inject constructor(
                 TimelinePagingSource(
                     mastodonApi = mastodonApi,
                     statusDao = statusDao,
+                    accountDao = accountDao,
                     timelineType = "home",
                     filter = filter
                 )
@@ -54,6 +57,7 @@ class TimelineRepositoryImpl @Inject constructor(
                 TimelinePagingSource(
                     mastodonApi = mastodonApi,
                     statusDao = statusDao,
+                    accountDao = accountDao,
                     timelineType = "public",
                     local = local,
                     filter = filter
@@ -63,12 +67,18 @@ class TimelineRepositoryImpl @Inject constructor(
     }
 
     override suspend fun refreshHomeTimeline() {
-        // Clear cached home timeline statuses
-        statusDao.deleteStatusesByTimelineType("home")
+        // Get active account and clear its cached home timeline statuses
+        val activeAccount = accountDao.getActiveAccount()
+        if (activeAccount != null) {
+            statusDao.deleteStatusesByTimelineType("home", activeAccount.id)
+        }
     }
 
     override suspend fun refreshPublicTimeline() {
-        // Clear cached public timeline statuses
-        statusDao.deleteStatusesByTimelineType("public")
+        // Get active account and clear its cached public timeline statuses
+        val activeAccount = accountDao.getActiveAccount()
+        if (activeAccount != null) {
+            statusDao.deleteStatusesByTimelineType("public", activeAccount.id)
+        }
     }
 }

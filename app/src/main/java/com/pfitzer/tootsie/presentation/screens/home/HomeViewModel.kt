@@ -7,10 +7,12 @@ import androidx.paging.cachedIn
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
+import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,10 +21,12 @@ import javax.inject.Inject
  * ViewModel for Home Screen.
  * Manages timeline data and status interactions.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val timelineRepository: TimelineRepository,
     private val statusRepository: StatusRepository,
+    private val accountManagementRepository: AccountManagementRepository,
     private val preferencesManager: PreferencesManager,
     private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
     private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
@@ -47,9 +51,16 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Paging data flow for timeline with filter applied.
+     * Automatically refreshes when either the filter OR the active account changes.
      */
-    val timelinePagingData: Flow<PagingData<Status>> = timelineFilter
-        .flatMapLatest { filter ->
+    val timelinePagingData: Flow<PagingData<Status>> = combine(
+        timelineFilter,
+        accountManagementRepository.observeActiveAccount()
+    ) { filter, activeAccount ->
+        Pair(filter, activeAccount?.id)
+    }
+        .flatMapLatest { (filter, _) ->
+            // The account change triggers flatMapLatest to cancel old flow and start new one
             timelineRepository.getHomeTimeline(filter)
         }
         .cachedIn(viewModelScope)

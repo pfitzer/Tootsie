@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -35,6 +36,8 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToReply Callback to navigate to compose screen for reply with status ID
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
+ * @param onNavigateToSearch Callback to navigate to search with query
+ * @param onNavigateToSettings Callback to navigate to settings screen
  * @param viewModel ViewModel for managing home screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +48,7 @@ fun HomeScreen(
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
     onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,6 +73,14 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Home") },
                 actions = {
+                    // Settings button
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+
                     // Filter button with indicator
                     IconButton(onClick = { showFilterDialog = true }) {
                         Badge(

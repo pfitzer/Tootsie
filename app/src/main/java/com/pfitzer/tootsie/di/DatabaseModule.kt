@@ -34,7 +34,10 @@ object DatabaseModule {
             TootsieDatabase::class.java,
             TootsieDatabase.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration() // For development; use migrations in production
+            .addMigrations(
+                TootsieDatabase.MIGRATION_2_3,
+                TootsieDatabase.MIGRATION_3_4
+            )
             .build()
     }
 

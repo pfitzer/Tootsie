@@ -4,9 +4,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Phase 3 In Progress - Advanced Features 🔨
-**Version**: 1.0.0-rc1 (release candidate)
-**Project State**: Full-featured Mastodon client with video/audio upload support
+**Current Phase**: Phase 3 Complete - Advanced Features ✅
+**Version**: 1.0.0-rc3 (release candidate 3)
+**Project State**: Full-featured Mastodon client with multi-account support and automatic timeline refresh
 
 ### Completed Features ✅
 
@@ -82,6 +82,19 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - **Filter Dialog**: Clean UI with switches for each filter option
 - **Performance**: Filtering happens in paging layer, maintains smooth scrolling
 
+**Phase 3d - Multi-Account Support:**
+- **Account Switching**: Switch between logged-in accounts seamlessly
+- **Settings Screen**: Account management UI with list, switching, and removal
+- **Data Isolation**: Account-specific timeline caches and drafts
+- **Database Migrations**: Room v2 → v3 → v4 with composite keys and account scoping
+- **Atomic Operations**: Thread-safe account switching updates database, preferences, and providers
+- **Smart Removal**: Auto-switch to another account or logout when removing active account
+- **Reactive Filtering**: flatMapLatest operator for automatic UI updates on account switch
+- **Automatic Timeline Refresh**: Timeline instantly shows new account's posts when switching (no manual refresh)
+- **Account List UI**: Rich account cards with avatars, display names, and active indicators
+- **Navigation Integration**: Settings accessible from home screen toolbar
+- **Session Persistence**: Stay on current screen when switching accounts
+
 ### Current Implementation Status
 **Phase 2 (Core Features)** - Complete ✅
 - ✅ Post interactions (favorite, boost, reply, bookmark)
@@ -93,11 +106,11 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Media preview and management
 - ✅ Conversation threading
 
-**Phase 3 (Advanced Features)** - In Progress
+**Phase 3 (Advanced Features)** - Complete ✅
 - ✅ Video & audio upload support (Phase 3a complete)
 - ✅ Draft post saving with auto-save (Phase 3b complete)
 - ✅ Advanced timeline filters (Phase 3c complete)
-- 🔨 Multi-account support (upcoming)
+- ✅ Multi-account support (Phase 3d complete)
 
 ### Recent Updates (December 2024)
 
@@ -110,6 +123,27 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Proper icon semantics throughout the app
 - ✅ Continuous blue border for replies in conversation threads
 - ✅ Improved reply visualization in status detail screen
+
+**Phase 3d - Multi-Account Support:**
+- ✅ Database migration v2 → v3 → v4 with account scoping and cleanup
+- ✅ AccountManagementRepository with atomic account switching
+- ✅ Account-specific timeline caches (ownerAccountId in StatusEntity)
+- ✅ Account-specific drafts (accountId in DraftEntity)
+- ✅ Composite primary keys in TimelineRemoteKeys for account isolation
+- ✅ SettingsScreen with account list and management UI
+- ✅ SettingsViewModel with MVI pattern for state management
+- ✅ Account switching without app reload (stays on current screen)
+- ✅ Smart account removal (auto-switch or logout logic)
+- ✅ Reactive filtering with flatMapLatest for draft/timeline updates
+- ✅ Navigation integration (Settings icon in HomeScreen)
+- ✅ 4 new use cases (GetAll, Switch, Add, Remove)
+- ✅ Updated all repositories for account scoping
+- ✅ Updated DAOs with account filtering parameters
+- ✅ Updated TimelinePagingSource to cache with ownerAccountId
+- ✅ HomeViewModel observes active account for automatic timeline refresh
+- ✅ Bug fix: Migration v3→v4 cleans up orphaned cache with NULL ownerAccountId
+- ✅ Bug fix: SettingsViewModel properly detects active account using repository
+- ✅ Bug fix: Timeline auto-refreshes when switching accounts (no manual refresh needed)
 
 **Phase 3c - Advanced Timeline Filters:**
 - ✅ Hide boosts toggle (filters reblogged posts)
@@ -161,23 +195,45 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ AttachFile icon for media attachment (proper Material Design)
 
 ### Next Steps
-Remaining Phase 3 features:
-- Multi-account support
+Phase 4 - Polish & Advanced Features:
 - Custom emoji support
 - Push notifications (FCM integration)
-- Accessibility improvements
-- Performance optimizations
+- Accessibility improvements (TalkBack optimization, contrast modes)
+- Performance optimizations (timeline scroll, memory usage)
+- Lists support (create and manage lists)
+- Filters support (keyword and context filters)
+- Bookmarks screen
+- Favorites screen
+- Translation support for posts
+- Trending posts and hashtags
 
 ---
 
 ## Features
 
+### Implemented
+- Multi-account support with seamless switching
+- Modern Jetpack Compose design with Material Design 3
+- Offline-first architecture with Room caching
+- Full OAuth 2.0 authentication flow
+- Timeline viewing (Home, Public, Federated)
+- Post interactions (favorite, boost, reply, bookmark)
+- Rich media support (images, videos, audio)
+- Draft auto-save and management
+- Advanced timeline filters
+- Search (accounts, posts, hashtags)
+- Notifications with actions
+- User profiles with follow/unfollow
+- Content warnings and visibility controls
+- HTML rendering with clickable links and hashtags
+
 ### Planned
-- Multi-account support
-- Modern Jetpack Compose design
-- Best performance
-- Easy to use
-- Supports all Mastodon API features
+- Custom emoji support
+- Push notifications (FCM)
+- Lists and filters
+- Bookmarks and favorites screens
+- Translation support
+- Trending content
 
 ---
 
@@ -339,12 +395,18 @@ Targeting Mastodon API v1 and v2 (compatible with Mastodon 3.0+)
 - **Plurals**: Proper plural handling using Android quantity strings
 - **Translation Coverage**: All user-facing strings must be externalized
 
-### Multi-Account Architecture
-- Separate Room databases per account OR single database with accountId scoping
-- Quick account switching without full app reload
-- Account-specific settings and preferences
-- Cross-account posting capability
-- Isolated notification channels per account
+### Multi-Account Architecture (Implemented ✅)
+- **Single Database with Account Scoping**: All data uses accountId/ownerAccountId fields for isolation
+- **Atomic Account Switching**: Database → PreferencesManager → Provider updates in correct order
+- **No App Reload**: UI automatically updates via Flow observation when switching accounts
+- **Account-Specific Data**: Timeline caches and drafts completely isolated per account
+- **Smart Account Removal**: Auto-switches to another account or logs out if removing active account
+- **Reactive UI Updates**: flatMapLatest operator for automatic content updates on account switch
+- **Automatic Timeline Refresh**: HomeViewModel observes active account and auto-refreshes timeline on switch
+- **Thread-Safe Provider Pattern**: TokenProvider and InstanceUrlProvider with AtomicReference
+- **Database Migrations v2 → v3 → v4**: Preserves existing data while adding account scoping and cleanup
+- **Composite Primary Keys**: TimelineRemoteKeys uses (statusId, timelineType, ownerAccountId)
+- **Settings Screen**: Rich UI with account list, switching, and removal capabilities
 
 ### Known Challenges
 1. **HTML Content Rendering**: Mastodon posts contain HTML that must be safely rendered

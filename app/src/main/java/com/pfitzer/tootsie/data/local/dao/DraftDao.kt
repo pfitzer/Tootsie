@@ -28,44 +28,46 @@ interface DraftDao {
     suspend fun updateDraft(draft: DraftEntity)
 
     /**
-     * Get all drafts ordered by most recently updated.
+     * Get all drafts for a specific account, ordered by most recently updated.
      */
-    @Query("SELECT * FROM drafts ORDER BY updatedAt DESC")
-    fun getAllDrafts(): Flow<List<DraftEntity>>
+    @Query("SELECT * FROM drafts WHERE accountId = :accountId ORDER BY updatedAt DESC")
+    fun getAllDrafts(accountId: String): Flow<List<DraftEntity>>
 
     /**
-     * Get a draft by ID.
+     * Get a draft by ID for a specific account.
+     * Ensures the draft belongs to the specified account.
      */
-    @Query("SELECT * FROM drafts WHERE id = :draftId")
-    suspend fun getDraftById(draftId: Long): DraftEntity?
+    @Query("SELECT * FROM drafts WHERE id = :draftId AND accountId = :accountId")
+    suspend fun getDraftById(accountId: String, draftId: Long): DraftEntity?
 
     /**
-     * Get a draft by ID as Flow.
+     * Get a draft by ID as Flow for a specific account.
      */
-    @Query("SELECT * FROM drafts WHERE id = :draftId")
-    fun getDraftByIdFlow(draftId: Long): Flow<DraftEntity?>
+    @Query("SELECT * FROM drafts WHERE id = :draftId AND accountId = :accountId")
+    fun getDraftByIdFlow(accountId: String, draftId: Long): Flow<DraftEntity?>
 
     /**
-     * Delete a specific draft.
+     * Delete a specific draft for a specific account.
+     * Ensures the draft belongs to the specified account.
      */
-    @Query("DELETE FROM drafts WHERE id = :draftId")
-    suspend fun deleteDraft(draftId: Long)
+    @Query("DELETE FROM drafts WHERE id = :draftId AND accountId = :accountId")
+    suspend fun deleteDraft(accountId: String, draftId: Long)
 
     /**
-     * Delete all drafts.
+     * Delete all drafts for a specific account.
      */
-    @Query("DELETE FROM drafts")
-    suspend fun deleteAllDrafts()
+    @Query("DELETE FROM drafts WHERE accountId = :accountId")
+    suspend fun deleteAllDrafts(accountId: String)
 
     /**
-     * Get count of all drafts.
+     * Get count of drafts for a specific account.
      */
-    @Query("SELECT COUNT(*) FROM drafts")
-    fun getDraftCount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM drafts WHERE accountId = :accountId")
+    fun getDraftCount(accountId: String): Flow<Int>
 
     /**
-     * Get the most recent draft (for auto-resuming).
+     * Get the most recent draft for a specific account (for auto-resuming).
      */
-    @Query("SELECT * FROM drafts ORDER BY updatedAt DESC LIMIT 1")
-    suspend fun getMostRecentDraft(): DraftEntity?
+    @Query("SELECT * FROM drafts WHERE accountId = :accountId ORDER BY updatedAt DESC LIMIT 1")
+    suspend fun getMostRecentDraft(accountId: String): DraftEntity?
 }

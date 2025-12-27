@@ -43,6 +43,7 @@ data class StatusEntity(
 
     // Timeline association
     val timelineType: String? = null, // "home", "local", "federated", etc.
+    val ownerAccountId: String? = null, // ID of logged-in account that cached this status
 
     // Cache metadata
     val lastSyncedAt: Long = System.currentTimeMillis()

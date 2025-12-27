@@ -49,7 +49,10 @@ fun StatusDto.toDomain(): Status {
 /**
  * Maps StatusDto to StatusEntity for caching.
  */
-fun StatusDto.toEntity(timelineType: String? = null): StatusEntity {
+fun StatusDto.toEntity(
+    timelineType: String? = null,
+    ownerAccountId: String? = null
+): StatusEntity {
     return StatusEntity(
         id = id,
         accountId = account.id,
@@ -79,7 +82,8 @@ fun StatusDto.toEntity(timelineType: String? = null): StatusEntity {
         pollJson = poll?.let { json.encodeToString(it) },
         reblogJson = reblog?.let { json.encodeToString(it) },
         cardJson = card?.let { json.encodeToString(it) },
-        timelineType = timelineType
+        timelineType = timelineType,
+        ownerAccountId = ownerAccountId
     )
 }
 

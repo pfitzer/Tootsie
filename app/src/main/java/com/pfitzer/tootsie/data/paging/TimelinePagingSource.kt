@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.data.paging
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
@@ -18,19 +19,28 @@ private const val TAG = "TimelinePagingSource"
 /**
  * PagingSource for Timeline data.
  * Fetches data from API and caches to local database for offline support.
+ * Data is scoped to the active account via ownerAccountId.
  */
 class TimelinePagingSource(
     private val mastodonApi: MastodonApiService,
     private val statusDao: StatusDao,
+    private val accountDao: AccountDao,
     private val timelineType: String,
     private val local: Boolean = false,
     private val filter: TimelineFilter = TimelineFilter.DEFAULT
 ) : PagingSource<String, Status>() {
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
+        // Get active account for scoping cached data
+        val activeAccount = accountDao.getActiveAccount()
+        if (activeAccount == null) {
+            Log.w(TAG, "No active account, returning empty result")
+            return LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
+        }
+
         return try {
             val maxId = params.key // For pagination, load older posts
-            Log.d(TAG, "load() called - timelineType=$timelineType, maxId=$maxId, loadSize=${params.loadSize}")
+            Log.d(TAG, "load() called - timelineType=$timelineType, ownerAccountId=${activeAccount.id}, maxId=$maxId, loadSize=${params.loadSize}")
 
             // Fetch from API
             val statusDtos = when (timelineType) {
@@ -57,9 +67,14 @@ class TimelinePagingSource(
 
             Log.d(TAG, "API returned ${statusDtos.size} statuses")
 
-            // Cache to database
+            // Cache to database with ownerAccountId
             if (statusDtos.isNotEmpty()) {
-                val entities = statusDtos.map { it.toEntity(timelineType = timelineType) }
+                val entities = statusDtos.map {
+                    it.toEntity(
+                        timelineType = timelineType,
+                        ownerAccountId = activeAccount.id
+                    )
+                }
                 statusDao.insertStatuses(entities)
             }
 
@@ -85,11 +100,11 @@ class TimelinePagingSource(
         } catch (e: IOException) {
             // Network error - try loading from cache
             Log.e(TAG, "Network error loading timeline", e)
-            tryLoadFromCache(params)
+            tryLoadFromCache(params, activeAccount.id)
         } catch (e: HttpException) {
             // HTTP error - try loading from cache
             Log.e(TAG, "HTTP error loading timeline: ${e.code()} ${e.message()}", e)
-            tryLoadFromCache(params)
+            tryLoadFromCache(params, activeAccount.id)
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error loading timeline", e)
             LoadResult.Error(e)
@@ -98,13 +113,18 @@ class TimelinePagingSource(
 
     /**
      * Fallback to cached data when network is unavailable.
+     * Filters by ownerAccountId to only load current account's cache.
      */
-    private suspend fun tryLoadFromCache(params: LoadParams<String>): LoadResult<String, Status> {
+    private suspend fun tryLoadFromCache(
+        params: LoadParams<String>,
+        ownerAccountId: String
+    ): LoadResult<String, Status> {
         return try {
-            Log.d(TAG, "Attempting to load from cache...")
-            // Collect the first emission from the Flow
+            Log.d(TAG, "Attempting to load from cache for account: $ownerAccountId...")
+            // Collect the first emission from the Flow, filtered by owner account
             val cachedEntities = statusDao.getStatusesFlow(
                 timelineType = timelineType,
+                ownerAccountId = ownerAccountId,
                 limit = params.loadSize
             ).first()
 

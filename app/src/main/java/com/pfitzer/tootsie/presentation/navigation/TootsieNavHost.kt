@@ -19,6 +19,7 @@ import com.pfitzer.tootsie.presentation.screens.home.HomeScreen
 import com.pfitzer.tootsie.presentation.screens.notifications.NotificationsScreen
 import com.pfitzer.tootsie.presentation.screens.profile.ProfileScreen
 import com.pfitzer.tootsie.presentation.screens.search.SearchScreen
+import com.pfitzer.tootsie.presentation.screens.settings.SettingsScreen
 import com.pfitzer.tootsie.presentation.screens.splash.SplashScreen
 
 /**
@@ -175,6 +176,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { hashtagQuery ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                },
+                onNavigateToSettings = {
+                    navController.navigate(TootsieDestinations.Settings.route)
                 }
             )
         }
@@ -322,9 +326,16 @@ fun TootsieNavHost(
             )
         }
 
-        // Settings screen
+        // Settings screen - account management
         composable(route = TootsieDestinations.Settings.route) {
-            // SettingsScreen will be implemented in Phase 3
+            SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToLogin = {
+                    navController.navigate(TootsieDestinations.Login.route)
+                }
+            )
         }
         }
     }
