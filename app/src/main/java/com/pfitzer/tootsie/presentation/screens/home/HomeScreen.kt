@@ -6,6 +6,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -38,6 +41,8 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToProfile Callback to navigate to profile
  * @param onNavigateToSearch Callback to navigate to search with query
  * @param onNavigateToSettings Callback to navigate to settings screen
+ * @param onNavigateToBookmarks Callback to navigate to bookmarks screen
+ * @param onNavigateToFavorites Callback to navigate to favorites screen
  * @param viewModel ViewModel for managing home screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +54,8 @@ fun HomeScreen(
     onNavigateToProfile: (String) -> Unit,
     onNavigateToSearch: (String) -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToBookmarks: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -56,6 +63,7 @@ fun HomeScreen(
     val timelinePagingItems = viewModel.timelinePagingData.collectAsLazyPagingItems()
 
     var showFilterDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     // Filter dialog
     if (showFilterDialog) {
@@ -73,6 +81,47 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Home") },
                 actions = {
+                    // Menu button (bookmarks, favorites)
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Bookmarks") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToBookmarks()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Favorites") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToFavorites()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Favorite,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        }
+                    }
+
                     // Settings button
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(

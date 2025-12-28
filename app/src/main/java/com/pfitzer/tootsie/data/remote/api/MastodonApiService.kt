@@ -284,6 +284,42 @@ interface MastodonApiService {
     @GET("api/v1/statuses/{id}/context")
     suspend fun getContext(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.ContextDto
 
+    // ========== Bookmarks & Favorites Endpoints ==========
+
+    /**
+     * Get bookmarked statuses.
+     * Returns statuses the authenticated user has bookmarked.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     */
+    @GET("api/v1/bookmarks")
+    suspend fun getBookmarks(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): List<StatusDto>
+
+    /**
+     * Get favorited statuses.
+     * Returns statuses the authenticated user has favorited.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     */
+    @GET("api/v1/favourites")
+    suspend fun getFavorites(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): List<StatusDto>
+
     // ========== Media Endpoints ==========
 
     /**

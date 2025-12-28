@@ -4,9 +4,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Phase 3 Complete - Advanced Features ✅
-**Version**: 1.0.0-rc3 (release candidate 3)
-**Project State**: Full-featured Mastodon client with multi-account support and automatic timeline refresh
+**Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
+**Version**: 1.0.0-rc4 (release candidate 4)
+**Project State**: Full-featured Mastodon client with bookmarks and favorites screens
 
 ### Completed Features ✅
 
@@ -112,6 +112,13 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Advanced timeline filters (Phase 3c complete)
 - ✅ Multi-account support (Phase 3d complete)
 
+**Phase 4 (Polish & Advanced Features)** - In Progress 🔨
+- ✅ Bookmarks & Favorites screens (Phase 4a complete)
+- ⏳ Custom emoji support
+- ⏳ Push notifications (FCM)
+- ⏳ Lists support
+- ⏳ Translation support
+
 ### Recent Updates (December 2024)
 
 **Material Design Icons Implementation:**
@@ -194,16 +201,24 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Alt text dialog for accessibility
 - ✅ AttachFile icon for media attachment (proper Material Design)
 
+**Phase 4a - Bookmarks & Favorites Screens:**
+- ✅ Bookmarks screen with paginated list
+- ✅ Favorites screen with paginated list
+- ✅ Full status interactions (favorite, boost, bookmark, reply)
+- ✅ Navigation from home screen menu
+- ✅ Status detail navigation
+- ✅ Profile navigation
+- ✅ Empty states and loading indicators
+- ✅ Error handling
+
 ### Next Steps
-Phase 4 - Polish & Advanced Features:
+Phase 4 - Polish & Advanced Features (Remaining):
 - Custom emoji support
 - Push notifications (FCM integration)
 - Accessibility improvements (TalkBack optimization, contrast modes)
 - Performance optimizations (timeline scroll, memory usage)
 - Lists support (create and manage lists)
 - Filters support (keyword and context filters)
-- Bookmarks screen
-- Favorites screen
 - Translation support for posts
 - Trending posts and hashtags
 
@@ -226,6 +241,8 @@ Phase 4 - Polish & Advanced Features:
 - User profiles with follow/unfollow
 - Content warnings and visibility controls
 - HTML rendering with clickable links and hashtags
+- Bookmarks screen with pagination
+- Favorites screen with pagination
 
 ### Planned
 - Custom emoji support

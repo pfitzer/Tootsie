@@ -55,9 +55,9 @@ fun StatusActions(
             activeColor = MaterialTheme.colorScheme.tertiary
         )
 
-        // Favorite
+        // Favorite (using heart icon)
         ActionButton(
-            icon = if (status.favourited) Icons.Filled.Star else Icons.Outlined.Star,
+            icon = if (status.favourited) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             count = status.favouritesCount,
             isActive = status.favourited,
             onClick = onFavoriteClick,
@@ -65,14 +65,14 @@ fun StatusActions(
             activeColor = MaterialTheme.colorScheme.primary
         )
 
-        // Bookmark (using different star color to distinguish from favorite)
+        // Bookmark (using star icon to distinguish from heart favorite)
         ActionButton(
             icon = if (status.bookmarked) Icons.Filled.Star else Icons.Outlined.Star,
             count = null,
             isActive = status.bookmarked,
             onClick = onBookmarkClick,
             contentDescription = if (status.bookmarked) "Remove bookmark" else "Bookmark",
-            activeColor = MaterialTheme.colorScheme.tertiary
+            activeColor = MaterialTheme.colorScheme.secondary
         )
     }
 }

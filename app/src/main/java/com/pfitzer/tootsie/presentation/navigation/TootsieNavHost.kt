@@ -21,6 +21,8 @@ import com.pfitzer.tootsie.presentation.screens.profile.ProfileScreen
 import com.pfitzer.tootsie.presentation.screens.search.SearchScreen
 import com.pfitzer.tootsie.presentation.screens.settings.SettingsScreen
 import com.pfitzer.tootsie.presentation.screens.splash.SplashScreen
+import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
+import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 
 /**
  * Main navigation host for the Tootsie app.
@@ -179,6 +181,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSettings = {
                     navController.navigate(TootsieDestinations.Settings.route)
+                },
+                onNavigateToBookmarks = {
+                    navController.navigate(TootsieDestinations.Bookmarks.route)
+                },
+                onNavigateToFavorites = {
+                    navController.navigate(TootsieDestinations.Favorites.route)
                 }
             )
         }
@@ -334,6 +342,48 @@ fun TootsieNavHost(
                 },
                 onNavigateToLogin = {
                     navController.navigate(TootsieDestinations.Login.route)
+                }
+            )
+        }
+
+        // Bookmarks screen - view bookmarked statuses
+        composable(route = TootsieDestinations.Bookmarks.route) {
+            BookmarksScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { query ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                }
+            )
+        }
+
+        // Favorites screen - view favorited statuses
+        composable(route = TootsieDestinations.Favorites.route) {
+            FavoritesScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { query ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query))
                 }
             )
         }

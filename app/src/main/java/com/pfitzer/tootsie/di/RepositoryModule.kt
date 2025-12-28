@@ -2,14 +2,18 @@ package com.pfitzer.tootsie.di
 
 import com.pfitzer.tootsie.data.repository.AccountRepositoryImpl
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
+import com.pfitzer.tootsie.data.repository.BookmarksRepositoryImpl
 import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
+import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
 import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
 import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
+import com.pfitzer.tootsie.domain.repository.BookmarksRepository
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.domain.repository.FavoritesRepository
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
@@ -90,4 +94,22 @@ abstract class RepositoryModule {
     abstract fun bindDraftRepository(
         draftRepositoryImpl: DraftRepositoryImpl
     ): DraftRepository
+
+    /**
+     * Binds BookmarksRepositoryImpl to BookmarksRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindBookmarksRepository(
+        bookmarksRepositoryImpl: BookmarksRepositoryImpl
+    ): BookmarksRepository
+
+    /**
+     * Binds FavoritesRepositoryImpl to FavoritesRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindFavoritesRepository(
+        favoritesRepositoryImpl: FavoritesRepositoryImpl
+    ): FavoritesRepository
 }

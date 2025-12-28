@@ -99,4 +99,14 @@ sealed class TootsieDestinations(val route: String) {
      * Settings screen - app settings and preferences.
      */
     data object Settings : TootsieDestinations("settings")
+
+    /**
+     * Bookmarks screen - view bookmarked statuses.
+     */
+    data object Bookmarks : TootsieDestinations("bookmarks")
+
+    /**
+     * Favorites screen - view favorited statuses.
+     */
+    data object Favorites : TootsieDestinations("favorites")
 }

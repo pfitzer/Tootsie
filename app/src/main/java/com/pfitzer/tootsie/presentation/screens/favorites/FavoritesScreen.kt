@@ -1,0 +1,238 @@
+package com.pfitzer.tootsie.presentation.screens.favorites
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
+import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.StatusCard
+import com.pfitzer.tootsie.util.openInBrowser
+
+/**
+ * Favorites Screen - displays the user's favorited statuses.
+ *
+ * @param onNavigateBack Callback to navigate back
+ * @param onNavigateToReply Callback to navigate to compose screen for reply with status ID
+ * @param onNavigateToStatus Callback to navigate to status detail
+ * @param onNavigateToProfile Callback to navigate to profile
+ * @param onNavigateToSearch Callback to navigate to search with query
+ * @param viewModel ViewModel for managing favorites screen state
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FavoritesScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToReply: (String) -> Unit,
+    onNavigateToStatus: (String) -> Unit,
+    onNavigateToProfile: (String) -> Unit,
+    onNavigateToSearch: (String) -> Unit = {},
+    viewModel: FavoritesViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val favoritesPagingItems = viewModel.favoritesPagingData.collectAsLazyPagingItems()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Favorites") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            FavoritesList(
+                favoritesPagingItems = favoritesPagingItems,
+                onStatusClick = onNavigateToStatus,
+                onAvatarClick = onNavigateToProfile,
+                onMentionClick = onNavigateToProfile,
+                onHashtagClick = { tagName ->
+                    onNavigateToSearch("#$tagName")
+                },
+                onFavoriteClick = { status ->
+                    if (status.favourited) {
+                        viewModel.onAction(FavoritesAction.UnfavoriteStatus(status))
+                    } else {
+                        viewModel.onAction(FavoritesAction.FavoriteStatus(status))
+                    }
+                },
+                onBoostClick = { status ->
+                    if (status.reblogged) {
+                        viewModel.onAction(FavoritesAction.UnboostStatus(status))
+                    } else {
+                        viewModel.onAction(FavoritesAction.BoostStatus(status))
+                    }
+                },
+                onBookmarkClick = { status ->
+                    if (status.bookmarked) {
+                        viewModel.onAction(FavoritesAction.UnbookmarkStatus(status))
+                    } else {
+                        viewModel.onAction(FavoritesAction.BookmarkStatus(status))
+                    }
+                },
+                onReplyClick = { status ->
+                    onNavigateToReply(status.id)
+                }
+            )
+
+            // Error message
+            uiState.errorMessage?.let { error ->
+                ErrorMessage(
+                    message = error,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Favorites list with pagination.
+ */
+@Composable
+private fun FavoritesList(
+    favoritesPagingItems: LazyPagingItems<Status>,
+    onStatusClick: (String) -> Unit,
+    onAvatarClick: (String) -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
+    onFavoriteClick: (Status) -> Unit,
+    onBoostClick: (Status) -> Unit,
+    onBookmarkClick: (Status) -> Unit,
+    onReplyClick: (Status) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(
+            count = favoritesPagingItems.itemCount,
+            key = favoritesPagingItems.itemKey { it.id }
+        ) { index ->
+            val status = favoritesPagingItems[index]
+            status?.let {
+                StatusCard(
+                    status = it,
+                    onStatusClick = { onStatusClick(status.id) },
+                    onAvatarClick = { onAvatarClick(status.account.id) },
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
+                    onFavoriteClick = { onFavoriteClick(status) },
+                    onBoostClick = { onBoostClick(status) },
+                    onBookmarkClick = { onBookmarkClick(status) },
+                    onReplyClick = { onReplyClick(status) },
+                    onLinkClick = { url ->
+                        context.openInBrowser(url)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // Loading state at the end
+        when (favoritesPagingItems.loadState.append) {
+            is LoadState.Loading -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+            is LoadState.Error -> {
+                item {
+                    ErrorMessage(
+                        message = "Failed to load more favorites",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+            }
+            else -> {}
+        }
+
+        // Empty state
+        if (favoritesPagingItems.loadState.refresh is LoadState.NotLoading
+            && favoritesPagingItems.itemCount == 0
+        ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No favorites yet",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        // Initial loading state
+        if (favoritesPagingItems.loadState.refresh is LoadState.Loading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+
+        // Error state
+        if (favoritesPagingItems.loadState.refresh is LoadState.Error) {
+            item {
+                ErrorMessage(
+                    message = "Failed to load favorites",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp)
+                )
+            }
+        }
+    }
+}
