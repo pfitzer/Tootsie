@@ -2,6 +2,7 @@ package com.pfitzer.tootsie.data.remote.api
 
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.data.remote.dto.InstanceDto
+import com.pfitzer.tootsie.data.remote.dto.ListDto
 import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
@@ -420,4 +421,116 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0
     ): SearchResultsDto
+
+    // ========== Lists Endpoints ==========
+
+    /**
+     * Get all lists owned by the authenticated user.
+     */
+    @GET("api/v1/lists")
+    suspend fun getLists(): List<ListDto>
+
+    /**
+     * Get a single list by ID.
+     *
+     * @param id List ID
+     */
+    @GET("api/v1/lists/{id}")
+    suspend fun getList(
+        @Path("id") id: String
+    ): ListDto
+
+    /**
+     * Create a new list.
+     *
+     * @param title Title of the list
+     * @param repliesPolicy Replies policy: "followed", "list", or "none"
+     */
+    @FormUrlEncoded
+    @POST("api/v1/lists")
+    suspend fun createList(
+        @Field("title") title: String,
+        @Field("replies_policy") repliesPolicy: String = "list"
+    ): ListDto
+
+    /**
+     * Update a list.
+     *
+     * @param id List ID
+     * @param title New title
+     * @param repliesPolicy New replies policy
+     */
+    @FormUrlEncoded
+    @POST("api/v1/lists/{id}")
+    suspend fun updateList(
+        @Path("id") id: String,
+        @Field("title") title: String? = null,
+        @Field("replies_policy") repliesPolicy: String? = null
+    ): ListDto
+
+    /**
+     * Delete a list.
+     *
+     * @param id List ID
+     */
+    @DELETE("api/v1/lists/{id}")
+    suspend fun deleteList(
+        @Path("id") id: String
+    )
+
+    /**
+     * Get accounts in a list.
+     *
+     * @param id List ID
+     * @param limit Maximum number of accounts (default 40)
+     */
+    @GET("api/v1/lists/{id}/accounts")
+    suspend fun getListAccounts(
+        @Path("id") id: String,
+        @Query("limit") limit: Int = 40
+    ): List<AccountDto>
+
+    /**
+     * Add accounts to a list.
+     *
+     * @param id List ID
+     * @param accountIds Array of account IDs to add
+     */
+    @FormUrlEncoded
+    @POST("api/v1/lists/{id}/accounts")
+    suspend fun addAccountsToList(
+        @Path("id") id: String,
+        @Field("account_ids[]") accountIds: List<String>
+    )
+
+    /**
+     * Remove accounts from a list.
+     *
+     * @param id List ID
+     * @param accountIds Array of account IDs to remove
+     */
+    @FormUrlEncoded
+    @DELETE("api/v1/lists/{id}/accounts")
+    suspend fun removeAccountsFromList(
+        @Path("id") id: String,
+        @Field("account_ids[]") accountIds: List<String>
+    )
+
+    /**
+     * Get timeline for a specific list.
+     *
+     * @param id List ID
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     */
+    @GET("api/v1/timelines/list/{id}")
+    suspend fun getListTimeline(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): List<StatusDto>
 }

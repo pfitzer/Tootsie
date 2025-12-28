@@ -109,4 +109,9 @@ sealed class TootsieDestinations(val route: String) {
      * Favorites screen - view favorited statuses.
      */
     data object Favorites : TootsieDestinations("favorites")
+
+    /**
+     * Lists screen - view and manage user's lists.
+     */
+    data object Lists : TootsieDestinations("lists")
 }

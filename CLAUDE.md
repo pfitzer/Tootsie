@@ -5,8 +5,8 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 ## Development Status
 
 **Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
-**Version**: 1.0.0-rc4 (release candidate 4)
-**Project State**: Full-featured Mastodon client with bookmarks and favorites screens
+**Version**: 1.0.0-rc5 (release candidate 5)
+**Project State**: Full-featured Mastodon client with lists management support
 
 ### Completed Features ✅
 
@@ -114,9 +114,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 **Phase 4 (Polish & Advanced Features)** - In Progress 🔨
 - ✅ Bookmarks & Favorites screens (Phase 4a complete)
+- ✅ Lists support (Phase 4b complete)
 - ⏳ Custom emoji support
 - ⏳ Push notifications (FCM)
-- ⏳ Lists support
 - ⏳ Translation support
 
 ### Recent Updates (December 2024)
@@ -211,6 +211,21 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Empty states and loading indicators
 - ✅ Error handling
 
+**Phase 4b - Lists Support:**
+- ✅ Lists management screen with create, update, delete
+- ✅ Create list dialog with title and replies policy
+- ✅ View all user lists
+- ✅ Delete lists with confirmation
+- ✅ Replies policy options (followed, list members, none)
+- ✅ Navigation from home screen menu
+- ✅ ListsRepository with full CRUD operations
+- ✅ Four use cases (GetLists, CreateList, UpdateList, DeleteList)
+- ✅ ListsViewModel with MVI pattern
+- ✅ Complete API integration with 9 endpoints
+- ✅ Empty state when no lists exist
+- ✅ Loading and error states
+- ✅ Hilt dependency injection
+
 ### Next Steps
 Phase 4 - Polish & Advanced Features (Remaining):
 - Custom emoji support
@@ -243,14 +258,15 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - HTML rendering with clickable links and hashtags
 - Bookmarks screen with pagination
 - Favorites screen with pagination
+- Lists management (create, view, update, delete)
 
 ### Planned
 - Custom emoji support
 - Push notifications (FCM)
-- Lists and filters
-- Bookmarks and favorites screens
+- Keyword filters
 - Translation support
 - Trending content
+- List timelines
 
 ---
 

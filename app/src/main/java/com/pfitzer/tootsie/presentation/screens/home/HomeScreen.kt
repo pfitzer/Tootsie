@@ -56,6 +56,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToBookmarks: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToLists: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -115,6 +116,19 @@ fun HomeScreen(
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.Favorite,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Lists") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToLists()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
                                         contentDescription = null
                                     )
                                 }

@@ -1,0 +1,260 @@
+package com.pfitzer.tootsie.presentation.screens.lists
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.domain.model.MastodonList
+import com.pfitzer.tootsie.domain.model.RepliesPolicy
+
+/**
+ * Lists Screen - displays and manages user's Mastodon lists.
+ *
+ * @param onNavigateBack Callback to navigate back
+ * @param onNavigateToList Callback to navigate to a list timeline
+ * @param viewModel ViewModel for managing lists screen state
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ListsScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToList: (String) -> Unit = {},
+    viewModel: ListsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showCreateDialog by remember { mutableStateOf(false) }
+
+    // Create list dialog
+    if (showCreateDialog) {
+        CreateListDialog(
+            onDismiss = { showCreateDialog = false },
+            onCreate = { title, repliesPolicy ->
+                viewModel.onAction(ListsAction.CreateList(title, repliesPolicy))
+                showCreateDialog = false
+            }
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Lists") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showCreateDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create new list"
+                )
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                uiState.lists.isEmpty() && !uiState.isLoading -> {
+                    Text(
+                        text = "No lists yet\nTap + to create one",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        items(
+                            items = uiState.lists,
+                            key = { it.id }
+                        ) { list ->
+                            ListItem(
+                                list = list,
+                                onClick = { onNavigateToList(list.id) },
+                                onDelete = {
+                                    viewModel.onAction(ListsAction.DeleteList(list.id))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Error message
+            uiState.errorMessage?.let { error ->
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    action = {
+                        TextButton(onClick = { viewModel.onAction(ListsAction.DismissError) }) {
+                            Text("Dismiss")
+                        }
+                    }
+                ) {
+                    Text(error)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * List item card.
+ */
+@Composable
+private fun ListItem(
+    list: MastodonList,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = list.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = when (list.repliesPolicy) {
+                        RepliesPolicy.FOLLOWED -> "Show replies from followed"
+                        RepliesPolicy.LIST -> "Show replies from list members"
+                        RepliesPolicy.NONE -> "Hide all replies"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete list",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Dialog for creating a new list.
+ */
+@Composable
+private fun CreateListDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String, RepliesPolicy) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var selectedPolicy by remember { mutableStateOf(RepliesPolicy.LIST) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create New List") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("List title") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = "Replies policy:",
+                    style = MaterialTheme.typography.labelMedium
+                )
+
+                Column {
+                    RepliesPolicy.entries.forEach { policy ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedPolicy = policy }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            RadioButton(
+                                selected = selectedPolicy == policy,
+                                onClick = { selectedPolicy = policy }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = when (policy) {
+                                    RepliesPolicy.FOLLOWED -> "Show replies from followed"
+                                    RepliesPolicy.LIST -> "Show replies from list members"
+                                    RepliesPolicy.NONE -> "Hide all replies"
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onCreate(title, selectedPolicy) },
+                enabled = title.isNotBlank()
+            ) {
+                Text("Create")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}

@@ -5,6 +5,7 @@ import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.data.repository.BookmarksRepositoryImpl
 import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
 import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
+import com.pfitzer.tootsie.data.repository.ListsRepositoryImpl
 import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
 import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
@@ -14,6 +15,7 @@ import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.BookmarksRepository
 import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.domain.repository.FavoritesRepository
+import com.pfitzer.tootsie.domain.repository.ListsRepository
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
@@ -112,4 +114,13 @@ abstract class RepositoryModule {
     abstract fun bindFavoritesRepository(
         favoritesRepositoryImpl: FavoritesRepositoryImpl
     ): FavoritesRepository
+
+    /**
+     * Binds ListsRepositoryImpl to ListsRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindListsRepository(
+        listsRepositoryImpl: ListsRepositoryImpl
+    ): ListsRepository
 }

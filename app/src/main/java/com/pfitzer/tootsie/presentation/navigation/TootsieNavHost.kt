@@ -187,6 +187,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToFavorites = {
                     navController.navigate(TootsieDestinations.Favorites.route)
+                },
+                onNavigateToLists = {
+                    navController.navigate(TootsieDestinations.Lists.route)
                 }
             )
         }
@@ -384,6 +387,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                }
+            )
+        }
+
+        // Lists screen - view and manage lists
+        composable(route = TootsieDestinations.Lists.route) {
+            com.pfitzer.tootsie.presentation.screens.lists.ListsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToList = { listId ->
+                    // TODO: Navigate to list timeline when implemented
                 }
             )
         }
