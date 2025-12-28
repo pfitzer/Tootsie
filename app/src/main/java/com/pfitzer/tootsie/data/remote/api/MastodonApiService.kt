@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
 import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
+import com.pfitzer.tootsie.data.remote.dto.TrendingLinkDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.DELETE
@@ -437,6 +438,32 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 10,
         @Query("offset") offset: Int = 0
     ): List<TrendingTagDto>
+
+    /**
+     * Get trending statuses/posts.
+     * Returns statuses that have been interacted with more than others.
+     *
+     * @param limit Maximum number of results to return (default 20, max 40)
+     * @param offset Skip the first n results (for pagination)
+     */
+    @GET("api/v1/trends/statuses")
+    suspend fun getTrendingStatuses(
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): List<StatusDto>
+
+    /**
+     * Get trending links/articles.
+     * Returns links that have been shared more than others.
+     *
+     * @param limit Maximum number of results to return (default 10, max 20)
+     * @param offset Skip the first n results (for pagination)
+     */
+    @GET("api/v1/trends/links")
+    suspend fun getTrendingLinks(
+        @Query("limit") limit: Int = 10,
+        @Query("offset") offset: Int = 0
+    ): List<TrendingLinkDto>
 
     // ========== Lists Endpoints ==========
 

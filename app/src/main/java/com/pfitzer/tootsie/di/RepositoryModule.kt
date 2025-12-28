@@ -13,6 +13,8 @@ import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TrendingRepositoryImpl
+import com.pfitzer.tootsie.data.repository.TrendingPostsRepositoryImpl
+import com.pfitzer.tootsie.data.repository.TrendingLinksRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.BookmarksRepository
@@ -26,6 +28,8 @@ import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import com.pfitzer.tootsie.domain.repository.TrendingRepository
+import com.pfitzer.tootsie.domain.repository.TrendingPostsRepository
+import com.pfitzer.tootsie.domain.repository.TrendingLinksRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -156,4 +160,22 @@ abstract class RepositoryModule {
     abstract fun bindTrendingRepository(
         trendingRepositoryImpl: TrendingRepositoryImpl
     ): TrendingRepository
+
+    /**
+     * Binds TrendingPostsRepositoryImpl to TrendingPostsRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTrendingPostsRepository(
+        trendingPostsRepositoryImpl: TrendingPostsRepositoryImpl
+    ): TrendingPostsRepository
+
+    /**
+     * Binds TrendingLinksRepositoryImpl to TrendingLinksRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTrendingLinksRepository(
+        trendingLinksRepositoryImpl: TrendingLinksRepositoryImpl
+    ): TrendingLinksRepository
 }

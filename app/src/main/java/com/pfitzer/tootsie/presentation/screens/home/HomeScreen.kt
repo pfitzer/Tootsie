@@ -48,6 +48,8 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToBookmarks Callback to navigate to bookmarks screen
  * @param onNavigateToFavorites Callback to navigate to favorites screen
  * @param onNavigateToTrendingHashtags Callback to navigate to trending hashtags screen
+ * @param onNavigateToTrendingPosts Callback to navigate to trending posts screen
+ * @param onNavigateToTrendingLinks Callback to navigate to trending links screen
  * @param viewModel ViewModel for managing home screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +65,8 @@ fun HomeScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToLists: () -> Unit = {},
     onNavigateToTrendingHashtags: () -> Unit = {},
+    onNavigateToTrendingPosts: () -> Unit = {},
+    onNavigateToTrendingLinks: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -141,11 +145,33 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
-                    label = { Text("Trending") },
+                    label = { Text("Trending Hashtags") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToTrendingHashtags()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    label = { Text("Trending Posts") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToTrendingPosts()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    label = { Text("Trending Links") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToTrendingLinks()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

@@ -5,8 +5,8 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 ## Development Status
 
 **Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
-**Version**: 1.0.0-rc6 (release candidate 6)
-**Project State**: Full-featured Mastodon client with custom emoji support
+**Version**: 1.0.0-rc7 (release candidate 7)
+**Project State**: Full-featured Mastodon client with trending content support
 
 ### Completed Features ✅
 
@@ -117,6 +117,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Lists support (Phase 4b complete)
 - ✅ Custom emoji support (Phase 4c complete)
 - ✅ List timelines (Phase 4d complete)
+- ✅ Trending content (Phase 4e complete) - hashtags, posts, links
 - ⏳ Push notifications (FCM)
 - ⏳ Translation support
 
@@ -257,6 +258,25 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Paging 3 integration for infinite scroll
 - ✅ URL encoding for list names in navigation
 
+**Phase 4e - Trending Content:**
+- ✅ Trending Hashtags screen with engagement stats
+- ✅ Trending Posts screen with full status interactions
+- ✅ Trending Links screen with article previews
+- ✅ Three separate API endpoints (tags, statuses, links)
+- ✅ TrendingRepository, TrendingPostsRepository, TrendingLinksRepository
+- ✅ Three use cases (GetTrendingHashtags, GetTrendingPosts, GetTrendingLinks)
+- ✅ Three ViewModels with MVI pattern
+- ✅ Navigation drawer items for all trending screens
+- ✅ Pull-to-refresh support for all screens
+- ✅ Hashtag navigation to search with filtering
+- ✅ Post interactions (favorite, boost, bookmark, reply)
+- ✅ Link preview cards with images and engagement metrics
+- ✅ Browser integration for opening trending links
+- ✅ Total uses and accounts aggregation from history data
+- ✅ Empty states and loading indicators
+- ✅ Error handling with dismissible messages
+- ✅ Complete Hilt dependency injection
+
 ### Next Steps
 Phase 4 - Polish & Advanced Features (Remaining):
 - Push notifications (FCM integration)
@@ -264,7 +284,6 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Performance optimizations (timeline scroll, memory usage)
 - Filters support (keyword and context filters)
 - Translation support for posts
-- Trending posts and hashtags
 
 ---
 
@@ -290,13 +309,12 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Lists management (create, view, update, delete)
 - List timelines (view posts from specific lists)
 - Custom emoji picker with shortcode insertion
+- Trending content (hashtags, posts, links/articles)
 
 ### Planned
 - Push notifications (FCM)
 - Keyword filters
 - Translation support
-- Trending content
-- List timelines
 
 ---
 

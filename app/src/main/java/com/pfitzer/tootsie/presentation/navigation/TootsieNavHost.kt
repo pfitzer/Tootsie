@@ -193,6 +193,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToTrendingHashtags = {
                     navController.navigate(TootsieDestinations.TrendingHashtags.route)
+                },
+                onNavigateToTrendingPosts = {
+                    navController.navigate(TootsieDestinations.TrendingPosts.route)
+                },
+                onNavigateToTrendingLinks = {
+                    navController.navigate(TootsieDestinations.TrendingLinks.route)
                 }
             )
         }
@@ -452,6 +458,36 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                }
+            )
+        }
+
+        // Trending Posts screen - view trending posts/statuses
+        composable(route = TootsieDestinations.TrendingPosts.route) {
+            com.pfitzer.tootsie.presentation.screens.trendingposts.TrendingPostsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { query ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                }
+            )
+        }
+
+        // Trending Links screen - view trending links/articles
+        composable(route = TootsieDestinations.TrendingLinks.route) {
+            com.pfitzer.tootsie.presentation.screens.trendinglinks.TrendingLinksScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

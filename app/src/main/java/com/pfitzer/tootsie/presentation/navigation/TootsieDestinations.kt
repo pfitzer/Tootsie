@@ -132,4 +132,14 @@ sealed class TootsieDestinations(val route: String) {
      * Trending Hashtags screen - view trending hashtags.
      */
     data object TrendingHashtags : TootsieDestinations("trending_hashtags")
+
+    /**
+     * Trending Posts screen - view trending posts/statuses.
+     */
+    data object TrendingPosts : TootsieDestinations("trending_posts")
+
+    /**
+     * Trending Links screen - view trending links/articles.
+     */
+    data object TrendingLinks : TootsieDestinations("trending_links")
 }
