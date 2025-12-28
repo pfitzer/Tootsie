@@ -127,4 +127,9 @@ sealed class TootsieDestinations(val route: String) {
         const val ARG_LIST_ID = "listId"
         const val ARG_LIST_NAME = "listName"
     }
+
+    /**
+     * Trending Hashtags screen - view trending hashtags.
+     */
+    data object TrendingHashtags : TootsieDestinations("trending_hashtags")
 }

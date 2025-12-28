@@ -190,6 +190,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToLists = {
                     navController.navigate(TootsieDestinations.Lists.route)
+                },
+                onNavigateToTrendingHashtags = {
+                    navController.navigate(TootsieDestinations.TrendingHashtags.route)
                 }
             )
         }
@@ -434,6 +437,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { query ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                }
+            )
+        }
+
+        // Trending Hashtags screen - view trending hashtags
+        composable(route = TootsieDestinations.TrendingHashtags.route) {
+            com.pfitzer.tootsie.presentation.screens.trending.TrendingHashtagsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))

@@ -12,6 +12,7 @@ import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
 import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
+import com.pfitzer.tootsie.data.repository.TrendingRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.BookmarksRepository
@@ -24,6 +25,7 @@ import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
+import com.pfitzer.tootsie.domain.repository.TrendingRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -145,4 +147,13 @@ abstract class RepositoryModule {
     abstract fun bindListTimelineRepository(
         listTimelineRepositoryImpl: ListTimelineRepositoryImpl
     ): ListTimelineRepository
+
+    /**
+     * Binds TrendingRepositoryImpl to TrendingRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTrendingRepository(
+        trendingRepositoryImpl: TrendingRepositoryImpl
+    ): TrendingRepository
 }

@@ -6,6 +6,7 @@ import com.pfitzer.tootsie.data.remote.dto.ListDto
 import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
+import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.DELETE
@@ -421,6 +422,21 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0
     ): SearchResultsDto
+
+    // ========== Trending Endpoints ==========
+
+    /**
+     * Get trending hashtags.
+     * Returns tags that are being used more frequently within the past week.
+     *
+     * @param limit Maximum number of results to return (default 10, max 20)
+     * @param offset Skip the first n results (for pagination)
+     */
+    @GET("api/v1/trends/tags")
+    suspend fun getTrendingTags(
+        @Query("limit") limit: Int = 10,
+        @Query("offset") offset: Int = 0
+    ): List<TrendingTagDto>
 
     // ========== Lists Endpoints ==========
 

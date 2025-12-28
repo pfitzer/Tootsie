@@ -47,6 +47,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToSettings Callback to navigate to settings screen
  * @param onNavigateToBookmarks Callback to navigate to bookmarks screen
  * @param onNavigateToFavorites Callback to navigate to favorites screen
+ * @param onNavigateToTrendingHashtags Callback to navigate to trending hashtags screen
  * @param viewModel ViewModel for managing home screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +62,7 @@ fun HomeScreen(
     onNavigateToBookmarks: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToLists: () -> Unit = {},
+    onNavigateToTrendingHashtags: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -133,6 +135,17 @@ fun HomeScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToLists()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    label = { Text("Trending") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToTrendingHashtags()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
