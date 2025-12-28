@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,12 +17,14 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.notification.NotificationCard
+import com.pfitzer.tootsie.util.openInBrowser
 
 /**
  * Notifications Screen - displays user notifications (follows, favorites, boosts, mentions).
  *
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
+ * @param onNavigateToSearch Callback to navigate to search with hashtag
  * @param viewModel ViewModel for managing notifications state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,10 +32,12 @@ import com.pfitzer.tootsie.presentation.components.notification.NotificationCard
 fun NotificationsScreen(
     onNavigateToStatus: (String) -> Unit = {},
     onNavigateToProfile: (String) -> Unit = {},
+    onNavigateToSearch: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val notificationsPagingItems = viewModel.notificationsPagingData.collectAsLazyPagingItems()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -82,6 +87,15 @@ fun NotificationsScreen(
                             },
                             onAvatarClick = { accountId ->
                                 onNavigateToProfile(accountId)
+                            },
+                            onMentionClick = { accountId ->
+                                onNavigateToProfile(accountId)
+                            },
+                            onHashtagClick = { tag ->
+                                onNavigateToSearch(tag)
+                            },
+                            onLinkClick = { url ->
+                                context.openInBrowser(url)
                             },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )

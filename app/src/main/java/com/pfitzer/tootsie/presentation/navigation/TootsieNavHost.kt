@@ -321,6 +321,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { tag ->
+                    navController.navigate(TootsieDestinations.Search.createRoute("#$tag"))
                 }
             )
         }

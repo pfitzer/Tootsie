@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
+import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 
 /**
  * Card component for displaying a notification.
@@ -28,6 +29,9 @@ fun NotificationCard(
     notification: Notification,
     onNotificationClick: (Notification) -> Unit,
     onAvatarClick: (String) -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -91,12 +95,14 @@ fun NotificationCard(
 
                 // Status content (if applicable)
                 if (notification.status != null) {
-                    Text(
-                        text = notification.status.content,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
+                    RichTextContent(
+                        content = notification.status.content,
+                        mentions = notification.status.mentions,
+                        tags = notification.status.tags,
+                        onMentionClick = onMentionClick,
+                        onHashtagClick = onHashtagClick,
+                        onLinkClick = onLinkClick,
+                        onTextClick = null, // Don't handle text clicks separately
                         modifier = Modifier.padding(start = 48.dp)
                     )
                 }
