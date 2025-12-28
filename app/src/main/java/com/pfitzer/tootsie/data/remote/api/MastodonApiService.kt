@@ -533,4 +533,13 @@ interface MastodonApiService {
         @Query("min_id") minId: String? = null,
         @Query("limit") limit: Int = 20
     ): List<StatusDto>
+
+    // ========== Custom Emoji Endpoints ==========
+
+    /**
+     * Get all custom emojis available on this instance.
+     * Returns a list of custom emojis that can be used in statuses.
+     */
+    @GET("api/v1/custom_emojis")
+    suspend fun getCustomEmojis(): List<com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto>
 }

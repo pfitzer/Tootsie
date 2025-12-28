@@ -5,8 +5,8 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 ## Development Status
 
 **Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
-**Version**: 1.0.0-rc5 (release candidate 5)
-**Project State**: Full-featured Mastodon client with lists management support
+**Version**: 1.0.0-rc6 (release candidate 6)
+**Project State**: Full-featured Mastodon client with custom emoji support
 
 ### Completed Features ✅
 
@@ -115,7 +115,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 **Phase 4 (Polish & Advanced Features)** - In Progress 🔨
 - ✅ Bookmarks & Favorites screens (Phase 4a complete)
 - ✅ Lists support (Phase 4b complete)
-- ⏳ Custom emoji support
+- ✅ Custom emoji support (Phase 4c complete)
 - ⏳ Push notifications (FCM)
 - ⏳ Translation support
 
@@ -226,16 +226,29 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Loading and error states
 - ✅ Hilt dependency injection
 
+**Phase 4c - Custom Emoji Support:**
+- ✅ Custom emoji picker dialog with grid layout
+- ✅ Fetch custom emojis from instance API
+- ✅ EmojiRepository and GetCustomEmojisUseCase
+- ✅ EmojiPickerDialog component with Coil image loading
+- ✅ ComposeViewModel integration for emoji loading
+- ✅ Emoji button (😊) in ComposeScreen toolbar
+- ✅ Shortcode insertion into post content (e.g., `:emoji_name:`)
+- ✅ Loading and empty states for emoji picker
+- ✅ Filter only visible emojis (visibleInPicker flag)
+- ✅ Auto-dismiss dialog on emoji selection
+- ✅ 5-column grid layout for optimal viewing
+- ✅ Complete Hilt dependency injection
+
 ### Next Steps
 Phase 4 - Polish & Advanced Features (Remaining):
-- Custom emoji support
 - Push notifications (FCM integration)
 - Accessibility improvements (TalkBack optimization, contrast modes)
 - Performance optimizations (timeline scroll, memory usage)
-- Lists support (create and manage lists)
 - Filters support (keyword and context filters)
 - Translation support for posts
 - Trending posts and hashtags
+- List timelines (view posts from lists)
 
 ---
 
@@ -259,9 +272,9 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Bookmarks screen with pagination
 - Favorites screen with pagination
 - Lists management (create, view, update, delete)
+- Custom emoji picker with shortcode insertion
 
 ### Planned
-- Custom emoji support
 - Push notifications (FCM)
 - Keyword filters
 - Translation support

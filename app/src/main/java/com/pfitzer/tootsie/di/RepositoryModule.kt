@@ -4,6 +4,7 @@ import com.pfitzer.tootsie.data.repository.AccountRepositoryImpl
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.data.repository.BookmarksRepositoryImpl
 import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
+import com.pfitzer.tootsie.data.repository.EmojiRepositoryImpl
 import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
 import com.pfitzer.tootsie.data.repository.ListsRepositoryImpl
 import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
@@ -14,6 +15,7 @@ import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.BookmarksRepository
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.domain.repository.EmojiRepository
 import com.pfitzer.tootsie.domain.repository.FavoritesRepository
 import com.pfitzer.tootsie.domain.repository.ListsRepository
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
@@ -123,4 +125,13 @@ abstract class RepositoryModule {
     abstract fun bindListsRepository(
         listsRepositoryImpl: ListsRepositoryImpl
     ): ListsRepository
+
+    /**
+     * Binds EmojiRepositoryImpl to EmojiRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindEmojiRepository(
+        emojiRepositoryImpl: EmojiRepositoryImpl
+    ): EmojiRepository
 }

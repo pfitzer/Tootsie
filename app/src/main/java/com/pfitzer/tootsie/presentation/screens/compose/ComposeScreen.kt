@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.compose.AltTextDialog
+import com.pfitzer.tootsie.presentation.components.compose.EmojiPickerDialog
 import com.pfitzer.tootsie.presentation.components.compose.MediaPreviewGrid
 import com.pfitzer.tootsie.util.toFile
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +49,9 @@ fun ComposeScreen(
     // Alt text dialog state
     var showAltTextDialog by remember { mutableStateOf(false) }
     var selectedMediaForAltText by remember { mutableStateOf<MediaAttachment?>(null) }
+
+    // Emoji picker dialog state
+    var showEmojiPicker by remember { mutableStateOf(false) }
 
     // Image picker launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -84,6 +88,21 @@ fun ComposeScreen(
             onSave = { attachmentId, description ->
                 viewModel.onAction(ComposeAction.UpdateMediaDescription(attachmentId, description))
             }
+        )
+    }
+
+    // Emoji picker dialog
+    if (showEmojiPicker) {
+        EmojiPickerDialog(
+            emojis = uiState.customEmojis,
+            onEmojiSelected = { shortcode ->
+                // Insert emoji shortcode into content
+                val currentContent = uiState.content
+                val newContent = "$currentContent:$shortcode:"
+                viewModel.onAction(ComposeAction.UpdateContent(newContent))
+            },
+            onDismiss = { showEmojiPicker = false },
+            isLoading = uiState.isLoadingEmojis
         )
     }
 
@@ -253,6 +272,16 @@ fun ComposeScreen(
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             }
+                        )
+                    }
+
+                    // Emoji picker button
+                    IconButton(
+                        onClick = { showEmojiPicker = true }
+                    ) {
+                        Text(
+                            text = "😊",
+                            style = MaterialTheme.typography.titleLarge
                         )
                     }
                 }

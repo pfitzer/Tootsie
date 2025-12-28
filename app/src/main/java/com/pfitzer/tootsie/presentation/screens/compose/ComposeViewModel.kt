@@ -31,6 +31,7 @@ class ComposeViewModel @Inject constructor(
     private val uploadMediaUseCase: com.pfitzer.tootsie.domain.usecase.status.UploadMediaUseCase,
     private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
     private val draftRepository: DraftRepository,
+    private val getCustomEmojisUseCase: com.pfitzer.tootsie.domain.usecase.emoji.GetCustomEmojisUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -44,6 +45,9 @@ class ComposeViewModel @Inject constructor(
     private var autoSaveJob: Job? = null
 
     init {
+        // Load custom emojis from instance
+        loadCustomEmojis()
+
         // Load draft if resuming from drafts
         if (draftId != null) {
             loadDraft(draftId.toLongOrNull() ?: 0L)
@@ -51,6 +55,26 @@ class ComposeViewModel @Inject constructor(
         // Load reply context if replying to a status
         else if (replyToId != null) {
             loadReplyContext(replyToId)
+        }
+    }
+
+    /**
+     * Load custom emojis available on the instance.
+     */
+    private fun loadCustomEmojis() {
+        viewModelScope.launch {
+            when (val result = getCustomEmojisUseCase()) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(customEmojis = result.data, isLoadingEmojis = false)
+                    }
+                }
+                is Result.Error -> {
+                    // Emojis are optional, so we don't show error
+                    _uiState.update { it.copy(isLoadingEmojis = false) }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -415,7 +439,9 @@ data class ComposeUiState(
     val replyToAccount: String? = null,
     val currentDraftId: Long? = null,
     val isSavingDraft: Boolean = false,
-    val lastDraftSavedAt: Long? = null
+    val lastDraftSavedAt: Long? = null,
+    val customEmojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji> = emptyList(),
+    val isLoadingEmojis: Boolean = true
 ) {
     val characterCount: Int get() = content.length
     val hasMedia: Boolean get() = mediaAttachments.isNotEmpty()
