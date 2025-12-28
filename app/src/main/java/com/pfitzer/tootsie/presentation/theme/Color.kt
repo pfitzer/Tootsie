@@ -2,26 +2,28 @@ package com.pfitzer.tootsie.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val NewPrimary = Color(5, 14, 181)
-val NewSecondary = Color(0xFFF4A261)
-val NewTertiary = Color(0xFF2A9D8F)
+// Tootsie brand colors from app icon
+// Navy Blue - Primary brand color
+val TootsieNavy = Color(0xFF3B5B8C)
+val TootsieNavyLight = Color(0xFF5A7DAE)
+val TootsieNavyDark = Color(0xFF2A4168)
 
-val NewPrimaryDark = Color(0xFFB6C3FF)
-val NewSecondaryDark = Color(0xFFF8CBA7)
-val NewTertiaryDark = Color(0xFF86C9C1)
+// Cyan - Secondary/Accent color
+val TootsieCyan = Color(0xFF7FE5DD)
+val TootsieCyanLight = Color(0xFFB3F0EA)
+val TootsieCyanDark = Color(0xFF4DBFB5)
 
+// Orange - Tertiary/Highlight color
+val TootsieOrange = Color(0xFFE89A7C)
+val TootsieOrangeLight = Color(0xFFF4BEA9)
+val TootsieOrangeDark = Color(0xFFD67756)
 
 // Light theme colors
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val LightPrimary = TootsieNavy
+val LightSecondary = TootsieCyan
+val LightTertiary = TootsieOrange
 
-// Dark theme colors
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-// Mastodon-inspired colors
-val MastodonPurple = Color(0xFF6364FF)
-val MastodonBlue = Color(0xFF2B90D9)
-val MastodonDarkBlue = Color(0xFF1A1A2E)
+// Dark theme colors (lighter variants for proper contrast)
+val DarkPrimary = TootsieNavyLight
+val DarkSecondary = TootsieCyanLight
+val DarkTertiary = TootsieOrangeLight
