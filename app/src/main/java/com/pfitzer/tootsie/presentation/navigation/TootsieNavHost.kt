@@ -400,8 +400,43 @@ fun TootsieNavHost(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onNavigateToList = { listId ->
-                    // TODO: Navigate to list timeline when implemented
+                onNavigateToList = { listId, listName ->
+                    navController.navigate(TootsieDestinations.ListTimeline.createRoute(listId, listName))
+                }
+            )
+        }
+
+        // List Timeline screen - view statuses from a specific list
+        composable(
+            route = TootsieDestinations.ListTimeline.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.ListTimeline.ARG_LIST_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(TootsieDestinations.ListTimeline.ARG_LIST_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "List"
+                }
+            )
+        ) { backStackEntry ->
+            val listName = backStackEntry.arguments?.getString(TootsieDestinations.ListTimeline.ARG_LIST_NAME) ?: "List"
+            com.pfitzer.tootsie.presentation.screens.listtimeline.ListTimelineScreen(
+                listName = listName,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToSearch = { query ->
+                    navController.navigate(TootsieDestinations.Search.createRoute(query))
                 }
             )
         }

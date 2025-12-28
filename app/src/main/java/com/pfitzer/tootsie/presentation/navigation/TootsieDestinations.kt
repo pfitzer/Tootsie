@@ -114,4 +114,17 @@ sealed class TootsieDestinations(val route: String) {
      * Lists screen - view and manage user's lists.
      */
     data object Lists : TootsieDestinations("lists")
+
+    /**
+     * List Timeline screen - view statuses from a specific list.
+     * Requires listId and listName parameters.
+     */
+    data object ListTimeline : TootsieDestinations("list_timeline/{listId}?listName={listName}") {
+        fun createRoute(listId: String, listName: String): String {
+            val encodedName = java.net.URLEncoder.encode(listName, "UTF-8")
+            return "list_timeline/$listId?listName=$encodedName"
+        }
+        const val ARG_LIST_ID = "listId"
+        const val ARG_LIST_NAME = "listName"
+    }
 }

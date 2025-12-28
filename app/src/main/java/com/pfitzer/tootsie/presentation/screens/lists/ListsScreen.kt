@@ -22,14 +22,14 @@ import com.pfitzer.tootsie.domain.model.RepliesPolicy
  * Lists Screen - displays and manages user's Mastodon lists.
  *
  * @param onNavigateBack Callback to navigate back
- * @param onNavigateToList Callback to navigate to a list timeline
+ * @param onNavigateToList Callback to navigate to a list timeline (listId, listName)
  * @param viewModel ViewModel for managing lists screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListsScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToList: (String) -> Unit = {},
+    onNavigateToList: (String, String) -> Unit = { _, _ -> },
     viewModel: ListsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,7 +106,7 @@ fun ListsScreen(
                         ) { list ->
                             ListItem(
                                 list = list,
-                                onClick = { onNavigateToList(list.id) },
+                                onClick = { onNavigateToList(list.id, list.title) },
                                 onDelete = {
                                     viewModel.onAction(ListsAction.DeleteList(list.id))
                                 }

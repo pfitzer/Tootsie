@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
 import com.pfitzer.tootsie.data.repository.EmojiRepositoryImpl
 import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
 import com.pfitzer.tootsie.data.repository.ListsRepositoryImpl
+import com.pfitzer.tootsie.data.repository.ListTimelineRepositoryImpl
 import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
 import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
 import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
@@ -18,6 +19,7 @@ import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.domain.repository.EmojiRepository
 import com.pfitzer.tootsie.domain.repository.FavoritesRepository
 import com.pfitzer.tootsie.domain.repository.ListsRepository
+import com.pfitzer.tootsie.domain.repository.ListTimelineRepository
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.domain.repository.SearchRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
@@ -134,4 +136,13 @@ abstract class RepositoryModule {
     abstract fun bindEmojiRepository(
         emojiRepositoryImpl: EmojiRepositoryImpl
     ): EmojiRepository
+
+    /**
+     * Binds ListTimelineRepositoryImpl to ListTimelineRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindListTimelineRepository(
+        listTimelineRepositoryImpl: ListTimelineRepositoryImpl
+    ): ListTimelineRepository
 }

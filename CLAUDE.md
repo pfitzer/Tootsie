@@ -116,6 +116,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Bookmarks & Favorites screens (Phase 4a complete)
 - ✅ Lists support (Phase 4b complete)
 - ✅ Custom emoji support (Phase 4c complete)
+- ✅ List timelines (Phase 4d complete)
 - ⏳ Push notifications (FCM)
 - ⏳ Translation support
 
@@ -240,6 +241,22 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ 5-column grid layout for optimal viewing
 - ✅ Complete Hilt dependency injection
 
+**Phase 4d - List Timelines:**
+- ✅ List timeline screen with paginated posts
+- ✅ ListTimelinePagingSource for list-specific pagination
+- ✅ ListTimelineRepository and implementation
+- ✅ GetListTimelineUseCase for business logic
+- ✅ ListTimelineViewModel with MVI pattern
+- ✅ Full status interactions (favorite, boost, bookmark, reply)
+- ✅ Navigation from Lists screen with list name display
+- ✅ Status detail navigation
+- ✅ Profile navigation
+- ✅ Search navigation for hashtags
+- ✅ Empty states and loading indicators
+- ✅ Error handling with snackbar messages
+- ✅ Paging 3 integration for infinite scroll
+- ✅ URL encoding for list names in navigation
+
 ### Next Steps
 Phase 4 - Polish & Advanced Features (Remaining):
 - Push notifications (FCM integration)
@@ -248,7 +265,6 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Filters support (keyword and context filters)
 - Translation support for posts
 - Trending posts and hashtags
-- List timelines (view posts from lists)
 
 ---
 
@@ -272,6 +288,7 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Bookmarks screen with pagination
 - Favorites screen with pagination
 - Lists management (create, view, update, delete)
+- List timelines (view posts from specific lists)
 - Custom emoji picker with shortcode insertion
 
 ### Planned
