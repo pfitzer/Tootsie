@@ -5,8 +5,8 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 ## Development Status
 
 **Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
-**Version**: 1.0.0-rc7 (release candidate 7)
-**Project State**: Full-featured Mastodon client with trending content support
+**Version**: 1.0.0-rc8 (release candidate 8)
+**Project State**: Full-featured Mastodon client with followed tags support
 
 ### Completed Features ✅
 
@@ -118,8 +118,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Custom emoji support (Phase 4c complete)
 - ✅ List timelines (Phase 4d complete)
 - ✅ Trending content (Phase 4e complete) - hashtags, posts, links
+- ✅ Followed tags (Phase 4f complete) - view and manage followed hashtags
 - ⏳ Push notifications (FCM)
-- ⏳ Translation support
+- ⏳ Internationalization (i18n) - multi-language support
 
 ### Recent Updates (December 2024)
 
@@ -277,13 +278,30 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Error handling with dismissible messages
 - ✅ Complete Hilt dependency injection
 
+**Phase 4f - Followed Tags:**
+- ✅ Followed tags screen with list of followed hashtags
+- ✅ FollowedTag domain model with usage statistics
+- ✅ FollowedTagDto for API responses (renamed to avoid conflicts)
+- ✅ FollowedTagsRepository with get/follow/unfollow operations
+- ✅ Three use cases (GetFollowedTags, FollowTag, UnfollowTag)
+- ✅ FollowedTagsViewModel with MVI pattern
+- ✅ Pull-to-refresh support for manual updates
+- ✅ Unfollow functionality with optimistic UI updates
+- ✅ Click-to-view navigation to hashtag timeline
+- ✅ Navigation drawer integration ("Followed Tags" menu item)
+- ✅ Empty states and loading indicators
+- ✅ Error handling with dismissible messages
+- ✅ Usage statistics display (total uses and accounts)
+- ✅ Complete Hilt dependency injection
+- ✅ API integration with /api/v1/followed_tags endpoints
+
 ### Next Steps
 Phase 4 - Polish & Advanced Features (Remaining):
 - Push notifications (FCM integration)
+- Internationalization (i18n) - multi-language support for the entire app
 - Accessibility improvements (TalkBack optimization, contrast modes)
 - Performance optimizations (timeline scroll, memory usage)
 - Filters support (keyword and context filters)
-- Translation support for posts
 
 ---
 
@@ -310,11 +328,13 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - List timelines (view posts from specific lists)
 - Custom emoji picker with shortcode insertion
 - Trending content (hashtags, posts, links/articles)
+- Followed tags (view, unfollow, navigate to hashtag timelines)
 
 ### Planned
 - Push notifications (FCM)
+- Internationalization (i18n) - multi-language support
 - Keyword filters
-- Translation support
+- Accessibility improvements
 
 ---
 

@@ -47,6 +47,8 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToSettings Callback to navigate to settings screen
  * @param onNavigateToBookmarks Callback to navigate to bookmarks screen
  * @param onNavigateToFavorites Callback to navigate to favorites screen
+ * @param onNavigateToLists Callback to navigate to lists screen
+ * @param onNavigateToFollowedTags Callback to navigate to followed tags screen
  * @param onNavigateToTrendingHashtags Callback to navigate to trending hashtags screen
  * @param onNavigateToTrendingPosts Callback to navigate to trending posts screen
  * @param onNavigateToTrendingLinks Callback to navigate to trending links screen
@@ -64,6 +66,7 @@ fun HomeScreen(
     onNavigateToBookmarks: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToLists: () -> Unit = {},
+    onNavigateToFollowedTags: () -> Unit = {},
     onNavigateToTrendingHashtags: () -> Unit = {},
     onNavigateToTrendingPosts: () -> Unit = {},
     onNavigateToTrendingLinks: () -> Unit = {},
@@ -139,6 +142,17 @@ fun HomeScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToLists()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    label = { Text("Followed Tags") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToFollowedTags()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

@@ -6,6 +6,8 @@ import com.pfitzer.tootsie.data.remote.dto.ListDto
 import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
+import com.pfitzer.tootsie.data.remote.dto.TagDto
+import com.pfitzer.tootsie.data.remote.dto.FollowedTagDto
 import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
 import com.pfitzer.tootsie.data.remote.dto.TrendingLinkDto
 import okhttp3.MultipartBody
@@ -598,6 +600,44 @@ interface MastodonApiService {
         @Query("min_id") minId: String? = null,
         @Query("limit") limit: Int = 20
     ): List<StatusDto>
+
+    // ========== Followed Tags Endpoints ==========
+
+    /**
+     * Get all hashtags followed by the authenticated user.
+     *
+     * @param limit Maximum number of results (default 100, max 200)
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     */
+    @GET("api/v1/followed_tags")
+    suspend fun getFollowedTags(
+        @Query("limit") limit: Int = 100,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null
+    ): List<FollowedTagDto>
+
+    /**
+     * Follow a hashtag.
+     *
+     * @param id Tag name (hashtag without #)
+     */
+    @POST("api/v1/tags/{id}/follow")
+    suspend fun followTag(
+        @Path("id") id: String
+    ): FollowedTagDto
+
+    /**
+     * Unfollow a hashtag.
+     *
+     * @param id Tag name (hashtag without #)
+     */
+    @POST("api/v1/tags/{id}/unfollow")
+    suspend fun unfollowTag(
+        @Path("id") id: String
+    ): FollowedTagDto
 
     // ========== Custom Emoji Endpoints ==========
 

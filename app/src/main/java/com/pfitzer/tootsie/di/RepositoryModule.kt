@@ -6,6 +6,7 @@ import com.pfitzer.tootsie.data.repository.BookmarksRepositoryImpl
 import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
 import com.pfitzer.tootsie.data.repository.EmojiRepositoryImpl
 import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
+import com.pfitzer.tootsie.data.repository.FollowedTagsRepositoryImpl
 import com.pfitzer.tootsie.data.repository.ListsRepositoryImpl
 import com.pfitzer.tootsie.data.repository.ListTimelineRepositoryImpl
 import com.pfitzer.tootsie.data.repository.HashtagTimelineRepositoryImpl
@@ -22,6 +23,7 @@ import com.pfitzer.tootsie.domain.repository.BookmarksRepository
 import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.domain.repository.EmojiRepository
 import com.pfitzer.tootsie.domain.repository.FavoritesRepository
+import com.pfitzer.tootsie.domain.repository.FollowedTagsRepository
 import com.pfitzer.tootsie.domain.repository.ListsRepository
 import com.pfitzer.tootsie.domain.repository.ListTimelineRepository
 import com.pfitzer.tootsie.domain.repository.HashtagTimelineRepository
@@ -189,4 +191,13 @@ abstract class RepositoryModule {
     abstract fun bindTrendingLinksRepository(
         trendingLinksRepositoryImpl: TrendingLinksRepositoryImpl
     ): TrendingLinksRepository
+
+    /**
+     * Binds FollowedTagsRepositoryImpl to FollowedTagsRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindFollowedTagsRepository(
+        followedTagsRepositoryImpl: FollowedTagsRepositoryImpl
+    ): FollowedTagsRepository
 }

@@ -191,6 +191,9 @@ fun TootsieNavHost(
                 onNavigateToLists = {
                     navController.navigate(TootsieDestinations.Lists.route)
                 },
+                onNavigateToFollowedTags = {
+                    navController.navigate(TootsieDestinations.FollowedTags.route)
+                },
                 onNavigateToTrendingHashtags = {
                     navController.navigate(TootsieDestinations.TrendingHashtags.route)
                 },
@@ -411,6 +414,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToList = { listId, listName ->
                     navController.navigate(TootsieDestinations.ListTimeline.createRoute(listId, listName))
+                }
+            )
+        }
+
+        // Followed Tags screen - view and manage followed hashtags
+        composable(route = TootsieDestinations.FollowedTags.route) {
+            com.pfitzer.tootsie.presentation.screens.followedtags.FollowedTagsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 }
             )
         }

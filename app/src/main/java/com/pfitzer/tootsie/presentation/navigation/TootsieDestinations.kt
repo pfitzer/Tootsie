@@ -116,6 +116,11 @@ sealed class TootsieDestinations(val route: String) {
     data object Lists : TootsieDestinations("lists")
 
     /**
+     * Followed Tags screen - view and manage followed hashtags.
+     */
+    data object FollowedTags : TootsieDestinations("followed_tags")
+
+    /**
      * List Timeline screen - view statuses from a specific list.
      * Requires listId and listName parameters.
      */
