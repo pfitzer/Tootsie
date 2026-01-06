@@ -43,7 +43,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToReply Callback to navigate to compose screen for reply with status ID
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
- * @param onNavigateToSearch Callback to navigate to search with query
+ * @param onNavigateToHashtag Callback to navigate to hashtag timeline
  * @param onNavigateToSettings Callback to navigate to settings screen
  * @param onNavigateToBookmarks Callback to navigate to bookmarks screen
  * @param onNavigateToFavorites Callback to navigate to favorites screen
@@ -59,7 +59,7 @@ fun HomeScreen(
     onNavigateToReply: (String) -> Unit,
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToBookmarks: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
@@ -249,8 +249,8 @@ fun HomeScreen(
                 onAvatarClick = onNavigateToProfile,
                 onMentionClick = onNavigateToProfile,  // Mentions navigate to profile
                 onHashtagClick = { tagName ->
-                    // Navigate to search with hashtag query
-                    onNavigateToSearch("#$tagName")
+                    // Navigate to hashtag timeline
+                    onNavigateToHashtag(tagName)
                 },
                 onFavoriteClick = { status ->
                     if (status.favourited) {

@@ -129,6 +129,18 @@ sealed class TootsieDestinations(val route: String) {
     }
 
     /**
+     * Hashtag Timeline screen - view statuses containing a specific hashtag.
+     * Requires hashtag parameter.
+     */
+    data object HashtagTimeline : TootsieDestinations("hashtag_timeline/{hashtag}") {
+        fun createRoute(hashtag: String): String {
+            val encodedHashtag = java.net.URLEncoder.encode(hashtag, "UTF-8")
+            return "hashtag_timeline/$encodedHashtag"
+        }
+        const val ARG_HASHTAG = "hashtag"
+    }
+
+    /**
      * Trending Hashtags screen - view trending hashtags.
      */
     data object TrendingHashtags : TootsieDestinations("trending_hashtags")

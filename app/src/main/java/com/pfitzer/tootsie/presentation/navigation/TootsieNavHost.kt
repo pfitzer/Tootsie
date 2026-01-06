@@ -176,8 +176,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { hashtagQuery ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToSettings = {
                     navController.navigate(TootsieDestinations.Settings.route)
@@ -450,6 +450,36 @@ fun TootsieNavHost(
             )
         }
 
+        // Hashtag Timeline screen - view statuses containing a specific hashtag
+        composable(
+            route = TootsieDestinations.HashtagTimeline.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.HashtagTimeline.ARG_HASHTAG) {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val hashtag = backStackEntry.arguments?.getString(TootsieDestinations.HashtagTimeline.ARG_HASHTAG) ?: ""
+            com.pfitzer.tootsie.presentation.screens.hashtagtimeline.HashtagTimelineScreen(
+                hashtag = hashtag,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToHashtag = { newHashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(newHashtag))
+                }
+            )
+        }
+
         // Trending Hashtags screen - view trending hashtags
         composable(route = TootsieDestinations.TrendingHashtags.route) {
             com.pfitzer.tootsie.presentation.screens.trending.TrendingHashtagsScreen(
@@ -457,7 +487,9 @@ fun TootsieNavHost(
                     navController.popBackStack()
                 },
                 onNavigateToSearch = { query ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                    // Remove the # if present
+                    val hashtag = query.removePrefix("#")
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 }
             )
         }

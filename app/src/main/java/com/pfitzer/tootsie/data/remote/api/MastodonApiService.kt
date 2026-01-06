@@ -189,6 +189,28 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 20
     ): List<StatusDto>
 
+    /**
+     * Get hashtag timeline (public posts containing a specific hashtag).
+     *
+     * @param hashtag The hashtag name (without the # symbol)
+     * @param local Only show posts from this instance
+     * @param onlyMedia Only show posts with media
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param minId Return results immediately newer than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     */
+    @GET("api/v1/timelines/tag/{hashtag}")
+    suspend fun getHashtagTimeline(
+        @Path("hashtag") hashtag: String,
+        @Query("local") local: Boolean = false,
+        @Query("only_media") onlyMedia: Boolean = false,
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): List<StatusDto>
+
     // ========== Status Endpoints ==========
 
     /**
