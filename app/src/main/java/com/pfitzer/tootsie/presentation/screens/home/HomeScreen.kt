@@ -12,6 +12,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
+import com.pfitzer.tootsie.presentation.icons.CustomIcons
+import com.pfitzer.tootsie.presentation.icons.Tags
+import com.pfitzer.tootsie.presentation.icons.TrendingUp
+import com.pfitzer.tootsie.presentation.icons.Link
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -147,7 +151,7 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    icon = { Icon(CustomIcons.Tags, contentDescription = null) },
                     label = { Text("Followed Tags") },
                     selected = false,
                     onClick = {
@@ -158,7 +162,7 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    icon = { Icon(CustomIcons.TrendingUp, contentDescription = null) },
                     label = { Text("Trending Hashtags") },
                     selected = false,
                     onClick = {
@@ -180,7 +184,7 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                    icon = { Icon(CustomIcons.Link, contentDescription = null) },
                     label = { Text("Trending Links") },
                     selected = false,
                     onClick = {
