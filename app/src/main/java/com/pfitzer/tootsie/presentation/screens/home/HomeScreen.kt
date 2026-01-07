@@ -38,6 +38,7 @@ import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.components.timeline.TimelineFilterDialog
+import com.pfitzer.tootsie.presentation.icons.Hash
 import com.pfitzer.tootsie.util.openInBrowser
 
 /**
@@ -162,7 +163,7 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(CustomIcons.TrendingUp, contentDescription = null) },
+                    icon = { Icon(CustomIcons.Hash, contentDescription = null) },
                     label = { Text("Trending Hashtags") },
                     selected = false,
                     onClick = {
@@ -173,8 +174,8 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
-                    label = { Text("Trending Posts") },
+                    icon = { Icon(CustomIcons.TrendingUp, contentDescription = null) },
+                    label = { Text("Trending Statuses") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }

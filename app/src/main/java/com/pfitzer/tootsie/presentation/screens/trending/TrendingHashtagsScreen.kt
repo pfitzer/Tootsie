@@ -8,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import com.pfitzer.tootsie.presentation.icons.CustomIcons
-import com.pfitzer.tootsie.presentation.icons.TrendingUp
+import com.pfitzer.tootsie.presentation.icons.Tags
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -140,7 +140,7 @@ private fun TrendingHashtagItem(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = CustomIcons.TrendingUp,
+                        imageVector = CustomIcons.Tags,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
