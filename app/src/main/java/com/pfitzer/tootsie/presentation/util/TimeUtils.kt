@@ -11,7 +11,18 @@ import java.time.temporal.ChronoUnit
  *
  * @param isoTimestamp ISO 8601 timestamp string
  * @return Formatted relative time string
+ *
+ * @deprecated Use LocaleAwareDateFormatter.formatRelativeTime() instead for proper i18n support.
+ * This function uses hardcoded date patterns and doesn't respect user locale.
  */
+@Deprecated(
+    message = "Use LocaleAwareDateFormatter.formatRelativeTime(context, isoTimestamp) for locale-aware formatting",
+    replaceWith = ReplaceWith(
+        "LocaleAwareDateFormatter.formatRelativeTime(context, isoTimestamp)",
+        "com.pfitzer.tootsie.presentation.util.LocaleAwareDateFormatter"
+    ),
+    level = DeprecationLevel.WARNING
+)
 fun formatRelativeTime(isoTimestamp: String): String {
     return try {
         val instant = Instant.parse(isoTimestamp)
@@ -40,7 +51,18 @@ fun formatRelativeTime(isoTimestamp: String): String {
  *
  * @param isoTimestamp ISO 8601 timestamp string
  * @return Formatted date/time string
+ *
+ * @deprecated Use LocaleAwareDateFormatter.formatAbsoluteTime() instead for proper i18n support.
+ * This function uses hardcoded date patterns and doesn't respect user locale.
  */
+@Deprecated(
+    message = "Use LocaleAwareDateFormatter.formatAbsoluteTime(context, isoTimestamp) for locale-aware formatting",
+    replaceWith = ReplaceWith(
+        "LocaleAwareDateFormatter.formatAbsoluteTime(context, isoTimestamp)",
+        "com.pfitzer.tootsie.presentation.util.LocaleAwareDateFormatter"
+    ),
+    level = DeprecationLevel.WARNING
+)
 fun formatAbsoluteTime(isoTimestamp: String): String {
     return try {
         val instant = Instant.parse(isoTimestamp)

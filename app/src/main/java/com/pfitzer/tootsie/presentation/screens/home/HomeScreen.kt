@@ -26,7 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -102,7 +104,7 @@ fun HomeScreen(
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Tootsie",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp)
                 )
@@ -110,7 +112,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text("Home") },
+                    label = { Text(stringResource(R.string.drawer_home)) },
                     selected = true,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -120,7 +122,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Star, contentDescription = null) },
-                    label = { Text("Bookmarks") },
+                    label = { Text(stringResource(R.string.drawer_bookmarks)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -131,7 +133,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-                    label = { Text("Favorites") },
+                    label = { Text(stringResource(R.string.drawer_favorites)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -142,7 +144,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
-                    label = { Text("Lists") },
+                    label = { Text(stringResource(R.string.drawer_lists)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -153,7 +155,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(CustomIcons.Tags, contentDescription = null) },
-                    label = { Text("Followed Tags") },
+                    label = { Text(stringResource(R.string.drawer_followed_tags)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -164,7 +166,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(CustomIcons.Hash, contentDescription = null) },
-                    label = { Text("Trending Hashtags") },
+                    label = { Text(stringResource(R.string.drawer_trending_hashtags)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -175,7 +177,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(CustomIcons.TrendingUp, contentDescription = null) },
-                    label = { Text("Trending Statuses") },
+                    label = { Text(stringResource(R.string.drawer_trending_statuses)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -186,7 +188,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(CustomIcons.Link, contentDescription = null) },
-                    label = { Text("Trending Links") },
+                    label = { Text(stringResource(R.string.drawer_trending_links)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -199,7 +201,7 @@ fun HomeScreen(
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Settings") },
+                    label = { Text(stringResource(R.string.drawer_settings)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -213,12 +215,12 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Home") },
+                    title = { Text(stringResource(R.string.drawer_home)) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = "Open menu"
+                                contentDescription = stringResource(R.string.cd_menu)
                             )
                         }
                     },
@@ -234,7 +236,7 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Filter timeline"
+                                    contentDescription = stringResource(R.string.cd_filter_timeline)
                                 )
                             }
                         }

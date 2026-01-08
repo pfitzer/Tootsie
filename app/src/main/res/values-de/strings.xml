@@ -14,6 +14,24 @@
     <string name="retry">Erneut versuchen</string>
     <string name="loading">Lädt…</string>
     <string name="error">Fehler</string>
+    <string name="post">Posten</string>
+    <string name="posting">Wird gepostet…</string>
+    <string name="dismiss">Schließen</string>
+    <string name="create">Erstellen</string>
+    <string name="remove">Entfernen</string>
+    <string name="apply">Anwenden</string>
+    <string name="unfollow">Entfolgen</string>
+
+    <!-- Navigation Drawer -->
+    <string name="drawer_home">Startseite</string>
+    <string name="drawer_bookmarks">Lesezeichen</string>
+    <string name="drawer_favorites">Favoriten</string>
+    <string name="drawer_lists">Listen</string>
+    <string name="drawer_followed_tags">Gefolgte Tags</string>
+    <string name="drawer_trending_hashtags">Trending Hashtags</string>
+    <string name="drawer_trending_statuses">Trending-Beiträge</string>
+    <string name="drawer_trending_links">Trending-Links</string>
+    <string name="drawer_settings">Einstellungen</string>
 
     <!-- Authentication -->
     <string name="login">Anmelden</string>
@@ -21,6 +39,11 @@
     <string name="instance_url">Instanz-URL</string>
     <string name="instance_url_hint">z.B. mastodon.social</string>
     <string name="login_to_mastodon">Bei Mastodon anmelden</string>
+    <string name="login_title">Tootsie</string>
+    <string name="login_subtitle">Ein moderner Mastodon-Client</string>
+    <string name="login_helper_text">Gib deine Mastodon-Instanz ein (z.B. mastodon.social)</string>
+    <string name="login_button">Browser öffnen zum Autorisieren</string>
+    <string name="login_help_text">Noch kein Mastodon-Konto?\nBesuche joinmastodon.org, um eine Instanz zu finden</string>
 
     <!-- Timeline -->
     <string name="home_timeline">Startseite</string>
@@ -37,12 +60,19 @@
 
     <!-- Compose -->
     <string name="compose">Verfassen</string>
+    <string name="compose_title_reply">Antworten</string>
     <string name="compose_post">Beitrag verfassen</string>
     <string name="whats_happening">Was gibt\'s Neues?</string>
     <string name="publish">Veröffentlichen</string>
     <string name="content_warning">Inhaltswarnung</string>
     <string name="add_media">Medien hinzufügen</string>
     <string name="poll">Umfrage</string>
+    <string name="compose_placeholder_content">Was hast du im Sinn?</string>
+    <string name="compose_placeholder_warning">Warnungstext</string>
+    <string name="compose_replying_to">Antwort an @%1$s</string>
+    <string name="compose_character_count">%1$d / 500</string>
+    <string name="compose_button_post">Posten</string>
+    <string name="compose_button_posting">Wird gepostet…</string>
 
     <!-- Post Visibility -->
     <string name="visibility_public">Öffentlich</string>
@@ -56,10 +86,39 @@
     <string name="followers">Follower</string>
     <string name="following">Gefolgt</string>
     <string name="posts">Beiträge</string>
+    <string name="profile_badge_follows_you">Folgt dir</string>
+    <string name="profile_badge_blocked">Blockiert</string>
+    <string name="profile_badge_muted">Stummgeschaltet</string>
+
+    <!-- Lists -->
+    <string name="lists_title">Listen</string>
+    <string name="lists_empty_state">Noch keine Listen\nTippe auf +, um eine zu erstellen</string>
+    <string name="lists_dialog_create_title">Neue Liste erstellen</string>
+    <string name="lists_label_title">Listentitel</string>
+    <string name="lists_label_replies_policy">Antwort-Richtlinie:</string>
+    <string name="lists_policy_followed">Antworten von Gefolgten anzeigen</string>
+    <string name="lists_policy_list">Antworten von Listenmitgliedern anzeigen</string>
+    <string name="lists_policy_none">Alle Antworten ausblenden</string>
+
+    <!-- Drafts -->
+    <string name="drafts_title">Entwürfe</string>
+    <string name="drafts_empty_title">Keine Entwürfe</string>
+    <string name="drafts_empty_message">Deine gespeicherten Entwürfe werden hier angezeigt</string>
+    <string name="drafts_badge_cw">CW</string>
+    <string name="drafts_badge_media">Medien</string>
+    <string name="drafts_content_no_content">(Kein Inhalt)</string>
+
+    <!-- Alt Text Dialog -->
+    <string name="alt_text_dialog_title">Alternativtext bearbeiten</string>
+    <string name="alt_text_dialog_description">Beschreibe dieses Bild für blinde oder sehbehinderte Menschen.</string>
+    <string name="alt_text_label_description">Beschreibung</string>
+    <string name="alt_text_placeholder">Eine Person, die in einem Park spaziert…</string>
+    <string name="alt_text_counter">%1$d / 1500 Zeichen</string>
 
     <!-- Search -->
     <string name="search">Suchen</string>
     <string name="search_hint">Suche nach Benutzern, Hashtags oder Beiträgen</string>
+    <string name="search_placeholder">Suche nach Konten, Beiträgen, Hashtags…</string>
 
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
@@ -68,14 +127,77 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System-Standard</string>
     <string name="language">Sprache</string>
+    <string name="settings_account_title">Kontoeinstellungen</string>
+    <string name="settings_remove_account_dialog_title">Konto entfernen?</string>
 
     <!-- Accounts -->
     <string name="accounts">Konten</string>
     <string name="add_account">Konto hinzufügen</string>
     <string name="switch_account">Konto wechseln</string>
 
+    <!-- Empty States -->
+    <string name="empty_bookmarks">Noch keine Lesezeichen</string>
+    <string name="empty_favorites">Noch keine Favoriten</string>
+    <string name="empty_notifications">Keine Benachrichtigungen</string>
+    <string name="empty_search">Beginne zu tippen, um zu suchen</string>
+    <string name="empty_followed_tags">Noch keine gefolgten Tags</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_back">Zurück</string>
+    <string name="cd_menu">Menü öffnen</string>
+    <string name="cd_settings">Einstellungen</string>
+    <string name="cd_filter_timeline">Timeline filtern</string>
+    <string name="cd_view_drafts">Entwürfe ansehen</string>
+    <string name="cd_delete_draft">Entwurf löschen</string>
+    <string name="cd_delete_all_drafts">Alle Entwürfe löschen</string>
+    <string name="cd_create_list">Neue Liste erstellen</string>
+    <string name="cd_delete_list">Liste löschen</string>
+    <string name="cd_emoji_picker">Emoji-Auswahl öffnen</string>
+
+    <!-- Filter Dialog -->
+    <string name="filter_dialog_title">Timeline-Filter</string>
+    <string name="filter_hide_boosts">Geteilte Beiträge ausblenden</string>
+    <string name="filter_hide_replies">Antworten ausblenden</string>
+    <string name="filter_show_media_only">Nur Beiträge mit Medien anzeigen</string>
+
+    <!-- Trending Screens -->
+    <string name="trending_hashtags_title">Trending Hashtags</string>
+    <string name="trending_statuses_title">Trending-Beiträge</string>
+    <string name="trending_links_title">Trending-Links</string>
+
+    <!-- Followed Tags -->
+    <string name="followed_tags_title">Gefolgte Tags</string>
+
+    <!-- Bookmarks & Favorites -->
+    <string name="bookmarks_title">Lesezeichen</string>
+    <string name="favorites_title">Favoriten</string>
+
+    <!-- Status Detail -->
+    <string name="status_detail_title">Beitrag</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Benachrichtigungen</string>
+    <string name="notifications_error_loading">Fehler beim Laden der Benachrichtigungen</string>
+
+    <!-- Emoji Picker -->
+    <string name="emoji_picker_title">Benutzerdefinierte Emojis</string>
+    <string name="emoji_picker_empty">Keine benutzerdefinierten Emojis verfügbar</string>
+
+    <!-- Date/Time Formats -->
+    <string name="date_format_short">d. MMM</string>
+    <string name="date_format_long">d. MMM yyyy \'um\' HH:mm \'Uhr\'</string>
+
+    <!-- Date/Time Relative -->
+    <string name="time_just_now">Gerade eben</string>
+    <string name="time_minutes_ago">vor %1$dm</string>
+    <string name="time_hours_ago">vor %1$dh</string>
+    <string name="time_days_ago">vor %1$dd</string>
+
     <!-- Errors -->
     <string name="error_network">Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.</string>
     <string name="error_generic">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</string>
     <string name="error_authentication">Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an.</string>
+    <string name="error_failed_to_load">Fehler beim Laden</string>
+    <string name="error_failed_to_post">Fehler beim Posten</string>
+    <string name="error_failed_to_upload">Fehler beim Hochladen der Medien</string>
 </resources>
