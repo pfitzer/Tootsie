@@ -12,13 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
-import java.text.SimpleDateFormat
-import java.util.*
+import com.pfitzer.tootsie.presentation.util.LocaleAwareDateFormatter
 
 /**
  * Drafts Screen - displays saved draft posts.
@@ -40,12 +42,12 @@ fun DraftsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Drafts") },
+                title = { Text(stringResource(R.string.drafts_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -58,7 +60,7 @@ fun DraftsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete all drafts"
+                                contentDescription = stringResource(R.string.cd_delete_all_drafts)
                             )
                         }
                     }
@@ -86,12 +88,12 @@ fun DraftsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "No drafts",
+                            text = stringResource(R.string.drafts_empty_title),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Your saved drafts will appear here",
+                            text = stringResource(R.string.drafts_empty_message),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -122,7 +124,7 @@ fun DraftsScreen(
                         .padding(16.dp),
                     action = {
                         TextButton(onClick = { viewModel.onAction(DraftsAction.DismissError) }) {
-                            Text("Dismiss")
+                            Text(stringResource(R.string.dismiss))
                         }
                     }
                 ) {
@@ -143,6 +145,7 @@ private fun DraftCard(
     onDeleteDraft: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -162,7 +165,7 @@ private fun DraftCard(
             ) {
                 // Content preview
                 Text(
-                    text = draft.content.ifBlank { "(No content)" },
+                    text = draft.content.ifBlank { stringResource(R.string.drafts_content_no_content) },
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
@@ -175,7 +178,7 @@ private fun DraftCard(
                 ) {
                     // Timestamp
                     Text(
-                        text = formatTimestamp(draft.updatedAt),
+                        text = LocaleAwareDateFormatter.formatDraftTimestamp(context, draft.updatedAt),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -187,7 +190,7 @@ private fun DraftCard(
                             shape = MaterialTheme.shapes.small
                         ) {
                             Text(
-                                text = "CW",
+                                text = stringResource(R.string.drafts_badge_cw),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -202,7 +205,7 @@ private fun DraftCard(
                             shape = MaterialTheme.shapes.small
                         ) {
                             Text(
-                                text = "Media",
+                                text = stringResource(R.string.drafts_badge_media),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -216,26 +219,10 @@ private fun DraftCard(
             IconButton(onClick = onDeleteDraft) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete draft",
+                    contentDescription = stringResource(R.string.cd_delete_draft),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
         }
-    }
-}
-
-/**
- * Format timestamp to relative time string.
- */
-private fun formatTimestamp(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-
-    return when {
-        diff < 60_000 -> "Just now"
-        diff < 3600_000 -> "${diff / 60_000}m ago"
-        diff < 86400_000 -> "${diff / 3600_000}h ago"
-        diff < 604800_000 -> "${diff / 86400_000}d ago"
-        else -> SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestamp))
     }
 }
