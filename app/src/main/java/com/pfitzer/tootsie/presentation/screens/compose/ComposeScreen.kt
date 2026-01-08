@@ -15,7 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.domain.model.MediaAttachment
@@ -109,12 +111,16 @@ fun ComposeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (uiState.isReply) "Reply" else "Compose") },
+                title = {
+                    Text(stringResource(
+                        if (uiState.isReply) R.string.compose_title_reply else R.string.compose
+                    ))
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -123,7 +129,7 @@ fun ComposeScreen(
                     IconButton(onClick = onNavigateToDrafts) {
                         Icon(
                             imageVector = Icons.Default.List,
-                            contentDescription = "View drafts"
+                            contentDescription = stringResource(R.string.cd_view_drafts)
                         )
                     }
 
@@ -133,7 +139,10 @@ fun ComposeScreen(
                         enabled = uiState.canPost
                     ) {
                         Text(
-                            text = if (uiState.isPosting) "Posting..." else "Post",
+                            text = stringResource(
+                                if (uiState.isPosting) R.string.compose_button_posting
+                                else R.string.compose_button_post
+                            ),
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
@@ -152,13 +161,15 @@ fun ComposeScreen(
                 .padding(16.dp)
         ) {
             // Reply context (if replying)
-            if (uiState.isReply && uiState.replyToAccount != null) {
-                Text(
-                    text = "Replying to @${uiState.replyToAccount}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            uiState.replyToAccount?.let { account ->
+                if (uiState.isReply) {
+                    Text(
+                        text = stringResource(R.string.compose_replying_to, account),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
             }
 
             // Content warning (if enabled)
@@ -168,8 +179,8 @@ fun ComposeScreen(
                     onValueChange = {
                         viewModel.onAction(ComposeAction.UpdateContentWarning(it))
                     },
-                    label = { Text("Content Warning") },
-                    placeholder = { Text("Warning text") },
+                    label = { Text(stringResource(R.string.content_warning)) },
+                    placeholder = { Text(stringResource(R.string.compose_placeholder_warning)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
@@ -183,7 +194,7 @@ fun ComposeScreen(
                 onValueChange = {
                     viewModel.onAction(ComposeAction.UpdateContent(it))
                 },
-                placeholder = { Text("What's on your mind?") },
+                placeholder = { Text(stringResource(R.string.compose_placeholder_content)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -212,7 +223,7 @@ fun ComposeScreen(
 
             // Character counter
             Text(
-                text = "${uiState.characterCount} / 500",
+                text = stringResource(R.string.compose_character_count, uiState.characterCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (uiState.characterCount > 500) {
                     MaterialTheme.colorScheme.error

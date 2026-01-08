@@ -12,7 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.domain.model.MastodonList
@@ -49,7 +51,7 @@ fun ListsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lists") },
+                title = { Text(stringResource(R.string.lists_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -89,7 +91,7 @@ fun ListsScreen(
                 }
                 uiState.lists.isEmpty() && !uiState.isLoading -> {
                     Text(
-                        text = "No lists yet\nTap + to create one",
+                        text = stringResource(R.string.lists_empty_state),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.align(Alignment.Center)
@@ -124,7 +126,7 @@ fun ListsScreen(
                         .padding(16.dp),
                     action = {
                         TextButton(onClick = { viewModel.onAction(ListsAction.DismissError) }) {
-                            Text("Dismiss")
+                            Text(stringResource(R.string.dismiss))
                         }
                     }
                 ) {
@@ -167,11 +169,13 @@ private fun ListItem(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = when (list.repliesPolicy) {
-                        RepliesPolicy.FOLLOWED -> "Show replies from followed"
-                        RepliesPolicy.LIST -> "Show replies from list members"
-                        RepliesPolicy.NONE -> "Hide all replies"
-                    },
+                    text = stringResource(
+                        when (list.repliesPolicy) {
+                            RepliesPolicy.FOLLOWED -> R.string.lists_policy_followed
+                            RepliesPolicy.LIST -> R.string.lists_policy_list
+                            RepliesPolicy.NONE -> R.string.lists_policy_none
+                        }
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -180,7 +184,7 @@ private fun ListItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete list",
+                    contentDescription = stringResource(R.string.cd_delete_list),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -201,19 +205,19 @@ private fun CreateListDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New List") },
+        title = { Text(stringResource(R.string.lists_dialog_create_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("List title") },
+                    label = { Text(stringResource(R.string.lists_label_title)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
-                    text = "Replies policy:",
+                    text = stringResource(R.string.lists_label_replies_policy),
                     style = MaterialTheme.typography.labelMedium
                 )
 
@@ -232,11 +236,13 @@ private fun CreateListDialog(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = when (policy) {
-                                    RepliesPolicy.FOLLOWED -> "Show replies from followed"
-                                    RepliesPolicy.LIST -> "Show replies from list members"
-                                    RepliesPolicy.NONE -> "Hide all replies"
-                                }
+                                text = stringResource(
+                                    when (policy) {
+                                        RepliesPolicy.FOLLOWED -> R.string.lists_policy_followed
+                                        RepliesPolicy.LIST -> R.string.lists_policy_list
+                                        RepliesPolicy.NONE -> R.string.lists_policy_none
+                                    }
+                                )
                             )
                         }
                     }
@@ -248,12 +254,12 @@ private fun CreateListDialog(
                 onClick = { onCreate(title, selectedPolicy) },
                 enabled = title.isNotBlank()
             ) {
-                Text("Create")
+                Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

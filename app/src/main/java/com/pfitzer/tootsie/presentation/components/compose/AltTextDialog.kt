@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 
 /**
@@ -25,12 +27,12 @@ fun AltTextDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Edit Alt Text")
+            Text(stringResource(R.string.alt_text_dialog_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Describe this image for people who are blind or have low vision.",
+                    text = stringResource(R.string.alt_text_dialog_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -39,14 +41,14 @@ fun AltTextDialog(
                 OutlinedTextField(
                     value = altText,
                     onValueChange = { altText = it },
-                    label = { Text("Description") },
-                    placeholder = { Text("A person walking in a park...") },
+                    label = { Text(stringResource(R.string.alt_text_label_description)) },
+                    placeholder = { Text(stringResource(R.string.alt_text_placeholder)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
                     maxLines = 4,
                     supportingText = {
-                        Text("${altText.length} / 1500 characters")
+                        Text(stringResource(R.string.alt_text_counter, altText.length))
                     }
                 )
             }
@@ -59,12 +61,12 @@ fun AltTextDialog(
                 },
                 enabled = altText.length <= 1500
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
