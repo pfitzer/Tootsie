@@ -121,7 +121,7 @@ fun NotificationsScreen(
                     is LoadState.Error -> {
                         item {
                             ErrorMessage(
-                                message = "Failed to load notifications",
+                                message = stringResource(R.string.error_load_notifications),
                                 modifier = Modifier.padding(16.dp)
                             )
                         }
@@ -157,7 +157,7 @@ fun NotificationsScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No notifications yet",
+                                text = stringResource(R.string.empty_notifications),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

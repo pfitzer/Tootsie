@@ -160,9 +160,35 @@
     <!-- Empty States -->
     <string name="empty_bookmarks">Noch keine Lesezeichen</string>
     <string name="empty_favorites">Noch keine Favoriten</string>
-    <string name="empty_notifications">Keine Benachrichtigungen</string>
+    <string name="empty_notifications">Noch keine Benachrichtigungen</string>
     <string name="empty_search">Beginne zu tippen, um zu suchen</string>
-    <string name="empty_followed_tags">Noch keine gefolgten Tags</string>
+    <string name="empty_followed_tags">Keine gefolgten Tags</string>
+    <string name="empty_trending_posts">Keine Trending-Beiträge</string>
+    <string name="empty_trending_links">Keine Trending-Links</string>
+    <string name="empty_replies">Noch keine Antworten</string>
+
+    <!-- Media Labels -->
+    <string name="media_label_audio">AUDIO</string>
+    <string name="media_label_alt">ALT</string>
+    <string name="media_label_media">MEDIEN</string>
+
+    <!-- Status Labels -->
+    <string name="status_boosted">%1$s hat geteilt</string>
+    <string name="status_content_warning">IW: %1$s</string>
+    <string name="status_more_media">+%1$d</string>
+
+    <!-- Trending Labels -->
+    <string name="trending_posts_count">%1$d Beiträge</string>
+    <string name="trending_people_talking">%1$d Personen sprechen darüber</string>
+    <string name="trending_accounts_count">%1$d Konten</string>
+    <string name="trending_shares_count">%1$d Mal geteilt</string>
+
+    <!-- Loading Messages -->
+    <string name="uploading_media">Medien werden hochgeladen…</string>
+
+    <!-- Hashtag Timeline -->
+    <string name="hashtag_timeline_error">Fehler beim Laden der Hashtag-Timeline</string>
+    <string name="hashtag_timeline_no_posts">Keine Beiträge für diesen Hashtag gefunden</string>
 
     <!-- Content Descriptions -->
     <string name="cd_back">Zurück</string>
@@ -176,6 +202,27 @@
     <string name="cd_delete_list">Liste löschen</string>
     <string name="cd_emoji_picker">Emoji-Auswahl öffnen</string>
     <string name="cd_clear_search">Suche löschen</string>
+    <string name="cd_avatar">Avatar</string>
+    <string name="cd_profile_picture">Profilbild</string>
+    <string name="cd_media_attachment">Medienanhang</string>
+    <string name="cd_video">Video</string>
+    <string name="cd_image">Bild</string>
+    <string name="cd_video_thumbnail">Video-Vorschaubild</string>
+    <string name="cd_edit_alt_text">Alt-Text bearbeiten</string>
+    <string name="cd_remove_media">Medium entfernen</string>
+    <string name="cd_error">Fehler</string>
+    <string name="cd_reply">Antworten</string>
+    <string name="cd_boost">Teilen</string>
+    <string name="cd_unboost">Nicht mehr teilen</string>
+    <string name="cd_favorite">Favorisieren</string>
+    <string name="cd_unfavorite">Nicht mehr favorisieren</string>
+    <string name="cd_bookmark">Lesezeichen</string>
+    <string name="cd_remove_bookmark">Lesezeichen entfernen</string>
+    <string name="cd_attach_media">Medium anhängen</string>
+    <string name="cd_content_warning">Inhaltswarnung</string>
+    <string name="cd_play_video">Video abspielen</string>
+    <string name="cd_play">Abspielen</string>
+    <string name="cd_compose_post">Neuen Beitrag verfassen</string>
 
     <!-- Filter Dialog -->
     <string name="filter_dialog_title">Timeline-Filter</string>
@@ -200,6 +247,11 @@
 
     <!-- Status Detail -->
     <string name="status_detail_title">Beitrag</string>
+
+    <!-- List Timeline -->
+    <string name="list_timeline_error_load_more">Fehler beim Laden weiterer Beiträge</string>
+    <string name="list_timeline_empty">Noch keine Beiträge in dieser Liste</string>
+    <string name="list_timeline_error_load">Fehler beim Laden der Listenzeitlinie</string>
 
     <!-- Notifications -->
     <string name="notifications_title">Benachrichtigungen</string>
@@ -226,4 +278,10 @@
     <string name="error_failed_to_load">Fehler beim Laden</string>
     <string name="error_failed_to_post">Fehler beim Posten</string>
     <string name="error_failed_to_upload">Fehler beim Hochladen der Medien</string>
+    <string name="error_load_favorites">Fehler beim Laden der Favoriten</string>
+    <string name="error_load_more_favorites">Fehler beim Laden weiterer Favoriten</string>
+    <string name="error_load_bookmarks">Fehler beim Laden der Lesezeichen</string>
+    <string name="error_load_more_bookmarks">Fehler beim Laden weiterer Lesezeichen</string>
+    <string name="error_load_notifications">Fehler beim Laden der Benachrichtigungen</string>
+    <string name="error_load_posts">Fehler beim Laden der Beiträge</string>
 </resources>

@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.pfitzer.tootsie.domain.model.CustomEmoji
@@ -34,7 +36,7 @@ fun EmojiPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Custom Emojis") },
+        title = { Text(stringResource(R.string.emoji_picker_title)) },
         text = {
             Box(
                 modifier = Modifier
@@ -49,7 +51,7 @@ fun EmojiPickerDialog(
                     }
                     emojis.isEmpty() -> {
                         Text(
-                            text = "No custom emojis available",
+                            text = stringResource(R.string.emoji_picker_empty),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)
@@ -81,7 +83,7 @@ fun EmojiPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         },
         modifier = modifier

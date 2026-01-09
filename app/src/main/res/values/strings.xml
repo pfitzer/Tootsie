@@ -159,9 +159,35 @@
     <!-- Empty States -->
     <string name="empty_bookmarks">No bookmarks yet</string>
     <string name="empty_favorites">No favorites yet</string>
-    <string name="empty_notifications">No notifications</string>
+    <string name="empty_notifications">No notifications yet</string>
     <string name="empty_search">Start typing to search</string>
-    <string name="empty_followed_tags">No followed tags yet</string>
+    <string name="empty_followed_tags">No followed tags</string>
+    <string name="empty_trending_posts">No trending posts</string>
+    <string name="empty_trending_links">No trending links</string>
+    <string name="empty_replies">No replies yet</string>
+
+    <!-- Media Labels -->
+    <string name="media_label_audio">AUDIO</string>
+    <string name="media_label_alt">ALT</string>
+    <string name="media_label_media">MEDIA</string>
+
+    <!-- Status Labels -->
+    <string name="status_boosted">%1$s boosted</string>
+    <string name="status_content_warning">CW: %1$s</string>
+    <string name="status_more_media">+%1$d</string>
+
+    <!-- Trending Labels -->
+    <string name="trending_posts_count">%1$d posts</string>
+    <string name="trending_people_talking">%1$d people talking</string>
+    <string name="trending_accounts_count">%1$d accounts</string>
+    <string name="trending_shares_count">%1$d shares</string>
+
+    <!-- Loading Messages -->
+    <string name="uploading_media">Uploading media…</string>
+
+    <!-- Hashtag Timeline -->
+    <string name="hashtag_timeline_error">Error loading hashtag timeline</string>
+    <string name="hashtag_timeline_no_posts">No posts found for this hashtag</string>
 
     <!-- Content Descriptions -->
     <string name="cd_back">Back</string>
@@ -175,6 +201,27 @@
     <string name="cd_delete_list">Delete list</string>
     <string name="cd_emoji_picker">Open emoji picker</string>
     <string name="cd_clear_search">Clear search</string>
+    <string name="cd_avatar">Avatar</string>
+    <string name="cd_profile_picture">Profile picture</string>
+    <string name="cd_media_attachment">Media attachment</string>
+    <string name="cd_video">Video</string>
+    <string name="cd_image">Image</string>
+    <string name="cd_video_thumbnail">Video thumbnail</string>
+    <string name="cd_edit_alt_text">Edit alt text</string>
+    <string name="cd_remove_media">Remove media</string>
+    <string name="cd_error">Error</string>
+    <string name="cd_reply">Reply</string>
+    <string name="cd_boost">Boost</string>
+    <string name="cd_unboost">Unboost</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_unfavorite">Unfavorite</string>
+    <string name="cd_bookmark">Bookmark</string>
+    <string name="cd_remove_bookmark">Remove bookmark</string>
+    <string name="cd_attach_media">Attach media</string>
+    <string name="cd_content_warning">Content warning</string>
+    <string name="cd_play_video">Play video</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_compose_post">Compose new post</string>
 
     <!-- Filter Dialog -->
     <string name="filter_dialog_title">Timeline Filters</string>
@@ -199,6 +246,11 @@
 
     <!-- Status Detail -->
     <string name="status_detail_title">Post</string>
+
+    <!-- List Timeline -->
+    <string name="list_timeline_error_load_more">Failed to load more posts</string>
+    <string name="list_timeline_empty">No posts in this list yet</string>
+    <string name="list_timeline_error_load">Failed to load list timeline</string>
 
     <!-- Notifications -->
     <string name="notifications_title">Notifications</string>
@@ -225,4 +277,10 @@
     <string name="error_failed_to_load">Failed to load</string>
     <string name="error_failed_to_post">Failed to post</string>
     <string name="error_failed_to_upload">Failed to upload media</string>
+    <string name="error_load_favorites">Failed to load favorites</string>
+    <string name="error_load_more_favorites">Failed to load more favorites</string>
+    <string name="error_load_bookmarks">Failed to load bookmarks</string>
+    <string name="error_load_more_bookmarks">Failed to load more bookmarks</string>
+    <string name="error_load_notifications">Failed to load notifications</string>
+    <string name="error_load_posts">Failed to load posts</string>
 </resources>

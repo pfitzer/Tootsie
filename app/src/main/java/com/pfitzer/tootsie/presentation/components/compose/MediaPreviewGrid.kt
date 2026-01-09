@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.MediaType
@@ -82,7 +84,7 @@ private fun MediaPreviewItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "AUDIO",
+                        text = stringResource(R.string.media_label_audio),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -204,7 +206,7 @@ private fun MediaPreviewItem(
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = "ALT",
+                        text = stringResource(R.string.media_label_alt),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

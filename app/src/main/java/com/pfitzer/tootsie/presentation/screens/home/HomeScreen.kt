@@ -254,7 +254,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Compose new post"
+                    contentDescription = stringResource(R.string.cd_compose_post)
                 )
             }
         }
@@ -449,7 +449,7 @@ private fun ErrorState(
             color = MaterialTheme.colorScheme.error
         )
         Button(onClick = onRetry) {
-            Text("Retry")
+            Text(stringResource(R.string.retry))
         }
     }
 }

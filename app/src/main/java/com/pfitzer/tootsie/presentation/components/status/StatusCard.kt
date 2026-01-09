@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
@@ -146,7 +148,7 @@ private fun BoostIndicator(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "$boosterName boosted",
+            text = stringResource(R.string.status_boosted, boosterName),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -217,7 +219,7 @@ private fun ContentWarning(
         shape = MaterialTheme.shapes.small
     ) {
         Text(
-            text = "CW: $text",
+            text = stringResource(R.string.status_content_warning, text),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onErrorContainer,
             modifier = Modifier.padding(8.dp)
@@ -327,7 +329,7 @@ private fun SingleMediaAttachment(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "AUDIO",
+                        text = stringResource(R.string.media_label_audio),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -341,7 +343,7 @@ private fun SingleMediaAttachment(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "MEDIA",
+                        text = stringResource(R.string.media_label_media),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -482,7 +484,7 @@ private fun FourPlusMediaGrid(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "+${attachments.size - 4}",
+                                text = stringResource(R.string.status_more_media, attachments.size - 4),
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )

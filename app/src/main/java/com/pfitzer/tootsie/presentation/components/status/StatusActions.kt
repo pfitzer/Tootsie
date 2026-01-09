@@ -9,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
 
 /**
@@ -42,7 +44,7 @@ fun StatusActions(
             count = status.repliesCount,
             isActive = false,
             onClick = onReplyClick,
-            contentDescription = "Reply"
+            contentDescription = stringResource(R.string.cd_reply)
         )
 
         // Boost
@@ -51,7 +53,7 @@ fun StatusActions(
             count = status.reblogsCount,
             isActive = status.reblogged,
             onClick = onBoostClick,
-            contentDescription = if (status.reblogged) "Unboost" else "Boost",
+            contentDescription = if (status.reblogged) stringResource(R.string.cd_unboost) else stringResource(R.string.cd_boost),
             activeColor = MaterialTheme.colorScheme.tertiary
         )
 
@@ -61,7 +63,7 @@ fun StatusActions(
             count = status.favouritesCount,
             isActive = status.favourited,
             onClick = onFavoriteClick,
-            contentDescription = if (status.favourited) "Unfavorite" else "Favorite",
+            contentDescription = if (status.favourited) stringResource(R.string.cd_unfavorite) else stringResource(R.string.cd_favorite),
             activeColor = MaterialTheme.colorScheme.primary
         )
 
@@ -71,7 +73,7 @@ fun StatusActions(
             count = null,
             isActive = status.bookmarked,
             onClick = onBookmarkClick,
-            contentDescription = if (status.bookmarked) "Remove bookmark" else "Bookmark",
+            contentDescription = if (status.bookmarked) stringResource(R.string.cd_remove_bookmark) else stringResource(R.string.cd_bookmark),
             activeColor = MaterialTheme.colorScheme.secondary
         )
     }

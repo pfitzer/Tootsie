@@ -75,7 +75,7 @@ fun FollowedTagsScreen(
                     }
                     uiState.followedTags.isEmpty() && !uiState.isLoading -> {
                         Text(
-                            text = "No followed tags",
+                            text = stringResource(R.string.empty_followed_tags),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)

@@ -156,13 +156,13 @@ private fun TrendingHashtagItem(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${trendingTag.totalUses} posts",
+                    text = stringResource(R.string.trending_posts_count, trendingTag.totalUses),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (trendingTag.totalAccounts > 0) {
                     Text(
-                        text = "${trendingTag.totalAccounts} people talking",
+                        text = stringResource(R.string.trending_people_talking, trendingTag.totalAccounts),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

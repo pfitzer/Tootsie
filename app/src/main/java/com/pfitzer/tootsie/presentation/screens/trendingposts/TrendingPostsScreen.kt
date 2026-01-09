@@ -82,7 +82,7 @@ fun TrendingPostsScreen(
                     }
                     uiState.trendingPosts.isEmpty() && !uiState.isLoading -> {
                         Text(
-                            text = "No trending posts",
+                            text = stringResource(R.string.empty_trending_posts),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)

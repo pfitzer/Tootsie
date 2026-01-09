@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 
 /**
@@ -28,7 +30,7 @@ fun TimelineFilterDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Timeline Filters")
+            Text(stringResource(R.string.filter_dialog_title))
         },
         text = {
             Column(
@@ -41,7 +43,7 @@ fun TimelineFilterDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Hide boosts")
+                    Text(stringResource(R.string.filter_hide_boosts))
                     Switch(
                         checked = hideBoosts,
                         onCheckedChange = { hideBoosts = it }
@@ -54,7 +56,7 @@ fun TimelineFilterDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Hide replies")
+                    Text(stringResource(R.string.filter_hide_replies))
                     Switch(
                         checked = hideReplies,
                         onCheckedChange = { hideReplies = it }
@@ -67,7 +69,7 @@ fun TimelineFilterDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Show only posts with media")
+                    Text(stringResource(R.string.filter_show_media_only))
                     Switch(
                         checked = showOnlyMedia,
                         onCheckedChange = { showOnlyMedia = it }
@@ -88,12 +90,12 @@ fun TimelineFilterDialog(
                     onDismiss()
                 }
             ) {
-                Text("Apply")
+                Text(stringResource(R.string.apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

@@ -164,7 +164,7 @@ fun ProfileScreen(
                                 is LoadState.Error -> {
                                     item {
                                         ErrorMessage(
-                                            message = "Failed to load posts",
+                                            message = stringResource(R.string.error_load_posts),
                                             modifier = Modifier.padding(16.dp)
                                         )
                                     }

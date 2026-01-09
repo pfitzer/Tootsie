@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -55,7 +57,7 @@ fun ListTimelineScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -181,7 +183,7 @@ private fun ListTimelineList(
             is LoadState.Error -> {
                 item {
                     ErrorMessage(
-                        message = "Failed to load more posts",
+                        message = stringResource(R.string.list_timeline_error_load_more),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -203,7 +205,7 @@ private fun ListTimelineList(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No posts in this list yet",
+                        text = stringResource(R.string.list_timeline_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -229,7 +231,7 @@ private fun ListTimelineList(
         if (listTimelinePagingItems.loadState.refresh is LoadState.Error) {
             item {
                 ErrorMessage(
-                    message = "Failed to load list timeline",
+                    message = stringResource(R.string.list_timeline_error_load),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(32.dp)

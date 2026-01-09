@@ -77,7 +77,7 @@ fun TrendingLinksScreen(
                     }
                     uiState.trendingLinks.isEmpty() && !uiState.isLoading -> {
                         Text(
-                            text = "No trending links",
+                            text = stringResource(R.string.empty_trending_links),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)
@@ -190,12 +190,12 @@ private fun TrendingLinkCard(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "${trendingLink.totalAccounts} accounts",
+                            text = stringResource(R.string.trending_accounts_count, trendingLink.totalAccounts),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "${trendingLink.totalUses} shares",
+                            text = stringResource(R.string.trending_shares_count, trendingLink.totalUses),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

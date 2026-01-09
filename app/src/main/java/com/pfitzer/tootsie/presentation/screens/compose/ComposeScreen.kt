@@ -311,7 +311,7 @@ fun ComposeScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Uploading media...",
+                        text = stringResource(R.string.uploading_media),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
@@ -48,12 +50,12 @@ fun BookmarksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bookmarks") },
+                title = { Text(stringResource(R.string.bookmarks_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -179,7 +181,7 @@ private fun BookmarksList(
             is LoadState.Error -> {
                 item {
                     ErrorMessage(
-                        message = "Failed to load more bookmarks",
+                        message = stringResource(R.string.error_load_more_bookmarks),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -201,7 +203,7 @@ private fun BookmarksList(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No bookmarks yet",
+                        text = stringResource(R.string.empty_bookmarks),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -227,7 +229,7 @@ private fun BookmarksList(
         if (bookmarksPagingItems.loadState.refresh is LoadState.Error) {
             item {
                 ErrorMessage(
-                    message = "Failed to load bookmarks",
+                    message = stringResource(R.string.error_load_bookmarks),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(32.dp)
