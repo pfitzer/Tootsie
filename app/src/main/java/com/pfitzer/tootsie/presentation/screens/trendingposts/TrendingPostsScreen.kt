@@ -12,9 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
@@ -46,12 +48,12 @@ fun TrendingPostsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trending Posts") },
+                title = { Text(stringResource(R.string.trending_posts_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },

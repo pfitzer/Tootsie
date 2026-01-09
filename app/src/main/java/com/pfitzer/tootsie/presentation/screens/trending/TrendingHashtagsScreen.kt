@@ -14,10 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.TrendingTag
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 
@@ -40,12 +42,12 @@ fun TrendingHashtagsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trending Hashtags") },
+                title = { Text(stringResource(R.string.trending_hashtags_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -74,7 +76,7 @@ fun TrendingHashtagsScreen(
                     }
                     uiState.trendingTags.isEmpty() && !uiState.isLoading -> {
                         Text(
-                            text = "No trending hashtags",
+                            text = stringResource(R.string.empty_trending_hashtags),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.align(Alignment.Center)

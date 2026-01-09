@@ -186,7 +186,9 @@
     <!-- Trending Screens -->
     <string name="trending_hashtags_title">Trending Hashtags</string>
     <string name="trending_statuses_title">Trending-Beiträge</string>
+    <string name="trending_posts_title">Trending-Beiträge</string>
     <string name="trending_links_title">Trending-Links</string>
+    <string name="empty_trending_hashtags">Keine Trending Hashtags</string>
 
     <!-- Followed Tags -->
     <string name="followed_tags_title">Gefolgte Tags</string>
