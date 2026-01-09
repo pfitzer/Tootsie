@@ -85,9 +85,15 @@
     <string name="followers">Followers</string>
     <string name="following">Following</string>
     <string name="posts">Posts</string>
+    <string name="profile_posts">Posts</string>
+    <string name="profile_following">Following</string>
+    <string name="profile_followers">Followers</string>
     <string name="profile_badge_follows_you">Follows you</string>
     <string name="profile_badge_blocked">Blocked</string>
     <string name="profile_badge_muted">Muted</string>
+    <string name="profile_follows_you">Follows you</string>
+    <string name="profile_blocked">Blocked</string>
+    <string name="profile_muted">Muted</string>
 
     <!-- Lists -->
     <string name="lists_title">Lists</string>
@@ -118,6 +124,15 @@
     <string name="search">Search</string>
     <string name="search_hint">Search for users, hashtags, or posts</string>
     <string name="search_placeholder">Search for accounts, posts, hashtags…</string>
+    <string name="search_section_accounts">Accounts (%1$d)</string>
+    <string name="search_section_posts">Posts (%1$d)</string>
+    <string name="search_section_hashtags">Hashtags (%1$d)</string>
+    <string name="search_followers_count">%1$d followers</string>
+    <string name="search_hashtag_uses">%1$d posts</string>
+    <string name="search_no_results">No results found for \"%1$s\"</string>
+    <string name="search_no_results_hint">Try different keywords or check your spelling</string>
+    <string name="search_empty_title">Search for accounts, posts, and hashtags</string>
+    <string name="search_empty_subtitle">Start typing to search across the Fediverse</string>
 
     <!-- Settings -->
     <string name="settings">Settings</string>
@@ -126,7 +141,14 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System default</string>
     <string name="language">Language</string>
+    <string name="settings_title">Account Settings</string>
     <string name="settings_account_title">Account Settings</string>
+    <string name="settings_active_account">Active account</string>
+    <string name="settings_remove_account">Remove account</string>
+    <string name="settings_add_account">Add Another Account</string>
+    <string name="settings_remove_dialog_title">Remove Account?</string>
+    <string name="settings_remove_dialog_message">Are you sure you want to remove @%1$s? This will delete all cached data for this account.</string>
+    <string name="settings_remove_dialog_message_generic">Are you sure you want to remove this account?</string>
     <string name="settings_remove_account_dialog_title">Remove Account?</string>
 
     <!-- Accounts -->
@@ -152,6 +174,7 @@
     <string name="cd_create_list">Create new list</string>
     <string name="cd_delete_list">Delete list</string>
     <string name="cd_emoji_picker">Open emoji picker</string>
+    <string name="cd_clear_search">Clear search</string>
 
     <!-- Filter Dialog -->
     <string name="filter_dialog_title">Timeline Filters</string>

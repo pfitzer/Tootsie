@@ -19,10 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 
 /**
@@ -52,12 +54,12 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Account Settings") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 }
@@ -213,7 +215,7 @@ private fun AccountItem(
             if (isActive) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Active account",
+                    contentDescription = stringResource(R.string.settings_active_account),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -225,7 +227,7 @@ private fun AccountItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Remove account",
+                    contentDescription = stringResource(R.string.settings_remove_account),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -260,7 +262,7 @@ private fun AddAccountButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Add Another Account",
+                text = stringResource(R.string.settings_add_account),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -279,24 +281,24 @@ private fun RemoveAccountDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Remove Account?") },
+        title = { Text(stringResource(R.string.settings_remove_dialog_title)) },
         text = {
             Text(
                 if (account != null) {
-                    "Are you sure you want to remove @${account.acct}? This will delete all cached data for this account."
+                    stringResource(R.string.settings_remove_dialog_message, account.acct)
                 } else {
-                    "Are you sure you want to remove this account?"
+                    stringResource(R.string.settings_remove_dialog_message_generic)
                 }
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Remove", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.remove), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -324,7 +326,7 @@ private fun ErrorContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            Text("Retry")
+            Text(stringResource(R.string.retry))
         }
     }
 }
@@ -354,7 +356,7 @@ private fun ErrorBanner(
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = onDismiss) {
-                Text("Dismiss")
+                Text(stringResource(R.string.dismiss))
             }
         }
     }

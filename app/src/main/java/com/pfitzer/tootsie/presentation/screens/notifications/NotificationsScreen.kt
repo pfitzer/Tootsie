@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -42,7 +44,7 @@ fun NotificationsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifications") },
+                title = { Text(stringResource(R.string.notifications_title)) },
                 actions = {
                     // Clear all button
                     IconButton(
@@ -51,7 +53,7 @@ fun NotificationsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Clear all notifications"
+                            contentDescription = stringResource(R.string.cd_delete_all_drafts)
                         )
                     }
                 },
@@ -172,7 +174,7 @@ fun NotificationsScreen(
                         .padding(16.dp),
                     action = {
                         TextButton(onClick = { viewModel.onAction(NotificationsAction.DismissError) }) {
-                            Text("Dismiss")
+                            Text(stringResource(R.string.dismiss))
                         }
                     }
                 ) {

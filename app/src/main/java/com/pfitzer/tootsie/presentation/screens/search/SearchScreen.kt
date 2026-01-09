@@ -11,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 
@@ -59,7 +61,7 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Search") },
+                title = { Text(stringResource(R.string.search)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -136,7 +138,7 @@ private fun SearchBar(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
-        placeholder = { Text("Search for accounts, posts, hashtags...") },
+        placeholder = { Text(stringResource(R.string.search_placeholder)) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -148,7 +150,7 @@ private fun SearchBar(
                 IconButton(onClick = onClearClick) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Clear search"
+                        contentDescription = stringResource(R.string.cd_clear_search)
                     )
                 }
             }
@@ -201,7 +203,7 @@ private fun SearchResults(
         if (uiState.accounts.isNotEmpty()) {
             item {
                 Text(
-                    text = "Accounts (${uiState.accounts.size})",
+                    text = stringResource(R.string.search_section_accounts, uiState.accounts.size),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -218,7 +220,7 @@ private fun SearchResults(
         if (uiState.statuses.isNotEmpty()) {
             item {
                 Text(
-                    text = "Posts (${uiState.statuses.size})",
+                    text = stringResource(R.string.search_section_posts, uiState.statuses.size),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = if (uiState.accounts.isNotEmpty()) 16.dp else 0.dp)
@@ -241,7 +243,7 @@ private fun SearchResults(
         if (uiState.hashtags.isNotEmpty()) {
             item {
                 Text(
-                    text = "Hashtags (${uiState.hashtags.size})",
+                    text = stringResource(R.string.search_section_hashtags, uiState.hashtags.size),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(
@@ -298,7 +300,7 @@ private fun AccountResultCard(
                 )
                 if (account.followersCount > 0) {
                     Text(
-                        text = "${account.followersCount} followers",
+                        text = stringResource(R.string.search_followers_count, account.followersCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -335,7 +337,7 @@ private fun HashtagCard(
                 )
                 if (hashtag.totalUses > 0) {
                     Text(
-                        text = "${hashtag.totalUses} posts",
+                        text = stringResource(R.string.search_hashtag_uses, hashtag.totalUses),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -379,13 +381,13 @@ private fun EmptyResults(query: String) {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "No results found for \"$query\"",
+                text = stringResource(R.string.search_no_results, query),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Try different keywords or check your spelling",
+                text = stringResource(R.string.search_no_results_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -415,13 +417,13 @@ private fun EmptyState() {
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Search for accounts, posts, and hashtags",
+                text = stringResource(R.string.search_empty_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Start typing to search across the Fediverse",
+                text = stringResource(R.string.search_empty_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

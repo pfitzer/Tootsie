@@ -86,9 +86,15 @@
     <string name="followers">Follower</string>
     <string name="following">Gefolgt</string>
     <string name="posts">Beiträge</string>
+    <string name="profile_posts">Beiträge</string>
+    <string name="profile_following">Gefolgt</string>
+    <string name="profile_followers">Follower</string>
     <string name="profile_badge_follows_you">Folgt dir</string>
     <string name="profile_badge_blocked">Blockiert</string>
     <string name="profile_badge_muted">Stummgeschaltet</string>
+    <string name="profile_follows_you">Folgt dir</string>
+    <string name="profile_blocked">Blockiert</string>
+    <string name="profile_muted">Stummgeschaltet</string>
 
     <!-- Lists -->
     <string name="lists_title">Listen</string>
@@ -119,6 +125,15 @@
     <string name="search">Suchen</string>
     <string name="search_hint">Suche nach Benutzern, Hashtags oder Beiträgen</string>
     <string name="search_placeholder">Suche nach Konten, Beiträgen, Hashtags…</string>
+    <string name="search_section_accounts">Konten (%1$d)</string>
+    <string name="search_section_posts">Beiträge (%1$d)</string>
+    <string name="search_section_hashtags">Hashtags (%1$d)</string>
+    <string name="search_followers_count">%1$d Follower</string>
+    <string name="search_hashtag_uses">%1$d Beiträge</string>
+    <string name="search_no_results">Keine Ergebnisse für \"%1$s\" gefunden</string>
+    <string name="search_no_results_hint">Versuchen Sie andere Suchbegriffe oder überprüfen Sie die Rechtschreibung</string>
+    <string name="search_empty_title">Suche nach Konten, Beiträgen und Hashtags</string>
+    <string name="search_empty_subtitle">Beginnen Sie zu tippen, um im Fediverse zu suchen</string>
 
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
@@ -127,7 +142,14 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System-Standard</string>
     <string name="language">Sprache</string>
+    <string name="settings_title">Kontoeinstellungen</string>
     <string name="settings_account_title">Kontoeinstellungen</string>
+    <string name="settings_active_account">Aktives Konto</string>
+    <string name="settings_remove_account">Konto entfernen</string>
+    <string name="settings_add_account">Weiteres Konto hinzufügen</string>
+    <string name="settings_remove_dialog_title">Konto entfernen?</string>
+    <string name="settings_remove_dialog_message">Sind Sie sicher, dass Sie @%1$s entfernen möchten? Alle zwischengespeicherten Daten für dieses Konto werden gelöscht.</string>
+    <string name="settings_remove_dialog_message_generic">Sind Sie sicher, dass Sie dieses Konto entfernen möchten?</string>
     <string name="settings_remove_account_dialog_title">Konto entfernen?</string>
 
     <!-- Accounts -->
@@ -153,6 +175,7 @@
     <string name="cd_create_list">Neue Liste erstellen</string>
     <string name="cd_delete_list">Liste löschen</string>
     <string name="cd_emoji_picker">Emoji-Auswahl öffnen</string>
+    <string name="cd_clear_search">Suche löschen</string>
 
     <!-- Filter Dialog -->
     <string name="filter_dialog_title">Timeline-Filter</string>

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
@@ -292,15 +294,15 @@ private fun ProfileHeader(
         ) {
             ProfileStat(
                 count = account.statusesCount,
-                label = "Posts"
+                label = stringResource(R.string.profile_posts)
             )
             ProfileStat(
                 count = account.followingCount,
-                label = "Following"
+                label = stringResource(R.string.profile_following)
             )
             ProfileStat(
                 count = account.followersCount,
-                label = "Followers"
+                label = stringResource(R.string.profile_followers)
             )
         }
 
@@ -313,19 +315,19 @@ private fun ProfileHeader(
                 if (relationship.followedBy) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("Follows you") }
+                        label = { Text(stringResource(R.string.profile_follows_you)) }
                     )
                 }
                 if (relationship.blocking) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("Blocked") }
+                        label = { Text(stringResource(R.string.profile_blocked)) }
                     )
                 }
                 if (relationship.muting) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("Muted") }
+                        label = { Text(stringResource(R.string.profile_muted)) }
                     )
                 }
             }
