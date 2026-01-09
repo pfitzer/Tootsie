@@ -192,6 +192,7 @@
 
     <!-- Followed Tags -->
     <string name="followed_tags_title">Gefolgte Tags</string>
+    <string name="followed_tag_stats">%1$d Verwendungen • %2$d Personen</string>
 
     <!-- Bookmarks & Favorites -->
     <string name="bookmarks_title">Lesezeichen</string>

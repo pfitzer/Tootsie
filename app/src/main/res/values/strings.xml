@@ -191,6 +191,7 @@
 
     <!-- Followed Tags -->
     <string name="followed_tags_title">Followed Tags</string>
+    <string name="followed_tag_stats">%1$d uses • %2$d people</string>
 
     <!-- Bookmarks & Favorites -->
     <string name="bookmarks_title">Bookmarks</string>

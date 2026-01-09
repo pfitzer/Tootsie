@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.FollowedTag
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 
@@ -39,12 +41,12 @@ fun FollowedTagsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Followed Tags") },
+                title = { Text(stringResource(R.string.followed_tags_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -161,7 +163,7 @@ private fun FollowedTagItem(
                     if (tag.history.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${tag.totalUses} uses • ${tag.totalAccounts} people",
+                            text = stringResource(R.string.followed_tag_stats, tag.totalUses, tag.totalAccounts),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -170,7 +172,7 @@ private fun FollowedTagItem(
             }
 
             TextButton(onClick = onUnfollowClick) {
-                Text("Unfollow")
+                Text(stringResource(R.string.unfollow))
             }
         }
     }
