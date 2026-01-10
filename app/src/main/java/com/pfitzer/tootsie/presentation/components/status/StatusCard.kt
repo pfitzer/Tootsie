@@ -112,6 +112,7 @@ fun StatusCard(
                 MediaAttachmentGrid(
                     attachments = displayStatus.mediaAttachments,
                     sensitive = displayStatus.sensitive,
+                    onLinkClick = onLinkClick,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
@@ -264,15 +265,16 @@ private fun StatusContent(
 private fun MediaAttachmentGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
     sensitive: Boolean,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (attachments.isEmpty()) return
 
     when (attachments.size) {
-        1 -> SingleMediaAttachment(attachments[0], modifier)
-        2 -> TwoMediaGrid(attachments, modifier)
-        3 -> ThreeMediaGrid(attachments, modifier)
-        else -> FourPlusMediaGrid(attachments, modifier)
+        1 -> SingleMediaAttachment(attachments[0], onLinkClick, modifier)
+        2 -> TwoMediaGrid(attachments, onLinkClick, modifier)
+        3 -> ThreeMediaGrid(attachments, onLinkClick, modifier)
+        else -> FourPlusMediaGrid(attachments, onLinkClick, modifier)
     }
 }
 
@@ -282,17 +284,24 @@ private fun MediaAttachmentGrid(
 @Composable
 private fun SingleMediaAttachment(
     attachment: com.pfitzer.tootsie.domain.model.MediaAttachment,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(300.dp)
+            .then(
+                // Make videos clickable to play
+                if (attachment.type == MediaType.VIDEO) {
+                    Modifier.clickable { onLinkClick(attachment.url) }
+                } else Modifier
+            )
     ) {
         when (attachment.type) {
             MediaType.IMAGE, MediaType.GIFV -> {
                 AsyncImage(
-                    model = attachment.previewUrl,
+                    model = attachment.previewUrl ?: attachment.url,
                     contentDescription = attachment.description ?: stringResource(R.string.cd_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -300,7 +309,7 @@ private fun SingleMediaAttachment(
             }
             MediaType.VIDEO -> {
                 AsyncImage(
-                    model = attachment.previewUrl,
+                    model = attachment.previewUrl ?: attachment.url,
                     contentDescription = attachment.description ?: stringResource(R.string.cd_video_thumbnail),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -359,6 +368,7 @@ private fun SingleMediaAttachment(
 @Composable
 private fun TwoMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -368,9 +378,17 @@ private fun TwoMediaGrid(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         attachments.take(2).forEach { attachment ->
-            Box(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        if (attachment.type == MediaType.VIDEO) {
+                            Modifier.clickable { onLinkClick(attachment.url) }
+                        } else Modifier
+                    )
+            ) {
                 AsyncImage(
-                    model = attachment.previewUrl,
+                    model = attachment.previewUrl ?: attachment.url,
                     contentDescription = attachment.description,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -396,6 +414,7 @@ private fun TwoMediaGrid(
 @Composable
 private fun ThreeMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -405,9 +424,17 @@ private fun ThreeMediaGrid(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         // First item takes half width
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .then(
+                    if (attachments[0].type == MediaType.VIDEO) {
+                        Modifier.clickable { onLinkClick(attachments[0].url) }
+                    } else Modifier
+                )
+        ) {
             AsyncImage(
-                model = attachments[0].previewUrl,
+                model = attachments[0].previewUrl ?: attachments[0].url,
                 contentDescription = attachments[0].description,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -419,9 +446,17 @@ private fun ThreeMediaGrid(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             attachments.drop(1).take(2).forEach { attachment ->
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(
+                            if (attachment.type == MediaType.VIDEO) {
+                                Modifier.clickable { onLinkClick(attachment.url) }
+                            } else Modifier
+                        )
+                ) {
                     AsyncImage(
-                        model = attachment.previewUrl,
+                        model = attachment.previewUrl ?: attachment.url,
                         contentDescription = attachment.description,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -438,6 +473,7 @@ private fun ThreeMediaGrid(
 @Composable
 private fun FourPlusMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
+    onLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -452,9 +488,17 @@ private fun FourPlusMediaGrid(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             attachments.take(2).forEach { attachment ->
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(
+                            if (attachment.type == MediaType.VIDEO) {
+                                Modifier.clickable { onLinkClick(attachment.url) }
+                            } else Modifier
+                        )
+                ) {
                     AsyncImage(
-                        model = attachment.previewUrl,
+                        model = attachment.previewUrl ?: attachment.url,
                         contentDescription = attachment.description,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -468,9 +512,17 @@ private fun FourPlusMediaGrid(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             attachments.drop(2).take(2).forEach { attachment ->
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(
+                            if (attachment.type == MediaType.VIDEO) {
+                                Modifier.clickable { onLinkClick(attachment.url) }
+                            } else Modifier
+                        )
+                ) {
                     AsyncImage(
-                        model = attachment.previewUrl,
+                        model = attachment.previewUrl ?: attachment.url,
                         contentDescription = attachment.description,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

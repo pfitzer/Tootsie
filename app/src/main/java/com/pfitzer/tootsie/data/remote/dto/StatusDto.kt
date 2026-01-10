@@ -42,7 +42,7 @@ data class MediaAttachmentDto(
     @SerialName("id") val id: String,
     @SerialName("type") val type: String,
     @SerialName("url") val url: String,
-    @SerialName("preview_url") val previewUrl: String,
+    @SerialName("preview_url") val previewUrl: String? = null,
     @SerialName("description") val description: String? = null,
     @SerialName("blurhash") val blurhash: String? = null,
     @SerialName("meta") val meta: MediaMetaDto? = null

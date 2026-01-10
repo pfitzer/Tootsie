@@ -50,7 +50,7 @@ data class MediaAttachment(
     val id: String,
     val type: MediaType,
     val url: String, // Full-size URL
-    val previewUrl: String, // Thumbnail URL
+    val previewUrl: String?, // Thumbnail URL (nullable - may not exist for some media)
     val description: String? = null, // Alt text
     val blurhash: String? = null, // Blurhash for placeholder
     val meta: MediaMeta? = null // Metadata (dimensions, duration, etc.)

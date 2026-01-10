@@ -162,7 +162,7 @@ private fun MediaAttachmentDto.toDomain(): MediaAttachment {
         id = id,
         type = type.toMediaTypeEnum(),
         url = url,
-        previewUrl = previewUrl,
+        previewUrl = previewUrl ?: url, // Fall back to full URL if no preview available
         description = description,
         blurhash = blurhash,
         meta = meta?.original?.let {
