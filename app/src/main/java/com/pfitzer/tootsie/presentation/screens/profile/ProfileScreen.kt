@@ -66,7 +66,7 @@ fun ProfileScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(R.string.cd_back)
                             )
                         }
                     }
@@ -231,7 +231,7 @@ private fun ProfileHeader(
             // Avatar
             AsyncImage(
                 model = account.avatar,
-                contentDescription = "Profile picture",
+                contentDescription = stringResource(R.string.cd_profile_picture),
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape),

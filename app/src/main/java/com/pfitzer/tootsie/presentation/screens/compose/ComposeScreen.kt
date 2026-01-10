@@ -262,7 +262,7 @@ fun ComposeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
-                            contentDescription = "Attach media (image or video)",
+                            contentDescription = stringResource(R.string.cd_attach_media),
                             tint = if (uiState.canAddMedia) {
                                 MaterialTheme.colorScheme.primary
                             } else {
@@ -277,7 +277,7 @@ fun ComposeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Warning,
-                            contentDescription = "Content warning",
+                            contentDescription = stringResource(R.string.cd_content_warning),
                             tint = if (uiState.showContentWarning) {
                                 MaterialTheme.colorScheme.primary
                             } else {

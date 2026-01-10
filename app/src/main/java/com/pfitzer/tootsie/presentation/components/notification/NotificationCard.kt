@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
@@ -68,7 +70,7 @@ fun NotificationCard(
                 ) {
                     AsyncImage(
                         model = notification.account.avatar,
-                        contentDescription = "Avatar",
+                        contentDescription = stringResource(R.string.cd_avatar),
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
@@ -86,7 +88,7 @@ fun NotificationCard(
                         )
 
                         Text(
-                            text = getNotificationMessage(notification.type),
+                            text = GetNotificationMessage(notification.type),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -142,16 +144,17 @@ private fun NotificationTypeIcon(
 /**
  * Get human-readable message for notification type.
  */
-private fun getNotificationMessage(type: NotificationType): String {
+@Composable
+private fun GetNotificationMessage(type: NotificationType): String {
     return when (type) {
-        NotificationType.FOLLOW -> "followed you"
-        NotificationType.FOLLOW_REQUEST -> "requested to follow you"
-        NotificationType.MENTION -> "mentioned you"
-        NotificationType.REBLOG -> "boosted your post"
-        NotificationType.FAVOURITE -> "favourited your post"
-        NotificationType.POLL -> "poll has ended"
-        NotificationType.STATUS -> "posted a new status"
-        NotificationType.UPDATE -> "edited a post"
-        NotificationType.UNKNOWN -> "notification"
+        NotificationType.FOLLOW -> stringResource(R.string.notification_followed_you)
+        NotificationType.FOLLOW_REQUEST -> stringResource(R.string.notification_requested_follow)
+        NotificationType.MENTION -> stringResource(R.string.notification_mentioned_you)
+        NotificationType.REBLOG -> stringResource(R.string.notification_boosted_post)
+        NotificationType.FAVOURITE -> stringResource(R.string.notification_favourited_post)
+        NotificationType.POLL -> stringResource(R.string.notification_poll_ended)
+        NotificationType.STATUS -> stringResource(R.string.notification_new_status)
+        NotificationType.UPDATE -> stringResource(R.string.notification_edited_post)
+        NotificationType.UNKNOWN -> stringResource(R.string.notification_generic)
     }
 }

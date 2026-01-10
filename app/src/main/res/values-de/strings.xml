@@ -256,6 +256,15 @@
     <!-- Notifications -->
     <string name="notifications_title">Benachrichtigungen</string>
     <string name="notifications_error_loading">Fehler beim Laden der Benachrichtigungen</string>
+    <string name="notification_followed_you">folgt dir jetzt</string>
+    <string name="notification_requested_follow">möchte dir folgen</string>
+    <string name="notification_mentioned_you">hat dich erwähnt</string>
+    <string name="notification_boosted_post">hat deinen Beitrag geteilt</string>
+    <string name="notification_favourited_post">hat deinen Beitrag favorisiert</string>
+    <string name="notification_poll_ended">Umfrage ist beendet</string>
+    <string name="notification_new_status">hat einen neuen Beitrag veröffentlicht</string>
+    <string name="notification_edited_post">hat einen Beitrag bearbeitet</string>
+    <string name="notification_generic">Benachrichtigung</string>
 
     <!-- Emoji Picker -->
     <string name="emoji_picker_title">Benutzerdefinierte Emojis</string>

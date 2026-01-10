@@ -124,7 +124,7 @@ private fun MediaPreviewItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Video",
+                    contentDescription = stringResource(R.string.cd_video),
                     modifier = Modifier
                         .padding(12.dp)
                         .size(32.dp),
@@ -150,7 +150,7 @@ private fun MediaPreviewItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit alt text",
+                    contentDescription = stringResource(R.string.cd_edit_alt_text),
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -166,7 +166,7 @@ private fun MediaPreviewItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Remove media",
+                    contentDescription = stringResource(R.string.cd_remove_media),
                     modifier = Modifier.size(16.dp)
                 )
             }

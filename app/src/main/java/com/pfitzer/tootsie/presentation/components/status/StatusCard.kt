@@ -293,7 +293,7 @@ private fun SingleMediaAttachment(
             MediaType.IMAGE, MediaType.GIFV -> {
                 AsyncImage(
                     model = attachment.previewUrl,
-                    contentDescription = attachment.description ?: "Image",
+                    contentDescription = attachment.description ?: stringResource(R.string.cd_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -301,7 +301,7 @@ private fun SingleMediaAttachment(
             MediaType.VIDEO -> {
                 AsyncImage(
                     model = attachment.previewUrl,
-                    contentDescription = attachment.description ?: "Video thumbnail",
+                    contentDescription = attachment.description ?: stringResource(R.string.cd_video_thumbnail),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -314,7 +314,7 @@ private fun SingleMediaAttachment(
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play video",
+                        contentDescription = stringResource(R.string.cd_play_video),
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
@@ -378,7 +378,7 @@ private fun TwoMediaGrid(
                 if (attachment.type == MediaType.VIDEO || attachment.type == MediaType.GIFV) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play",
+                        contentDescription = stringResource(R.string.cd_play),
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(48.dp),

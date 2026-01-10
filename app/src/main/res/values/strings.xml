@@ -255,6 +255,15 @@
     <!-- Notifications -->
     <string name="notifications_title">Notifications</string>
     <string name="notifications_error_loading">Failed to load notifications</string>
+    <string name="notification_followed_you">followed you</string>
+    <string name="notification_requested_follow">requested to follow you</string>
+    <string name="notification_mentioned_you">mentioned you</string>
+    <string name="notification_boosted_post">boosted your post</string>
+    <string name="notification_favourited_post">favourited your post</string>
+    <string name="notification_poll_ended">poll has ended</string>
+    <string name="notification_new_status">posted a new status</string>
+    <string name="notification_edited_post">edited a post</string>
+    <string name="notification_generic">notification</string>
 
     <!-- Emoji Picker -->
     <string name="emoji_picker_title">Custom Emojis</string>

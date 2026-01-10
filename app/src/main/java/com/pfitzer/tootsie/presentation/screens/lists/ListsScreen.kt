@@ -56,7 +56,7 @@ fun ListsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -73,7 +73,7 @@ fun ListsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Create new list"
+                    contentDescription = stringResource(R.string.cd_create_list)
                 )
             }
         }

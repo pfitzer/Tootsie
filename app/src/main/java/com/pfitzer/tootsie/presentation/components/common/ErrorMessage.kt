@@ -11,7 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pfitzer.tootsie.R
 
 /**
  * Displays an error message in a styled card.
@@ -38,7 +40,7 @@ fun ErrorMessage(
         ) {
             Icon(
                 imageVector = Icons.Filled.Warning,
-                contentDescription = "Error",
+                contentDescription = stringResource(R.string.cd_error),
                 tint = MaterialTheme.colorScheme.error
             )
             Spacer(modifier = Modifier.width(12.dp))
