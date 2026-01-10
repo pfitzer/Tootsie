@@ -80,9 +80,12 @@ fun NotificationsScreen(
                             notification = notification,
                             onNotificationClick = { clickedNotification ->
                                 // Navigate to status detail if notification has a status
+                                // If the status is a reply, navigate to the original status instead
                                 // Otherwise navigate to the account's profile (for follow notifications)
                                 if (clickedNotification.status != null) {
-                                    onNavigateToStatus(clickedNotification.status.id)
+                                    val targetStatusId = clickedNotification.status.inReplyToId
+                                        ?: clickedNotification.status.id
+                                    onNavigateToStatus(targetStatusId)
                                 } else {
                                     onNavigateToProfile(clickedNotification.account.id)
                                 }
