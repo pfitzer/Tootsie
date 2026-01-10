@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import com.pfitzer.tootsie.R
 
 /**
  * Bottom navigation bar for main app screens.
@@ -33,10 +36,10 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label
+                        contentDescription = stringResource(item.labelRes)
                     )
                 },
-                label = { Text(item.label) },
+                label = { Text(stringResource(item.labelRes)) },
                 selected = isSelected,
                 onClick = {
                     when (item) {
@@ -56,31 +59,31 @@ fun BottomNavigationBar(
  */
 enum class BottomNavItem(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
     HOME(
         route = "home",
-        label = "Home",
+        labelRes = R.string.home_timeline,
         selectedIcon = Icons.Filled.Home,
         unselectedIcon = Icons.Outlined.Home
     ),
     SEARCH(
         route = "search",
-        label = "Search",
+        labelRes = R.string.search,
         selectedIcon = Icons.Filled.Search,
         unselectedIcon = Icons.Outlined.Search
     ),
     NOTIFICATIONS(
         route = "notifications",
-        label = "Notifications",
+        labelRes = R.string.notifications,
         selectedIcon = Icons.Filled.Notifications,
         unselectedIcon = Icons.Outlined.Notifications
     ),
     PROFILE(
         route = "profile",
-        label = "Profile",
+        labelRes = R.string.profile,
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person
     )
