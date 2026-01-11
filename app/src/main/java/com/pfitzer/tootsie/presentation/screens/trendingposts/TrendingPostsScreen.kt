@@ -40,6 +40,8 @@ fun TrendingPostsScreen(
     onNavigateToStatus: (String) -> Unit = {},
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: TrendingPostsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -132,6 +134,8 @@ fun TrendingPostsScreen(
                                     onLinkClick = { url ->
                                         context.openInBrowser(url)
                                     },
+                                    onImageClick = onNavigateToImageViewer,
+                                    onVideoClick = onNavigateToVideoPlayer,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }

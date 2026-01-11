@@ -36,6 +36,8 @@ import com.pfitzer.tootsie.presentation.util.htmlToPlainText
  * @param onMentionClick Callback when a mention is clicked (receives accountId)
  * @param onHashtagClick Callback when a hashtag is clicked (receives tag name)
  * @param onLinkClick Callback when a link is clicked (receives URL)
+ * @param onImageClick Callback when an image is clicked (receives url, description)
+ * @param onVideoClick Callback when a video is clicked (receives url, description)
  * @param modifier Optional modifier
  */
 @Composable
@@ -50,6 +52,8 @@ fun StatusCard(
     onMentionClick: (String) -> Unit = {},
     onHashtagClick: (String) -> Unit = {},
     onLinkClick: (String) -> Unit = {},
+    onImageClick: (String, String?) -> Unit = { _, _ -> },
+    onVideoClick: (String, String?) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     // If this is a boost/reblog, show the boosted status
@@ -112,7 +116,8 @@ fun StatusCard(
                 MediaAttachmentGrid(
                     attachments = displayStatus.mediaAttachments,
                     sensitive = displayStatus.sensitive,
-                    onLinkClick = onLinkClick,
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
@@ -265,16 +270,17 @@ private fun StatusContent(
 private fun MediaAttachmentGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
     sensitive: Boolean,
-    onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (attachments.isEmpty()) return
 
     when (attachments.size) {
-        1 -> SingleMediaAttachment(attachments[0], onLinkClick, modifier)
-        2 -> TwoMediaGrid(attachments, onLinkClick, modifier)
-        3 -> ThreeMediaGrid(attachments, onLinkClick, modifier)
-        else -> FourPlusMediaGrid(attachments, onLinkClick, modifier)
+        1 -> SingleMediaAttachment(attachments[0], onImageClick, onVideoClick, modifier)
+        2 -> TwoMediaGrid(attachments, onImageClick, onVideoClick, modifier)
+        3 -> ThreeMediaGrid(attachments, onImageClick, onVideoClick, modifier)
+        else -> FourPlusMediaGrid(attachments, onImageClick, onVideoClick, modifier)
     }
 }
 
@@ -284,7 +290,8 @@ private fun MediaAttachmentGrid(
 @Composable
 private fun SingleMediaAttachment(
     attachment: com.pfitzer.tootsie.domain.model.MediaAttachment,
-    onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -292,10 +299,19 @@ private fun SingleMediaAttachment(
             .fillMaxWidth()
             .height(300.dp)
             .then(
-                // Make videos clickable to play
-                if (attachment.type == MediaType.VIDEO) {
-                    Modifier.clickable { onLinkClick(attachment.url) }
-                } else Modifier
+                when (attachment.type) {
+                    MediaType.IMAGE, MediaType.GIFV -> {
+                        Modifier.clickable {
+                            onImageClick(attachment.url, attachment.description)
+                        }
+                    }
+                    MediaType.VIDEO -> {
+                        Modifier.clickable {
+                            onVideoClick(attachment.url, attachment.description)
+                        }
+                    }
+                    else -> Modifier
+                }
             )
     ) {
         when (attachment.type) {
@@ -368,7 +384,8 @@ private fun SingleMediaAttachment(
 @Composable
 private fun TwoMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
-    onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -382,9 +399,19 @@ private fun TwoMediaGrid(
                 modifier = Modifier
                     .weight(1f)
                     .then(
-                        if (attachment.type == MediaType.VIDEO) {
-                            Modifier.clickable { onLinkClick(attachment.url) }
-                        } else Modifier
+                        when (attachment.type) {
+                            MediaType.IMAGE, MediaType.GIFV -> {
+                                Modifier.clickable {
+                                    onImageClick(attachment.url, attachment.description)
+                                }
+                            }
+                            MediaType.VIDEO -> {
+                                Modifier.clickable {
+                                    onVideoClick(attachment.url, attachment.description)
+                                }
+                            }
+                            else -> Modifier
+                        }
                     )
             ) {
                 AsyncImage(
@@ -414,7 +441,8 @@ private fun TwoMediaGrid(
 @Composable
 private fun ThreeMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
-    onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -428,9 +456,19 @@ private fun ThreeMediaGrid(
             modifier = Modifier
                 .weight(1f)
                 .then(
-                    if (attachments[0].type == MediaType.VIDEO) {
-                        Modifier.clickable { onLinkClick(attachments[0].url) }
-                    } else Modifier
+                    when (attachments[0].type) {
+                        MediaType.IMAGE, MediaType.GIFV -> {
+                            Modifier.clickable {
+                                onImageClick(attachments[0].url, attachments[0].description)
+                            }
+                        }
+                        MediaType.VIDEO -> {
+                            Modifier.clickable {
+                                onVideoClick(attachments[0].url, attachments[0].description)
+                            }
+                        }
+                        else -> Modifier
+                    }
                 )
         ) {
             AsyncImage(
@@ -450,9 +488,19 @@ private fun ThreeMediaGrid(
                     modifier = Modifier
                         .weight(1f)
                         .then(
-                            if (attachment.type == MediaType.VIDEO) {
-                                Modifier.clickable { onLinkClick(attachment.url) }
-                            } else Modifier
+                            when (attachment.type) {
+                                MediaType.IMAGE, MediaType.GIFV -> {
+                                    Modifier.clickable {
+                                        onImageClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                MediaType.VIDEO -> {
+                                    Modifier.clickable {
+                                        onVideoClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                else -> Modifier
+                            }
                         )
                 ) {
                     AsyncImage(
@@ -473,7 +521,8 @@ private fun ThreeMediaGrid(
 @Composable
 private fun FourPlusMediaGrid(
     attachments: List<com.pfitzer.tootsie.domain.model.MediaAttachment>,
-    onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -492,9 +541,19 @@ private fun FourPlusMediaGrid(
                     modifier = Modifier
                         .weight(1f)
                         .then(
-                            if (attachment.type == MediaType.VIDEO) {
-                                Modifier.clickable { onLinkClick(attachment.url) }
-                            } else Modifier
+                            when (attachment.type) {
+                                MediaType.IMAGE, MediaType.GIFV -> {
+                                    Modifier.clickable {
+                                        onImageClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                MediaType.VIDEO -> {
+                                    Modifier.clickable {
+                                        onVideoClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                else -> Modifier
+                            }
                         )
                 ) {
                     AsyncImage(
@@ -516,9 +575,19 @@ private fun FourPlusMediaGrid(
                     modifier = Modifier
                         .weight(1f)
                         .then(
-                            if (attachment.type == MediaType.VIDEO) {
-                                Modifier.clickable { onLinkClick(attachment.url) }
-                            } else Modifier
+                            when (attachment.type) {
+                                MediaType.IMAGE, MediaType.GIFV -> {
+                                    Modifier.clickable {
+                                        onImageClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                MediaType.VIDEO -> {
+                                    Modifier.clickable {
+                                        onVideoClick(attachment.url, attachment.description)
+                                    }
+                                }
+                                else -> Modifier
+                            }
                         )
                 ) {
                     AsyncImage(

@@ -34,6 +34,8 @@ fun SearchScreen(
     initialQuery: String? = null,
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToStatusDetail: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,7 +115,9 @@ fun SearchScreen(
                         onAccountClick = onNavigateToProfile,
                         onStatusClick = onNavigateToStatusDetail,
                         onHashtagClick = onHashtagClick,
-                        onStatusAction = { _, _ -> /* TODO: Handle status actions */ }
+                        onStatusAction = { _, _ -> /* TODO: Handle status actions */ },
+                        onImageClick = onNavigateToImageViewer,
+                        onVideoClick = onNavigateToVideoPlayer
                     )
                 }
                 else -> {
@@ -192,7 +196,9 @@ private fun SearchResults(
     onAccountClick: (String) -> Unit,
     onStatusClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onStatusAction: (String, String) -> Unit
+    onStatusAction: (String, String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -234,7 +240,9 @@ private fun SearchResults(
                     onReplyClick = { /* TODO */ },
                     onBoostClick = { /* TODO */ },
                     onFavoriteClick = { /* TODO */ },
-                    onBookmarkClick = { /* TODO */ }
+                    onBookmarkClick = { /* TODO */ },
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick
                 )
             }
         }

@@ -202,6 +202,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToTrendingLinks = {
                     navController.navigate(TootsieDestinations.TrendingLinks.route)
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -240,6 +246,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { hashtagQuery ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -267,6 +279,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { hashtagQuery ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -295,6 +313,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { hashtagQuery ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -321,6 +345,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToStatusDetail = { statusId ->
                     navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -381,6 +411,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -402,6 +438,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -461,6 +503,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -491,6 +539,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToHashtag = { newHashtag ->
                     navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(newHashtag))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -526,6 +580,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToSearch = { query ->
                     navController.navigate(TootsieDestinations.Search.createRoute(query))
+                },
+                onNavigateToImageViewer = { url, description ->
+                    navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
+                },
+                onNavigateToVideoPlayer = { url, description ->
+                    navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
                 }
             )
         }
@@ -533,6 +593,62 @@ fun TootsieNavHost(
         // Trending Links screen - view trending links/articles
         composable(route = TootsieDestinations.TrendingLinks.route) {
             com.pfitzer.tootsie.presentation.screens.trendinglinks.TrendingLinksScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Image Viewer screen - full screen image viewer with zoom
+        composable(
+            route = TootsieDestinations.ImageViewer.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.ImageViewer.ARG_URL) {
+                    type = NavType.StringType
+                },
+                navArgument(TootsieDestinations.ImageViewer.ARG_DESCRIPTION) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val url = backStackEntry.arguments?.getString(TootsieDestinations.ImageViewer.ARG_URL)
+                ?.let { java.net.URLDecoder.decode(it, "UTF-8") } ?: return@composable
+            val description = backStackEntry.arguments?.getString(TootsieDestinations.ImageViewer.ARG_DESCRIPTION)
+                ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+
+            com.pfitzer.tootsie.presentation.screens.imageviewer.ImageViewerScreen(
+                imageUrl = url,
+                description = description,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Video Player screen - full screen video player with controls
+        composable(
+            route = TootsieDestinations.VideoPlayer.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.VideoPlayer.ARG_URL) {
+                    type = NavType.StringType
+                },
+                navArgument(TootsieDestinations.VideoPlayer.ARG_DESCRIPTION) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val url = backStackEntry.arguments?.getString(TootsieDestinations.VideoPlayer.ARG_URL)
+                ?.let { java.net.URLDecoder.decode(it, "UTF-8") } ?: return@composable
+            val description = backStackEntry.arguments?.getString(TootsieDestinations.VideoPlayer.ARG_DESCRIPTION)
+                ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
+
+            com.pfitzer.tootsie.presentation.screens.videoplayer.VideoPlayerScreen(
+                videoUrl = url,
+                description = description,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

@@ -42,6 +42,8 @@ fun StatusDetailScreen(
     onNavigateToProfile: (String) -> Unit,
     onNavigateToCompose: (String) -> Unit,
     onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: StatusDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +93,8 @@ fun StatusDetailScreen(
                         onLinkClick = { url ->
                             context.openInBrowser(url)
                         },
+                        onImageClick = onNavigateToImageViewer,
+                        onVideoClick = onNavigateToVideoPlayer,
                         onReplyClick = { status ->
                             onNavigateToCompose(status.id)
                         },
@@ -143,6 +147,8 @@ private fun ConversationThread(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     onReplyClick: (Status) -> Unit,
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
@@ -162,6 +168,8 @@ private fun ConversationThread(
                 onMentionClick = onMentionClick,
                 onHashtagClick = onHashtagClick,
                 onLinkClick = onLinkClick,
+                onImageClick = onImageClick,
+                onVideoClick = onVideoClick,
                 onFavoriteClick = onFavoriteClick,
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
@@ -189,6 +197,8 @@ private fun ConversationThread(
                     onMentionClick = onMentionClick,
                     onHashtagClick = onHashtagClick,
                     onLinkClick = onLinkClick,
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick,
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
@@ -208,6 +218,8 @@ private fun ConversationThread(
                 onMentionClick = onMentionClick,
                 onHashtagClick = onHashtagClick,
                 onLinkClick = onLinkClick,
+                onImageClick = onImageClick,
+                onVideoClick = onVideoClick,
                 onFavoriteClick = onFavoriteClick,
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
@@ -244,6 +256,8 @@ private fun ReplyItem(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     onReplyClick: (Status) -> Unit,
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
@@ -279,6 +293,8 @@ private fun ReplyItem(
             onMentionClick = onMentionClick,
             onHashtagClick = onHashtagClick,
             onLinkClick = onLinkClick,
+            onImageClick = onImageClick,
+            onVideoClick = onVideoClick,
             onFavoriteClick = onFavoriteClick,
             onBoostClick = onBoostClick,
             onReplyClick = onReplyClick,

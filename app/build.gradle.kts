@@ -116,6 +116,13 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // ExoPlayer
+    implementation(libs.exoplayer)
+    implementation(libs.exoplayer.ui)
+
+    // Accompanist
+    implementation(libs.accompanist.pager)
+
     // WorkManager
     implementation(libs.work.runtime)
 

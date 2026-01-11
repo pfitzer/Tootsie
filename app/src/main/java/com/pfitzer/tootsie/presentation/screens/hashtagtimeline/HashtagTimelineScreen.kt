@@ -44,6 +44,8 @@ fun HashtagTimelineScreen(
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
     onNavigateToHashtag: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: HashtagTimelineViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -104,7 +106,9 @@ fun HashtagTimelineScreen(
                 },
                 onReplyClick = { status ->
                     onNavigateToReply(status.id)
-                }
+                },
+                onImageClick = onNavigateToImageViewer,
+                onVideoClick = onNavigateToVideoPlayer
             )
 
             // Error message
@@ -134,6 +138,8 @@ private fun HashtagTimelineList(
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -159,6 +165,8 @@ private fun HashtagTimelineList(
                     onBookmarkClick = { onBookmarkClick(currentStatus) },
                     onReplyClick = { onReplyClick(currentStatus) },
                     onLinkClick = { url -> context.openInBrowser(url) },
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)

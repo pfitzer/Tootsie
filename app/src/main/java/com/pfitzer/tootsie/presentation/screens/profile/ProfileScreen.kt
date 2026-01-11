@@ -45,6 +45,8 @@ fun ProfileScreen(
     onNavigateBack: (() -> Unit)? = null,
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -138,6 +140,8 @@ fun ProfileScreen(
                                         onLinkClick = { url ->
                                             context.openInBrowser(url)
                                         },
+                                        onImageClick = onNavigateToImageViewer,
+                                        onVideoClick = onNavigateToVideoPlayer,
                                         onFavoriteClick = {},
                                         onBoostClick = {},
                                         onReplyClick = {},

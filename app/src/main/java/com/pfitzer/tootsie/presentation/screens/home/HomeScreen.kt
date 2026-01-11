@@ -77,6 +77,8 @@ fun HomeScreen(
     onNavigateToTrendingHashtags: () -> Unit = {},
     onNavigateToTrendingPosts: () -> Unit = {},
     onNavigateToTrendingLinks: () -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -297,6 +299,8 @@ fun HomeScreen(
                 onReplyClick = { status ->
                     onNavigateToReply(status.id)
                 },
+                onImageClick = onNavigateToImageViewer,
+                onVideoClick = onNavigateToVideoPlayer,
                 onRefresh = {
                     viewModel.onAction(HomeAction.RefreshTimeline)
                 },
@@ -332,6 +336,8 @@ private fun TimelineList(
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     onRefresh: () -> Unit,
     isRefreshing: Boolean,
     modifier: Modifier = Modifier
@@ -372,6 +378,8 @@ private fun TimelineList(
                     onMentionClick = onMentionClick,
                     onHashtagClick = onHashtagClick,
                     onLinkClick = { url -> context.openInBrowser(url) },
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick,
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,

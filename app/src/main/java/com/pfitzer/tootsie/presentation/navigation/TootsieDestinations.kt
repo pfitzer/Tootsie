@@ -159,4 +159,40 @@ sealed class TootsieDestinations(val route: String) {
      * Trending Links screen - view trending links/articles.
      */
     data object TrendingLinks : TootsieDestinations("trending_links")
+
+    /**
+     * Image Viewer screen - view image in full screen with zoom.
+     * Requires imageUrl parameter and optional description.
+     */
+    data object ImageViewer : TootsieDestinations("image_viewer?url={url}&description={description}") {
+        fun createRoute(url: String, description: String? = null): String {
+            val encodedUrl = java.net.URLEncoder.encode(url, "UTF-8")
+            val encodedDesc = description?.let { java.net.URLEncoder.encode(it, "UTF-8") } ?: ""
+            return if (description != null) {
+                "image_viewer?url=$encodedUrl&description=$encodedDesc"
+            } else {
+                "image_viewer?url=$encodedUrl"
+            }
+        }
+        const val ARG_URL = "url"
+        const val ARG_DESCRIPTION = "description"
+    }
+
+    /**
+     * Video Player screen - play video in full screen with controls.
+     * Requires videoUrl parameter and optional description.
+     */
+    data object VideoPlayer : TootsieDestinations("video_player?url={url}&description={description}") {
+        fun createRoute(url: String, description: String? = null): String {
+            val encodedUrl = java.net.URLEncoder.encode(url, "UTF-8")
+            val encodedDesc = description?.let { java.net.URLEncoder.encode(it, "UTF-8") } ?: ""
+            return if (description != null) {
+                "video_player?url=$encodedUrl&description=$encodedDesc"
+            } else {
+                "video_player?url=$encodedUrl"
+            }
+        }
+        const val ARG_URL = "url"
+        const val ARG_DESCRIPTION = "description"
+    }
 }

@@ -42,6 +42,8 @@ fun BookmarksScreen(
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
     onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: BookmarksViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -102,7 +104,9 @@ fun BookmarksScreen(
                 },
                 onReplyClick = { status ->
                     onNavigateToReply(status.id)
-                }
+                },
+                onImageClick = onNavigateToImageViewer,
+                onVideoClick = onNavigateToVideoPlayer
             )
 
             // Error message
@@ -132,6 +136,8 @@ private fun BookmarksList(
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
+    onImageClick: (String, String?) -> Unit,
+    onVideoClick: (String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -159,6 +165,8 @@ private fun BookmarksList(
                     onLinkClick = { url ->
                         context.openInBrowser(url)
                     },
+                    onImageClick = onImageClick,
+                    onVideoClick = onVideoClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
