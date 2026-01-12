@@ -17,6 +17,7 @@ import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TrendingRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TrendingPostsRepositoryImpl
 import com.pfitzer.tootsie.data.repository.TrendingLinksRepositoryImpl
+import com.pfitzer.tootsie.data.repository.PushRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.repository.AuthRepository
 import com.pfitzer.tootsie.domain.repository.BookmarksRepository
@@ -34,6 +35,7 @@ import com.pfitzer.tootsie.domain.repository.TimelineRepository
 import com.pfitzer.tootsie.domain.repository.TrendingRepository
 import com.pfitzer.tootsie.domain.repository.TrendingPostsRepository
 import com.pfitzer.tootsie.domain.repository.TrendingLinksRepository
+import com.pfitzer.tootsie.domain.repository.PushRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -200,4 +202,13 @@ abstract class RepositoryModule {
     abstract fun bindFollowedTagsRepository(
         followedTagsRepositoryImpl: FollowedTagsRepositoryImpl
     ): FollowedTagsRepository
+
+    /**
+     * Binds PushRepositoryImpl to PushRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindPushRepository(
+        pushRepositoryImpl: PushRepositoryImpl
+    ): PushRepository
 }
