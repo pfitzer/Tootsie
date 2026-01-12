@@ -390,6 +390,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToLogin = {
                     navController.navigate(TootsieDestinations.Login.route)
+                },
+                onNavigateToPushSettings = {
+                    navController.navigate(TootsieDestinations.PushSettings.route)
+                }
+            )
+        }
+
+        // Push Settings screen - configure push notifications
+        composable(route = TootsieDestinations.PushSettings.route) {
+            com.pfitzer.tootsie.presentation.screens.settings.push.PushSettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

@@ -293,4 +293,24 @@
     <string name="error_load_more_bookmarks">Fehler beim Laden weiterer Lesezeichen</string>
     <string name="error_load_notifications">Fehler beim Laden der Benachrichtigungen</string>
     <string name="error_load_posts">Fehler beim Laden der Beiträge</string>
+
+    <!-- Push Notification Settings -->
+    <string name="push_notifications">Push-Benachrichtigungen</string>
+    <string name="enable_push_notifications">Push-Benachrichtigungen aktivieren</string>
+    <string name="push_status">Status: %1$s</string>
+    <string name="push_distributor">Distributor: %1$s</string>
+    <string name="alert_types">Benachrichtigungstypen</string>
+    <string name="additional_alerts">Zusätzliche Benachrichtigungen</string>
+    <string name="mentions">Erwähnungen</string>
+    <string name="follows">Folgen</string>
+    <string name="favorites">Favoriten</string>
+    <string name="boosts">Boosts</string>
+    <string name="polls">Umfragen</string>
+    <string name="status_posts">Status-Beiträge</string>
+    <string name="updates">Aktualisierungen</string>
+    <string name="follow_requests">Folgeanfragen</string>
+    <string name="push_info_title">UnifiedPush erforderlich</string>
+    <string name="push_info_message">Push-Benachrichtigungen erfordern eine UnifiedPush-Distributor-App (wie ntfy, NextPush oder Conversations). Installieren Sie eine aus F-Droid oder Ihrem App-Store, um Push-Benachrichtigungen zu aktivieren.</string>
+    <string name="push_fallback_info">Wenn kein Distributor verfügbar ist, prüft Tootsie alle 15 Minuten auf neue Benachrichtigungen.</string>
+    <string name="get_distributor_app">Distributor-App installieren</string>
 </resources>

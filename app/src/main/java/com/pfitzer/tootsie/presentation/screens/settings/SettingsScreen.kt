@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -40,6 +41,7 @@ import com.pfitzer.tootsie.domain.model.Account
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToPushSettings: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -82,7 +84,8 @@ fun SettingsScreen(
                     SuccessContent(
                         state = state,
                         onAction = viewModel::onAction,
-                        onNavigateToLogin = onNavigateToLogin
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToPushSettings = onNavigateToPushSettings
                     )
                 }
 
@@ -108,7 +111,8 @@ fun SettingsScreen(
 private fun SuccessContent(
     state: SettingsUiState.Success,
     onAction: (SettingsAction) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToPushSettings: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -125,6 +129,14 @@ private fun SuccessContent(
                     isActive = account.id == state.activeAccountId,
                     onSwitch = { onAction(SettingsAction.SwitchAccount(account.id)) },
                     onRemove = { onAction(SettingsAction.RemoveAccount(account.id)) },
+                    isEnabled = !state.isSwitching && !state.isRemoving
+                )
+            }
+
+            // Push settings button
+            item {
+                PushSettingsButton(
+                    onClick = onNavigateToPushSettings,
                     isEnabled = !state.isSwitching && !state.isRemoving
                 )
             }
@@ -358,6 +370,39 @@ private fun ErrorBanner(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.dismiss))
             }
+        }
+    }
+}
+
+/**
+ * Push settings button.
+ */
+@Composable
+private fun PushSettingsButton(
+    onClick: () -> Unit,
+    isEnabled: Boolean
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled) { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.push_notifications),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

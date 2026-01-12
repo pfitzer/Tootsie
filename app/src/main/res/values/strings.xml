@@ -292,4 +292,24 @@
     <string name="error_load_more_bookmarks">Failed to load more bookmarks</string>
     <string name="error_load_notifications">Failed to load notifications</string>
     <string name="error_load_posts">Failed to load posts</string>
+
+    <!-- Push Notification Settings -->
+    <string name="push_notifications">Push Notifications</string>
+    <string name="enable_push_notifications">Enable Push Notifications</string>
+    <string name="push_status">Status: %1$s</string>
+    <string name="push_distributor">Distributor: %1$s</string>
+    <string name="alert_types">Alert Types</string>
+    <string name="additional_alerts">Additional Alerts</string>
+    <string name="mentions">Mentions</string>
+    <string name="follows">Follows</string>
+    <string name="favorites">Favorites</string>
+    <string name="boosts">Boosts</string>
+    <string name="polls">Polls</string>
+    <string name="status_posts">Status Posts</string>
+    <string name="updates">Updates</string>
+    <string name="follow_requests">Follow Requests</string>
+    <string name="push_info_title">UnifiedPush Required</string>
+    <string name="push_info_message">Push notifications require a UnifiedPush distributor app (like ntfy, NextPush, or Conversations). Install one from F-Droid or your app store to enable push notifications.</string>
+    <string name="push_fallback_info">When no distributor is available, Tootsie will check for new notifications every 15 minutes.</string>
+    <string name="get_distributor_app">Get a distributor app</string>
 </resources>

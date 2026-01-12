@@ -195,4 +195,9 @@ sealed class TootsieDestinations(val route: String) {
         const val ARG_URL = "url"
         const val ARG_DESCRIPTION = "description"
     }
+
+    /**
+     * Push Settings screen - configure push notification preferences.
+     */
+    data object PushSettings : TootsieDestinations("push_settings")
 }
