@@ -125,6 +125,13 @@ dependencies {
 
     // WorkManager
     implementation(libs.work.runtime)
+    implementation(libs.hilt.work)
+
+    // UnifiedPush
+    implementation(libs.unifiedpush.connector)
+
+    // BouncyCastle (VAPID key generation)
+    implementation(libs.bouncycastle.bcprov)
 
     // Testing
     testImplementation(libs.junit)

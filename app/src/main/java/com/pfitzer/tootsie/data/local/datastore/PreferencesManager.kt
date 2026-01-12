@@ -7,6 +7,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.pfitzer.tootsie.domain.model.AccountPushConfig
+import com.pfitzer.tootsie.domain.model.PushAlerts
+import com.pfitzer.tootsie.domain.model.PushStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -46,6 +49,24 @@ class PreferencesManager @Inject constructor(
         private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
         private val KEY_TIMELINE_SHOW_ONLY_MEDIA = booleanPreferencesKey("timeline_show_only_media")
     }
+
+    // Push Config Keys (account-scoped)
+    private fun pushEnabledKey(accountId: String) = booleanPreferencesKey("push_enabled_$accountId")
+    private fun pushEndpointKey(accountId: String) = stringPreferencesKey("push_endpoint_$accountId")
+    private fun pushVapidPublicKey(accountId: String) = stringPreferencesKey("push_vapid_public_$accountId")
+    private fun pushVapidPrivateKey(accountId: String) = stringPreferencesKey("push_vapid_private_$accountId")
+    private fun pushAuthSecretKey(accountId: String) = stringPreferencesKey("push_auth_secret_$accountId")
+    private fun pushStatusKey(accountId: String) = stringPreferencesKey("push_status_$accountId")
+
+    // Alert preference keys (account-scoped)
+    private fun pushAlertMentionKey(accountId: String) = booleanPreferencesKey("push_alert_mention_$accountId")
+    private fun pushAlertFollowKey(accountId: String) = booleanPreferencesKey("push_alert_follow_$accountId")
+    private fun pushAlertFavouriteKey(accountId: String) = booleanPreferencesKey("push_alert_favourite_$accountId")
+    private fun pushAlertReblogKey(accountId: String) = booleanPreferencesKey("push_alert_reblog_$accountId")
+    private fun pushAlertPollKey(accountId: String) = booleanPreferencesKey("push_alert_poll_$accountId")
+    private fun pushAlertStatusKey(accountId: String) = booleanPreferencesKey("push_alert_status_$accountId")
+    private fun pushAlertUpdateKey(accountId: String) = booleanPreferencesKey("push_alert_update_$accountId")
+    private fun pushAlertFollowRequestKey(accountId: String) = booleanPreferencesKey("push_alert_follow_request_$accountId")
 
     // ========== Authentication ==========
 
@@ -238,6 +259,93 @@ class PreferencesManager @Inject constructor(
      */
     suspend fun getTimelineFilter(): com.pfitzer.tootsie.domain.model.TimelineFilter {
         return timelineFilter.first()
+    }
+
+    // ========== Push Notifications ==========
+
+    /**
+     * Save push configuration for a specific account.
+     * IMPORTANT: Use .first() not .collect() when reading from DataStore.
+     */
+    suspend fun savePushConfig(config: AccountPushConfig) {
+        dataStore.edit { preferences ->
+            preferences[pushEnabledKey(config.accountId)] = config.enabled
+            config.endpoint?.let { preferences[pushEndpointKey(config.accountId)] = it }
+            config.vapidPublicKey?.let { preferences[pushVapidPublicKey(config.accountId)] = it }
+            config.vapidPrivateKey?.let { preferences[pushVapidPrivateKey(config.accountId)] = it }
+            config.authSecret?.let { preferences[pushAuthSecretKey(config.accountId)] = it }
+            preferences[pushStatusKey(config.accountId)] = config.status.name
+
+            // Save alerts
+            preferences[pushAlertMentionKey(config.accountId)] = config.alerts.mention
+            preferences[pushAlertFollowKey(config.accountId)] = config.alerts.follow
+            preferences[pushAlertFavouriteKey(config.accountId)] = config.alerts.favourite
+            preferences[pushAlertReblogKey(config.accountId)] = config.alerts.reblog
+            preferences[pushAlertPollKey(config.accountId)] = config.alerts.poll
+            preferences[pushAlertStatusKey(config.accountId)] = config.alerts.status
+            preferences[pushAlertUpdateKey(config.accountId)] = config.alerts.update
+            preferences[pushAlertFollowRequestKey(config.accountId)] = config.alerts.followRequest
+        }
+    }
+
+    /**
+     * Get push configuration for a specific account.
+     * Returns default config if not found.
+     */
+    suspend fun getPushConfig(accountId: String): AccountPushConfig {
+        return dataStore.data.map { preferences ->
+            AccountPushConfig(
+                accountId = accountId,
+                enabled = preferences[pushEnabledKey(accountId)] ?: false,
+                endpoint = preferences[pushEndpointKey(accountId)],
+                vapidPublicKey = preferences[pushVapidPublicKey(accountId)],
+                vapidPrivateKey = preferences[pushVapidPrivateKey(accountId)],
+                authSecret = preferences[pushAuthSecretKey(accountId)],
+                status = PushStatus.valueOf(
+                    preferences[pushStatusKey(accountId)] ?: PushStatus.DISABLED.name
+                ),
+                alerts = PushAlerts(
+                    mention = preferences[pushAlertMentionKey(accountId)] ?: true,
+                    follow = preferences[pushAlertFollowKey(accountId)] ?: true,
+                    favourite = preferences[pushAlertFavouriteKey(accountId)] ?: true,
+                    reblog = preferences[pushAlertReblogKey(accountId)] ?: true,
+                    poll = preferences[pushAlertPollKey(accountId)] ?: false,
+                    status = preferences[pushAlertStatusKey(accountId)] ?: false,
+                    update = preferences[pushAlertUpdateKey(accountId)] ?: false,
+                    followRequest = preferences[pushAlertFollowRequestKey(accountId)] ?: false
+                )
+            )
+        }.first()  // IMPORTANT: Use .first() not .collect()
+    }
+
+    /**
+     * Delete push configuration for a specific account.
+     * Removes all push-related preferences for the account.
+     */
+    suspend fun deletePushConfig(accountId: String) {
+        dataStore.edit { preferences ->
+            preferences.remove(pushEnabledKey(accountId))
+            preferences.remove(pushEndpointKey(accountId))
+            preferences.remove(pushVapidPublicKey(accountId))
+            preferences.remove(pushVapidPrivateKey(accountId))
+            preferences.remove(pushAuthSecretKey(accountId))
+            preferences.remove(pushStatusKey(accountId))
+            preferences.remove(pushAlertMentionKey(accountId))
+            preferences.remove(pushAlertFollowKey(accountId))
+            preferences.remove(pushAlertFavouriteKey(accountId))
+            preferences.remove(pushAlertReblogKey(accountId))
+            preferences.remove(pushAlertPollKey(accountId))
+            preferences.remove(pushAlertStatusKey(accountId))
+            preferences.remove(pushAlertUpdateKey(accountId))
+            preferences.remove(pushAlertFollowRequestKey(accountId))
+        }
+    }
+
+    /**
+     * Get active account ID as one-time read (suspend function).
+     */
+    suspend fun getActiveAccountId(): String? {
+        return dataStore.data.map { it[KEY_ACTIVE_ACCOUNT_ID] }.first()
     }
 
     // ========== Utility ==========

@@ -26,6 +26,9 @@ coroutines = "1.8.1"
 kotlinx-serialization = "1.6.3"
 exoplayer = "1.5.0"
 accompanist = "0.36.0"
+unifiedpush = "2.4.0"
+bouncycastle = "1.70"
+hilt-work = "1.2.0"
 
 [libraries]
 # Existing AndroidX
@@ -93,6 +96,15 @@ accompanist-pager = { group = "com.google.accompanist", name = "accompanist-page
 
 # WorkManager
 work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+
+# UnifiedPush
+unifiedpush-connector = { group = "com.github.UnifiedPush", name = "android-connector", version.ref = "unifiedpush" }
+
+# BouncyCastle (for VAPID key generation)
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk15on", version.ref = "bouncycastle" }
+
+# Hilt WorkManager
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

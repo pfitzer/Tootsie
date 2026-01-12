@@ -12,12 +12,14 @@ import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
 import com.pfitzer.tootsie.data.remote.dto.TrendingLinkDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -638,6 +640,44 @@ interface MastodonApiService {
     suspend fun unfollowTag(
         @Path("id") id: String
     ): FollowedTagDto
+
+    // ========== Push Subscription Endpoints ==========
+
+    /**
+     * Subscribe to push notifications.
+     * Creates a new Web Push subscription for the authenticated user.
+     *
+     * @param request Push subscription request with endpoint and alert preferences
+     */
+    @POST("api/v1/push/subscription")
+    suspend fun subscribeToPush(
+        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto
+    ): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
+
+    /**
+     * Get current push subscription.
+     *
+     * @return Current push subscription or error if not subscribed
+     */
+    @GET("api/v1/push/subscription")
+    suspend fun getPushSubscription(): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
+
+    /**
+     * Update push subscription alerts.
+     *
+     * @param request Updated push subscription request
+     */
+    @PUT("api/v1/push/subscription")
+    suspend fun updatePushSubscription(
+        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto
+    ): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
+
+    /**
+     * Delete push subscription.
+     * Unsubscribes from push notifications.
+     */
+    @DELETE("api/v1/push/subscription")
+    suspend fun deletePushSubscription()
 
     // ========== Custom Emoji Endpoints ==========
 
