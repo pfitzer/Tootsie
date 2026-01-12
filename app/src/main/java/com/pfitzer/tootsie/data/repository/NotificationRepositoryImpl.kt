@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.paging.NotificationPagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Notification
@@ -56,6 +57,16 @@ class NotificationRepositoryImpl @Inject constructor(
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to clear notifications")
+        }
+    }
+
+    override suspend fun fetchRecentNotifications(limit: Int): Result<List<Notification>> {
+        return try {
+            val notificationDtos = mastodonApi.getNotifications(limit = limit)
+            val notifications = notificationDtos.map { it.toDomain() }
+            Result.Success(notifications)
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to fetch recent notifications")
         }
     }
 }

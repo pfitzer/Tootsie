@@ -38,4 +38,13 @@ interface NotificationRepository {
      * @return Result indicating success or failure
      */
     suspend fun clearAllNotifications(): Result<Unit>
+
+    /**
+     * Fetch recent notifications as a simple list (for polling).
+     * Used by WorkManager fallback when UnifiedPush is unavailable.
+     *
+     * @param limit Maximum number of notifications to fetch
+     * @return Result with list of notifications
+     */
+    suspend fun fetchRecentNotifications(limit: Int = 20): Result<List<Notification>>
 }

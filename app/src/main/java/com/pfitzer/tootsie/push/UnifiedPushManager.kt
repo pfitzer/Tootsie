@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.push
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.unifiedpush.android.connector.UnifiedPush
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,7 +12,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class UnifiedPushManager @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
 
     /**
