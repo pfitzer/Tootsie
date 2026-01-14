@@ -112,7 +112,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Advanced timeline filters (Phase 3c complete)
 - ✅ Multi-account support (Phase 3d complete)
 
-**Phase 4 (Polish & Advanced Features)** - In Progress 🔨
+**Phase 4 (Polish & Advanced Features)** - Complete ✅
 - ✅ Bookmarks & Favorites screens (Phase 4a complete)
 - ✅ Lists support (Phase 4b complete)
 - ✅ Custom emoji support (Phase 4c complete)
@@ -120,7 +120,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Trending content (Phase 4e complete) - hashtags, posts, links
 - ✅ Followed tags (Phase 4f complete) - view and manage followed hashtags
 - ✅ Internationalization (Phase 4g complete) - English & German language support
-- ⏳ Push notifications (FCM)
+- ✅ Push notifications (Phase 4h complete) - UnifiedPush with WorkManager fallback
 
 ### Recent Updates (January 2025)
 
@@ -147,6 +147,23 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Proper icon semantics throughout the app
 - ✅ Continuous blue border for replies in conversation threads
 - ✅ Improved reply visualization in status detail screen
+
+**Phase 4h - UnifiedPush Push Notifications:**
+- ✅ **FOSS Push Notifications**: UnifiedPush integration (NO Google Firebase/FCM)
+- ✅ **Multi-Account Support**: Independent push subscriptions per account
+- ✅ **VAPID Key Generation**: P-256 elliptic curve keys with BouncyCastle
+- ✅ **Mastodon Push API**: Full integration with 4 endpoints (subscribe, update, unsubscribe, get)
+- ✅ **WorkManager Fallback**: 15-minute periodic polling when no distributor available
+- ✅ **Notification Channels**: 3 channels (Mentions, Follows, Boosts & Favorites)
+- ✅ **8 Alert Types**: Mentions, follows, favorites, boosts, polls, status posts, updates, follow requests
+- ✅ **Push Settings UI**: Complete settings screen with enable/disable toggle and alert configuration
+- ✅ **Status Display**: Real-time push status (ACTIVE, POLLING, DISABLED, ERROR)
+- ✅ **Distributor Detection**: Automatic detection of UnifiedPush apps (ntfy, NextPush, Conversations)
+- ✅ **Info Cards**: User-friendly explanations of UnifiedPush requirements
+- ✅ **Complete i18n**: English & German translations (18 new strings)
+- ✅ **Clean Architecture**: 3 use cases (Enable, Disable, Update, Get), repository pattern, MVI ViewModels
+- ✅ **Thread-Safe**: @ApplicationContext injection, WorkManager Configuration.Provider for Hilt workers
+- ✅ **Automatic State Management**: Switches between ACTIVE and POLLING based on distributor availability
 
 **Phase 3d - Multi-Account Support:**
 - ✅ Database migration v2 → v3 → v4 with account scoping and cleanup
@@ -328,11 +345,12 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Complete German translations matching all English strings
 
 ### Next Steps
-Phase 4 - Polish & Advanced Features (Remaining):
-- Push notifications (FCM integration)
+Phase 5 - Final Polish & Enhancements:
 - Accessibility improvements (TalkBack optimization, contrast modes)
 - Performance optimizations (timeline scroll, memory usage)
 - Filters support (keyword and context filters)
+- Full RFC 8291 Web Push encryption implementation
+- Notification tracking to avoid duplicates in polling mode
 
 ---
 
@@ -361,11 +379,12 @@ Phase 4 - Polish & Advanced Features (Remaining):
 - Trending content (hashtags, posts, links/articles)
 - Followed tags (view, unfollow, navigate to hashtag timelines)
 - Internationalization (English & German language support)
+- Push notifications (UnifiedPush with WorkManager fallback)
 
 ### Planned
-- Push notifications (FCM)
 - Keyword filters
 - Accessibility improvements
+- Full RFC 8291 Web Push encryption
 
 ---
 
@@ -484,6 +503,153 @@ Targeting Mastodon API v1 and v2 (compatible with Mastodon 3.0+)
 - Feature detection via /api/v1/instance endpoint
 - Graceful degradation for older Mastodon versions
 - Support for Mastodon forks (Glitch, Hometown, etc.)
+
+---
+
+## UnifiedPush Integration
+
+### Overview
+Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Google Firebase/FCM required. This provides privacy-respecting, decentralized push notifications compatible with any UnifiedPush distributor app.
+
+### Architecture
+
+**Core Components:**
+1. **UnifiedPushService** (MessagingReceiver)
+   - Receives 4 event types: NEW_ENDPOINT, MESSAGE, UNREGISTERED, REGISTRATION_FAILED
+   - Delegates to UnifiedPushHandler interface in TootsieApplication
+
+2. **UnifiedPushManager** (@Singleton)
+   - Manages registration/unregistration with distributors
+   - Detects available distributors (ntfy, NextPush, Conversations)
+   - Uses accountId as "instance" for multi-account support
+
+3. **TootsieApplication** (UnifiedPushHandler implementation)
+   - Handles push callbacks with application-scoped coroutines
+   - Manages state transitions: DISABLED → ACTIVE → POLLING
+   - Coordinates between UnifiedPush, Mastodon API, and WorkManager
+
+4. **NotificationPollWorker** (@HiltWorker)
+   - 15-minute periodic fallback when no distributor available
+   - Fetches recent notifications via Mastodon API
+   - Cancels automatically when UnifiedPush becomes active
+
+5. **NotificationHelper** (@Singleton)
+   - Creates Android notification channels (Mentions, Follows, Boosts)
+   - Displays notifications with proper formatting and deep links
+   - Handles both push (PushPayload) and polling (Notification) sources
+
+### VAPID Key Generation
+- **Algorithm**: P-256 elliptic curve (secp256r1) using BouncyCastle
+- **Storage**: Keys stored per-account in DataStore with base64url encoding
+- **Generation**: On-demand during first push enable
+- **Persistence**: Keys persist across app restarts for subscription continuity
+
+### Push Flow
+
+**Enable Push:**
+1. User toggles push ON in settings
+2. Generate VAPID keys (public, private) and auth secret
+3. Save config to DataStore with status=DISABLED
+4. Register with UnifiedPush (triggers dialog to select distributor)
+5. UnifiedPush calls `handleNewEndpoint()` with push endpoint
+6. Subscribe to Mastodon push API with endpoint + VAPID public key
+7. Save endpoint to config, update status=ACTIVE
+8. Cancel WorkManager polling (no longer needed)
+
+**Receive Push:**
+1. Mastodon server sends encrypted payload to UnifiedPush distributor
+2. Distributor forwards to UnifiedPushService
+3. UnifiedPushService calls `handleMessage()`
+4. Decrypt payload using VAPID private key + auth secret
+5. Display notification via NotificationHelper
+
+**Fallback to Polling:**
+1. No distributor available OR registration fails
+2. UnifiedPush calls `handleRegistrationFailed()`
+3. Update status=POLLING, save to DataStore
+4. Schedule WorkManager periodic worker (15-minute interval)
+5. Worker fetches recent notifications from Mastodon API
+6. Display notifications for each new item
+
+**Disable Push:**
+1. User toggles push OFF in settings
+2. Unregister from UnifiedPush distributor
+3. Unsubscribe from Mastodon push API
+4. Delete config from DataStore
+5. Cancel WorkManager polling
+6. Update status=DISABLED
+
+### Multi-Account Support
+- Each account has independent push subscription
+- AccountId used as UnifiedPush "instance" parameter
+- Separate VAPID keys per account stored in DataStore
+- Config keys: `push_enabled_{accountId}`, `push_endpoint_{accountId}`, etc.
+- Notifications tagged with accountId for proper routing
+
+### Data Layer
+
+**Domain Models:**
+- `PushSubscription`: Mastodon subscription (id, endpoint, serverKey, alerts)
+- `PushAlerts`: 8 boolean flags for notification types
+- `AccountPushConfig`: Local config (accountId, enabled, endpoint, VAPID keys, auth secret, alerts, status)
+- `PushStatus`: ACTIVE, POLLING, DISABLED, ERROR
+
+**Repository:**
+- `PushRepository`: 7 methods (subscribe, update, unsubscribe, get subscription, save/get/delete config)
+- `PushRepositoryImpl`: Implements repository with API calls and DataStore operations
+
+**Use Cases:**
+- `EnablePushUseCase`: Generate keys → save config → register UnifiedPush
+- `DisablePushUseCase`: Unregister UnifiedPush → unsubscribe API → delete config → cancel polling
+- `UpdatePushAlertsUseCase`: Update Mastodon subscription → save new alerts to DataStore
+- `GetPushConfigUseCase`: Retrieve config from DataStore
+
+### Presentation Layer
+
+**PushSettingsScreen:**
+- Material Design 3 UI with info cards explaining UnifiedPush
+- Enable/disable toggle with real-time status display
+- Distributor name display (e.g., "ntfy", "NextPush")
+- 8 alert type switches grouped by importance
+- Loading states and error handling with snackbars
+- Complete English & German internationalization
+
+**PushSettingsViewModel:**
+- MVI pattern with sealed PushSettingsAction interface
+- StateFlow-based UI state management
+- Loads config and distributor info on init
+- Handles toggle, update alerts, and dismiss error actions
+
+### Encryption (MVP Implementation)
+**Current**: Accepts plaintext JSON or base64-encoded JSON
+**Reason**: Many Mastodon instances support unencrypted push for simplicity
+**Future**: Full RFC 8291 Web Push encryption implementation planned
+
+### Notification Channels
+1. **Mentions** (IMPORTANCE_HIGH): When someone mentions you
+2. **Follows** (IMPORTANCE_DEFAULT): When someone follows you
+3. **Boosts & Favorites** (IMPORTANCE_LOW): When someone boosts or favorites your post
+
+Users can customize channel behavior in Android system settings (sound, vibration, etc.)
+
+### Dependencies
+- **UnifiedPush Connector**: 2.4.0 (JitPack repository)
+- **BouncyCastle**: 1.70 (cryptography provider for EC keys)
+- **Hilt Work**: 1.2.0 (dependency injection for WorkManager)
+- **WorkManager**: Periodic background tasks for fallback polling
+
+### Known Limitations
+1. **Encryption**: Currently accepts plaintext/base64 JSON (RFC 8291 encryption planned)
+2. **Distributor Detection**: Uses `getSavedDistributor()` (requires user to select distributor)
+3. **Polling Deduplication**: No tracking of shown notifications (may show duplicates)
+4. **Notification Persistence**: Notifications cleared on tap (no inbox storage)
+
+### Testing Considerations
+- Requires UnifiedPush distributor app (ntfy, NextPush, or Conversations)
+- Available on F-Droid or Play Store
+- Test both push (with distributor) and polling (without distributor) modes
+- Multi-account testing: Each account should have independent push config
+- Network conditions: Test with WiFi, mobile data, and offline scenarios
 
 ---
 

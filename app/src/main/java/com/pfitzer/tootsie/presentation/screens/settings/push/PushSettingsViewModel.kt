@@ -41,6 +41,7 @@ sealed interface PushSettingsAction {
 @HiltViewModel
 class PushSettingsViewModel @Inject constructor(
     private val enablePushUseCase: EnablePushUseCase,
+    private val disablePushUseCase: DisablePushUseCase,
     private val updatePushAlertsUseCase: UpdatePushAlertsUseCase,
     private val getPushConfigUseCase: GetPushConfigUseCase,
     private val unifiedPushManager: UnifiedPushManager,
@@ -139,14 +140,26 @@ class PushSettingsViewModel @Inject constructor(
                     else -> {}
                 }
             } else {
-                // Disable push (unregister from UnifiedPush)
-                unifiedPushManager.unregisterFromPush(accountId)
-                _uiState.update {
-                    it.copy(
-                        enabled = false,
-                        status = PushStatus.DISABLED,
-                        isLoading = false
-                    )
+                // Disable push
+                when (val result = disablePushUseCase(accountId)) {
+                    is Result.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                enabled = false,
+                                status = PushStatus.DISABLED,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is Result.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                errorMessage = result.message,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    else -> {}
                 }
             }
         }

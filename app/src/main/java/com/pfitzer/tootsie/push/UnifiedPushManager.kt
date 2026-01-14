@@ -47,7 +47,7 @@ class UnifiedPushManager @Inject constructor(
      * @return True if distributor is available
      */
     fun isDistributorAvailable(): Boolean {
-        return UnifiedPush.getDistributor(context).isNotEmpty()
+        return UnifiedPush.getSavedDistributor(context)?.isNotEmpty() == true
     }
 
     /**
@@ -56,6 +56,6 @@ class UnifiedPushManager @Inject constructor(
      * @return Distributor package name or empty string if none
      */
     fun getDistributor(): String {
-        return UnifiedPush.getDistributor(context)
+        return UnifiedPush.getSavedDistributor(context) ?: ""
     }
 }
