@@ -13,11 +13,12 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 **Phase 1 - Core Infrastructure:**
 - **OAuth 2.0 Authentication**: Full OAuth flow with dynamic app registration
 - **Multi-Instance Support**: Users can connect to any Mastodon instance
-- **Timeline Viewing**: Home and public timeline display with Paging 3
-- **Offline Caching**: Timeline posts cached in Room database
+- **Timeline Viewing**: Home, Local, and Federated timeline display with Paging 3 and tab-based switching
+- **Offline Caching**: Timeline posts cached in Room database with account and timeline type scoping
 - **Authentication Persistence**: Token and credentials stored securely in DataStore
 - **Clean Architecture**: Repository pattern, use cases, ViewModels all implemented
 - **Provider Pattern**: Thread-safe synchronous access to auth state for interceptors
+- **Timeline Switching**: PrimaryTabRow for quick switching between Home, Local, and Federated timelines
 
 **Phase 2a - Core Interactions:**
 - **Post Interactions**: Favorite, boost, unbookmark, and bookmark posts
@@ -121,8 +122,18 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Followed tags (Phase 4f complete) - view and manage followed hashtags
 - ✅ Internationalization (Phase 4g complete) - English & German language support
 - ✅ Push notifications (Phase 4h complete) - UnifiedPush with WorkManager fallback
+- ✅ Public Timelines & Tab Navigation (Phase 4i complete) - Home, Local, Federated with tab-based switching
 
 ### Recent Updates (January 2025)
+
+**Public Timelines & Tab Navigation:**
+- ✅ Support for Public (Local and Federated) timelines
+- ✅ Implemented `PrimaryTabRow` in `HomeScreen` for fast timeline switching
+- ✅ Reactive timeline updates based on active account and selected tab
+- ✅ Updated `HomeViewModel` to manage `TimelineType` state using MVI
+- ✅ Removed redundant timeline items from navigation drawer
+- ✅ Added German translations for "Local" and "Federated" timelines
+- ✅ Improved accessibility for the filter button with dynamic content descriptions
 
 **Phase 4g - Internationalization (i18n):**
 - ✅ Complete string externalization across entire app (220+ strings)
@@ -361,7 +372,7 @@ Phase 5 - Final Polish & Enhancements:
 - Modern Jetpack Compose design with Material Design 3
 - Offline-first architecture with Room caching
 - Full OAuth 2.0 authentication flow
-- Timeline viewing (Home, Public, Federated)
+- Timeline viewing (Home, Local, Federated) with tab switching
 - Post interactions (favorite, boost, reply, bookmark)
 - Rich media support (images, videos, audio)
 - Draft auto-save and management
@@ -686,11 +697,11 @@ Users can customize channel behavior in Android system settings (sound, vibratio
 
 ### Localization (i18n) - Fully Implemented ✅
 - **Supported Languages**: English (default), German (100% complete)
-- **String Resources**: 220+ externalized strings in values/strings.xml and values-de/strings.xml
+- **String Resources**: 230+ externalized strings in values/strings.xml and values-de/strings.xml
 - **Resource Strategy**: Android string resources with locale qualifiers
 - **Complete Coverage**: All screens (25+), components (10+), error messages, empty states
 - **Formatted Strings**: Proper placeholders (%1$s, %1$d) for dynamic content
-- **Accessibility**: All content descriptions localized for TalkBack support
+- **Accessibility**: All content descriptions localized for TalkBack support; dynamic filter button descriptions
 - **Zero Hardcoded Strings**: All user-facing text externalized (verified with build)
 - **Date/Time Formatting**: Locale-aware formatting with DateTimeFormatter
 - **Number Formatting**: Locale-specific number and currency formatting
@@ -826,7 +837,10 @@ class AuthRepositoryImpl @Inject constructor(
 
 // ✅ CORRECT - Explicit initialization in ViewModel
 @Singleton
-class AuthRepositoryImpl @Inject constructor(...) {
+class AuthRepositoryImpl @Inject constructor(
+    private val preferencesManager: PreferencesManager,
+    private val tokenProvider: TokenProvider
+) {
     suspend fun initializeProviders() {
         val token = preferencesManager.getAccessToken()
         tokenProvider.setToken(token)
