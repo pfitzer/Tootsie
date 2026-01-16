@@ -1,6 +1,45 @@
 ---
 name: kotlin-app-developer
-description: Use this agent when the user needs help with Android app development tasks, including writing new Kotlin code, implementing features, refactoring existing code, debugging issues, or making architectural decisions for the Tootsie Mastodon client. This agent should be used proactively when the user starts working on code-related tasks.\n\nExamples:\n\n<example>\nContext: User is implementing a new feature for the Tootsie app.\nuser: "I need to add a feature to mute users in the app"\nassistant: "I'll use the kotlin-app-developer agent to help design and implement the mute user feature."\n<agent_task>\nThe kotlin-app-developer agent would then provide implementation guidance following the app's clean architecture pattern, including creating the necessary use case, repository method, API endpoint, and UI components.\n</agent_task>\n</example>\n\n<example>\nContext: User is debugging a crash in the timeline loading.\nuser: "The app crashes when I scroll to the bottom of the timeline"\nassistant: "Let me use the kotlin-app-developer agent to help diagnose and fix this crash."\n<agent_task>\nThe kotlin-app-developer agent would analyze the error, check the Paging 3 implementation, and provide a fix following the project's patterns.\n</agent_task>\n</example>\n\n<example>\nContext: User is refactoring existing code.\nuser: "Can you help me refactor the ComposeViewModel to follow MVI pattern better?"\nassistant: "I'll use the kotlin-app-developer agent to refactor the ViewModel following MVI best practices."\n<agent_task>\nThe kotlin-app-developer agent would refactor the code to use sealed UiState classes and ensure proper state management.\n</agent_task>\n</example>\n\n<example>\nContext: User asks a general development question.\nuser: "What's the best way to handle API errors in this app?"\nassistant: "I'll consult the kotlin-app-developer agent for guidance on error handling patterns."\n<agent_task>\nThe kotlin-app-developer agent would explain the app's Result wrapper pattern and how to properly handle errors in the repository and use case layers.\n</agent_task>\n</example>
+description: |
+  Use this agent when the user needs help with Android app development tasks, including writing new Kotlin code, implementing features, refactoring existing code, debugging issues, or making architectural decisions for the Tootsie Mastodon client. This agent should be used proactively when the user starts working on code-related tasks.
+
+  Examples:
+
+  <example>
+  Context: User is implementing a new feature for the Tootsie app.
+  user: "I need to add a feature to mute users in the app"
+  assistant: "I'll use the kotlin-app-developer agent to help design and implement the mute user feature."
+  <agent_task>
+  The kotlin-app-developer agent would then provide implementation guidance following the app's clean architecture pattern, including creating the necessary use case, repository method, API endpoint, and UI components.
+  </agent_task>
+  </example>
+
+  <example>
+  Context: User is debugging a crash in the timeline loading.
+  user: "The app crashes when I scroll to the bottom of the timeline"
+  assistant: "Let me use the kotlin-app-developer agent to help diagnose and fix this crash."
+  <agent_task>
+  The kotlin-app-developer agent would analyze the error, check the Paging 3 implementation, and provide a fix following the project's patterns.
+  </agent_task>
+  </example>
+
+  <example>
+  Context: User is refactoring existing code.
+  user: "Can you help me refactor the ComposeViewModel to follow MVI pattern better?"
+  assistant: "I'll use the kotlin-app-developer agent to refactor the ViewModel following MVI best practices."
+  <agent_task>
+  The kotlin-app-developer agent would refactor the code to use sealed UiState classes and ensure proper state management.
+  </agent_task>
+  </example>
+
+  <example>
+  Context: User asks a general development question.
+  user: "What's the best way to handle API errors in this app?"
+  assistant: "I'll consult the kotlin-app-developer agent for guidance on error handling patterns."
+  <agent_task>
+  The kotlin-app-developer agent would explain the app's Result wrapper pattern and how to properly handle errors in the repository and use case layers.
+  </agent_task>
+  </example>
 model: sonnet
 ---
 
