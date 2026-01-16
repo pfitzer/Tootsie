@@ -29,6 +29,7 @@ accompanist = "0.36.0"
 unifiedpush = "2.4.0"
 bouncycastle = "1.70"
 hilt-work = "1.2.0"
+compose-googlefonts = "1.7.6"
 
 [libraries]
 # Existing AndroidX
@@ -83,6 +84,9 @@ paging-compose = { group = "androidx.paging", name = "paging-compose", version.r
 
 # DataStore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Google Fonts
+compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "compose-googlefonts" }
 
 # Coil (Image Loading)
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
