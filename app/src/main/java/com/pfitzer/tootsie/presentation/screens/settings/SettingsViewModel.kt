@@ -12,8 +12,11 @@ import com.pfitzer.tootsie.domain.usecase.auth.LogoutUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,6 +30,7 @@ private const val TAG = "SettingsViewModel"
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val accountManagementRepository: AccountManagementRepository,
+    private val preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager,
     private val getAllAccountsUseCase: GetAllAccountsUseCase,
     private val switchAccountUseCase: SwitchAccountUseCase,
     private val removeAccountUseCase: RemoveAccountUseCase,
@@ -34,7 +38,26 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    /**
+     * Combined UI state observing both accounts and theme.
+     */
+    val combinedUiState: StateFlow<SettingsUiState> = combine(
+        _uiState,
+        preferencesManager.theme
+    ) { state, theme ->
+        if (state is SettingsUiState.Success) {
+            state.copy(theme = theme)
+        } else {
+            state
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SettingsUiState.Loading
+    )
+
+    val uiState: StateFlow<SettingsUiState> = combinedUiState
 
     init {
         loadAccounts()
@@ -51,6 +74,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsAction.CancelRemoveAccount -> cancelRemoveAccount()
             is SettingsAction.Refresh -> loadAccounts()
             is SettingsAction.DismissError -> dismissError()
+            is SettingsAction.ChangeTheme -> changeTheme(action.theme)
         }
     }
 
@@ -210,6 +234,16 @@ class SettingsViewModel @Inject constructor(
             } else it
         }
     }
+
+    /**
+     * Change app theme.
+     */
+    private fun changeTheme(theme: String) {
+        viewModelScope.launch {
+            Log.d(TAG, "Changing theme to: $theme")
+            preferencesManager.saveTheme(theme)
+        }
+    }
 }
 
 /**
@@ -224,7 +258,8 @@ sealed class SettingsUiState {
         val isSwitching: Boolean = false,
         val isRemoving: Boolean = false,
         val accountToRemove: String? = null,
-        val errorMessage: String? = null
+        val errorMessage: String? = null,
+        val theme: String = "system"
     ) : SettingsUiState()
 
     data class Error(val message: String) : SettingsUiState()
@@ -242,4 +277,5 @@ sealed class SettingsAction {
     data object CancelRemoveAccount : SettingsAction()
     data object Refresh : SettingsAction()
     data object DismissError : SettingsAction()
+    data class ChangeTheme(val theme: String) : SettingsAction()
 }

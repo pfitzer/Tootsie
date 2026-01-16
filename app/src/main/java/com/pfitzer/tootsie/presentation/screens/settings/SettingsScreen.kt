@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,12 +118,22 @@ private fun SuccessContent(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Account list
+        // Scrollable content
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Accounts Section
+            item {
+                Text(
+                    text = stringResource(R.string.accounts),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             items(state.accounts, key = { it.id }) { account ->
                 AccountItem(
                     account = account,
@@ -146,6 +157,27 @@ private fun SuccessContent(
                 AddAccountButton(
                     onClick = onNavigateToLogin,
                     isEnabled = !state.isSwitching && !state.isRemoving
+                )
+            }
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            }
+
+            // Theme Section
+            item {
+                Text(
+                    text = stringResource(R.string.theme),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            item {
+                ThemeSelectionCard(
+                    currentTheme = state.theme,
+                    onThemeChange = { onAction(SettingsAction.ChangeTheme(it)) }
                 )
             }
         }
@@ -173,6 +205,61 @@ private fun SuccessContent(
 /**
  * Single account item card.
  */
+@Composable
+private fun ThemeSelectionCard(
+    currentTheme: String,
+    onThemeChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ThemeOption(
+                label = stringResource(R.string.theme_light),
+                selected = currentTheme == "light",
+                onClick = { onThemeChange("light") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.theme_dark),
+                selected = currentTheme == "dark",
+                onClick = { onThemeChange("dark") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.theme_system),
+                selected = currentTheme == "system",
+                onClick = { onThemeChange("system") }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
 @Composable
 private fun AccountItem(
     account: Account,
