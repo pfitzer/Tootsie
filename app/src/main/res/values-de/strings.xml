@@ -313,4 +313,8 @@
     <string name="push_info_message">Push-Benachrichtigungen erfordern eine UnifiedPush-Distributor-App (wie ntfy, NextPush oder Conversations). Installieren Sie eine aus F-Droid oder Ihrem App-Store, um Push-Benachrichtigungen zu aktivieren.</string>
     <string name="push_fallback_info">Wenn kein Distributor verfügbar ist, prüft Tootsie alle 15 Minuten auf neue Benachrichtigungen.</string>
     <string name="get_distributor_app">Distributor-App installieren</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_filter_applied">Filter angewendet</string>
+    <string name="cd_no_filter_applied">Kein Filter angewendet</string>
 </resources>

@@ -312,4 +312,8 @@
     <string name="push_info_message">Push notifications require a UnifiedPush distributor app (like ntfy, NextPush, or Conversations). Install one from F-Droid or your app store to enable push notifications.</string>
     <string name="push_fallback_info">When no distributor is available, Tootsie will check for new notifications every 15 minutes.</string>
     <string name="get_distributor_app">Get a distributor app</string>
+
+    <!-- UI Components -->
+    <string name="cd_filter_applied">Filter applied</string>
+    <string name="cd_no_filter_applied">No filter applied</string>
 </resources>

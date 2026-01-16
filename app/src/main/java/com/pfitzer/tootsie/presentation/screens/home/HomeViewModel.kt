@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
+import com.pfitzer.tootsie.domain.model.TimelineType
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
@@ -39,6 +40,9 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val _activeTimelineType = MutableStateFlow(TimelineType.HOME)
+    val activeTimelineType: StateFlow<TimelineType> = _activeTimelineType.asStateFlow()
+
     /**
      * Timeline filter from preferences.
      */
@@ -51,17 +55,22 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Paging data flow for timeline with filter applied.
-     * Automatically refreshes when either the filter OR the active account changes.
+     * Automatically refreshes when either the filter, the active account OR the timeline type changes.
      */
     val timelinePagingData: Flow<PagingData<Status>> = combine(
         timelineFilter,
+        _activeTimelineType,
         accountManagementRepository.observeActiveAccount()
-    ) { filter, activeAccount ->
-        Pair(filter, activeAccount?.id)
+    ) { filter, timelineType, activeAccount ->
+        Triple(filter, timelineType, activeAccount?.id)
     }
-        .flatMapLatest { (filter, _) ->
-            // The account change triggers flatMapLatest to cancel old flow and start new one
-            timelineRepository.getHomeTimeline(filter)
+        .flatMapLatest { (filter, timelineType, _) ->
+            // The account change or timeline type change triggers flatMapLatest to cancel old flow and start new one
+            when (timelineType) {
+                TimelineType.HOME -> timelineRepository.getHomeTimeline(filter)
+                TimelineType.PUBLIC_LOCAL -> timelineRepository.getPublicTimeline(local = true, filter = filter)
+                TimelineType.PUBLIC_FEDERATED -> timelineRepository.getPublicTimeline(local = false, filter = filter)
+            }
         }
         .cachedIn(viewModelScope)
 
@@ -79,6 +88,7 @@ class HomeViewModel @Inject constructor(
             is HomeAction.RefreshTimeline -> refreshTimeline()
             is HomeAction.DismissError -> dismissError()
             is HomeAction.UpdateFilter -> updateFilter(action.filter)
+            is HomeAction.ChangeTimelineType -> changeTimelineType(action.timelineType)
         }
     }
 
@@ -202,9 +212,19 @@ class HomeViewModel @Inject constructor(
     private fun refreshTimeline() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
-            timelineRepository.refreshHomeTimeline()
+            when (_activeTimelineType.value) {
+                TimelineType.HOME -> timelineRepository.refreshHomeTimeline()
+                TimelineType.PUBLIC_LOCAL, TimelineType.PUBLIC_FEDERATED -> timelineRepository.refreshPublicTimeline()
+            }
             _uiState.update { it.copy(isRefreshing = false) }
         }
+    }
+
+    /**
+     * Change active timeline type.
+     */
+    private fun changeTimelineType(timelineType: TimelineType) {
+        _activeTimelineType.value = timelineType
     }
 
     /**
@@ -249,4 +269,5 @@ sealed class HomeAction {
     data object RefreshTimeline : HomeAction()
     data object DismissError : HomeAction()
     data class UpdateFilter(val filter: TimelineFilter) : HomeAction()
+    data class ChangeTimelineType(val timelineType: TimelineType) : HomeAction()
 }

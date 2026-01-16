@@ -37,6 +37,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.TimelineType
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.components.timeline.TimelineFilterDialog
@@ -82,6 +83,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeTimelineType by viewModel.activeTimelineType.collectAsStateWithLifecycle()
     val timelineFilter by viewModel.timelineFilter.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData.collectAsLazyPagingItems()
 
@@ -111,16 +113,6 @@ fun HomeScreen(
                     modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp)
                 )
                 HorizontalDivider()
-
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text(stringResource(R.string.drawer_home)) },
-                    selected = true,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Star, contentDescription = null) },
@@ -216,38 +208,69 @@ fun HomeScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.drawer_home)) },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = stringResource(R.string.cd_menu)
-                            )
-                        }
-                    },
-                    actions = {
-                        // Filter button with indicator
-                        IconButton(onClick = { showFilterDialog = true }) {
-                            Badge(
-                                containerColor = if (timelineFilter.hasActiveFilters) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                }
-                            ) {
+                Column {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.app_name)) },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(R.string.cd_filter_timeline)
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = stringResource(R.string.cd_menu)
                                 )
                             }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        },
+                        actions = {
+                            // Filter button with indicator
+                            IconButton(onClick = { showFilterDialog = true }) {
+                                Badge(
+                                    containerColor = if (timelineFilter.hasActiveFilters) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = if (timelineFilter.hasActiveFilters) {
+                                            stringResource(R.string.cd_filter_applied)
+                                        } else {
+                                            stringResource(R.string.cd_no_filter_applied)
+                                        }
+                                    )
+                                }
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     )
-                )
+                    PrimaryTabRow(
+                        selectedTabIndex = when (activeTimelineType) {
+                            TimelineType.HOME -> 0
+                            TimelineType.PUBLIC_LOCAL -> 1
+                            TimelineType.PUBLIC_FEDERATED -> 2
+                        },
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ) {
+                        Tab(
+                            selected = activeTimelineType == TimelineType.HOME,
+                            onClick = { viewModel.onAction(HomeAction.ChangeTimelineType(TimelineType.HOME)) },
+                            text = { Text(stringResource(R.string.home_timeline)) }
+                        )
+                        Tab(
+                            selected = activeTimelineType == TimelineType.PUBLIC_LOCAL,
+                            onClick = { viewModel.onAction(HomeAction.ChangeTimelineType(TimelineType.PUBLIC_LOCAL)) },
+                            text = { Text(stringResource(R.string.local_timeline)) }
+                        )
+                        Tab(
+                            selected = activeTimelineType == TimelineType.PUBLIC_FEDERATED,
+                            onClick = { viewModel.onAction(HomeAction.ChangeTimelineType(TimelineType.PUBLIC_FEDERATED)) },
+                            text = { Text(stringResource(R.string.federated_timeline)) }
+                        )
+                    }
+                }
             },
         floatingActionButton = {
             FloatingActionButton(
