@@ -67,6 +67,7 @@ class PreferencesManager @Inject constructor(
     private fun pushAlertStatusKey(accountId: String) = booleanPreferencesKey("push_alert_status_$accountId")
     private fun pushAlertUpdateKey(accountId: String) = booleanPreferencesKey("push_alert_update_$accountId")
     private fun pushAlertFollowRequestKey(accountId: String) = booleanPreferencesKey("push_alert_follow_request_$accountId")
+    private fun lastNotificationIdKey(accountId: String) = stringPreferencesKey("last_notification_id_$accountId")
 
     // ========== Authentication ==========
 
@@ -368,5 +369,21 @@ class PreferencesManager @Inject constructor(
             preferences.remove(KEY_ACTIVE_ACCOUNT_ID)
             preferences.remove(KEY_INSTANCE_URL)
         }
+    }
+
+    /**
+     * Save the ID of the last notification shown to the user.
+     */
+    suspend fun saveLastNotificationId(accountId: String, notificationId: String) {
+        dataStore.edit { preferences ->
+            preferences[lastNotificationIdKey(accountId)] = notificationId
+        }
+    }
+
+    /**
+     * Get the ID of the last notification shown to the user.
+     */
+    suspend fun getLastNotificationId(accountId: String): String? {
+        return dataStore.data.first()[lastNotificationIdKey(accountId)]
     }
 }

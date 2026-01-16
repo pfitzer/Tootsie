@@ -60,9 +60,15 @@ class NotificationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun fetchRecentNotifications(limit: Int): Result<List<Notification>> {
+    override suspend fun fetchRecentNotifications(
+        limit: Int,
+        sinceId: String?
+    ): Result<List<Notification>> {
         return try {
-            val notificationDtos = mastodonApi.getNotifications(limit = limit)
+            val notificationDtos = mastodonApi.getNotifications(
+                limit = limit,
+                sinceId = sinceId
+            )
             val notifications = notificationDtos.map { it.toDomain() }
             Result.Success(notifications)
         } catch (e: Exception) {

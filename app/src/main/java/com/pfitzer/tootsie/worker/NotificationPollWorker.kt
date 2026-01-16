@@ -28,13 +28,21 @@ class NotificationPollWorker @AssistedInject constructor(
         val activeAccountId = preferencesManager.getActiveAccountId()
             ?: return androidx.work.ListenableWorker.Result.failure()
 
+        val sinceId = preferencesManager.getLastNotificationId(activeAccountId)
+
         // Fetch latest notifications
-        when (val result = notificationRepository.fetchRecentNotifications()) {
+        when (val result = notificationRepository.fetchRecentNotifications(sinceId = sinceId)) {
             is DomainResult.Success -> {
                 val notifications = result.data
-                // Display new notifications
-                notifications.forEach { notification ->
-                    notificationHelper.showNotification(notification, activeAccountId)
+                if (notifications.isNotEmpty()) {
+                    // Display new notifications (reverse to show oldest first if multiple, 
+                    // though usually we just want to show them)
+                    notifications.forEach { notification ->
+                        notificationHelper.showNotification(notification, activeAccountId)
+                    }
+                    // Update last seen notification ID
+                    // The first notification in the list is the most recent from Mastodon API
+                    preferencesManager.saveLastNotificationId(activeAccountId, notifications.first().id)
                 }
                 return androidx.work.ListenableWorker.Result.success()
             }

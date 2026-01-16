@@ -44,7 +44,11 @@ interface NotificationRepository {
      * Used by WorkManager fallback when UnifiedPush is unavailable.
      *
      * @param limit Maximum number of notifications to fetch
+     * @param sinceId Only fetch notifications after this ID
      * @return Result with list of notifications
      */
-    suspend fun fetchRecentNotifications(limit: Int = 20): Result<List<Notification>>
+    suspend fun fetchRecentNotifications(
+        limit: Int = 20,
+        sinceId: String? = null
+    ): Result<List<Notification>>
 }
