@@ -2,6 +2,8 @@ package com.pfitzer.tootsie.presentation.components.status
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -40,7 +42,7 @@ fun StatusActions(
     ) {
         // Reply
         ActionButton(
-            icon = Icons.Filled.ArrowForward,
+            icon = Icons.AutoMirrored.Filled.Reply,
             count = status.repliesCount,
             isActive = false,
             onClick = onReplyClick,
@@ -49,7 +51,7 @@ fun StatusActions(
 
         // Boost
         ActionButton(
-            icon = Icons.Filled.Share,
+            icon = Icons.Filled.Repeat,
             count = status.reblogsCount,
             isActive = status.reblogged,
             onClick = onBoostClick,
@@ -67,9 +69,9 @@ fun StatusActions(
             activeColor = MaterialTheme.colorScheme.primary
         )
 
-        // Bookmark (using star icon to distinguish from heart favorite)
+        // Bookmark
         ActionButton(
-            icon = if (status.bookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+            icon = if (status.bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
             count = null,
             isActive = status.bookmarked,
             onClick = onBookmarkClick,

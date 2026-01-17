@@ -3,14 +3,8 @@ package com.pfitzer.tootsie.presentation.screens.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import com.pfitzer.tootsie.presentation.icons.CustomIcons
 import com.pfitzer.tootsie.presentation.icons.Tags
@@ -115,7 +109,7 @@ fun HomeScreen(
                 HorizontalDivider()
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Star, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Bookmark, contentDescription = null) },
                     label = { Text(stringResource(R.string.drawer_bookmarks)) },
                     selected = false,
                     onClick = {
@@ -230,7 +224,7 @@ fun HomeScreen(
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.MoreVert,
+                                        imageVector = Icons.Default.FilterList,
                                         contentDescription = if (timelineFilter.hasActiveFilters) {
                                             stringResource(R.string.cd_filter_applied)
                                         } else {

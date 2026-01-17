@@ -6,10 +6,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -129,7 +126,7 @@ fun ComposeScreen(
                     // Drafts button
                     IconButton(onClick = onNavigateToDrafts) {
                         Icon(
-                            imageVector = Icons.Default.List,
+                            imageVector = Icons.Default.Drafts,
                             contentDescription = stringResource(R.string.cd_view_drafts)
                         )
                     }
@@ -332,7 +329,7 @@ fun ComposeScreen(
                         enabled = uiState.canAddPoll
                     ) {
                         Icon(
-                            imageVector = Icons.Default.List,
+                            imageVector = Icons.Default.Poll,
                             contentDescription = stringResource(R.string.poll),
                             tint = if (uiState.canAddPoll) {
                                 MaterialTheme.colorScheme.primary
