@@ -13,9 +13,15 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [ ] **Account Profile Editing**
     - **Description**: Allow users to update their own profile (display name, bio, avatar, header, and metadata fields).
     - **Scope**: Add an "Edit Profile" button to the `ProfileScreen` (when viewing own profile), create an `EditProfileViewModel`, and implement the corresponding API calls in `AccountRepository`.
-- [ ] **Lists Management UI**
+- [x] **Lists Management UI**
     - **Description**: Ability to create, delete, and add/remove accounts from lists within the app.
-    - **Scope**: Create a `ManageListsScreen` and a `ManageListMembersScreen`.
+    - **Scope**: Created `ListsScreen`, `ManageListScreen`, and associated ViewModels/UseCases.
+- [ ] **Followed Tags Management**
+    - **Description**: Ability to view and manage followed hashtags.
+    - **Scope**: Create a `FollowedTagsScreen` (partially implemented) and implement unfollow functionality.
+- [ ] **Trending Section Enhancements**
+    - **Description**: Improve the UI for trending hashtags, posts, and links.
+    - **Scope**: Create specialized cards and layouts for trending items.
 
 ### 🛠 Architectural & Technical Debt
 

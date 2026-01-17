@@ -14,6 +14,9 @@ Tootsie is a modern, high-performance, and privacy-respecting Mastodon client fo
     - Custom emoji support with picker.
     - Full poll support (view, vote, and create).
     - Advanced timeline filters (hide boosts, replies, or show only media).
+    - **List Management**: Create, delete, and manage members of Mastodon lists.
+    - **Followed Tags**: View and manage followed hashtags.
+    - **Trending**: Explorer for trending hashtags, posts, and links.
 - **Global Reach**: Fully internationalized with support for English and German.
 - **Fediverse Ready**: Universal search for accounts, posts, and hashtags; WebFinger support.
 
