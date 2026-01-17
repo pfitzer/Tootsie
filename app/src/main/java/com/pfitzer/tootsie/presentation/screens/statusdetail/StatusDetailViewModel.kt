@@ -29,6 +29,7 @@ class StatusDetailViewModel @Inject constructor(
     private val unreblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: com.pfitzer.tootsie.domain.usecase.status.VoteOnPollUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -102,6 +103,27 @@ class StatusDetailViewModel @Inject constructor(
             is StatusDetailAction.UnboostStatus -> unboostStatus(action.status)
             is StatusDetailAction.BookmarkStatus -> bookmarkStatus(action.status)
             is StatusDetailAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is StatusDetailAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Refresh status to show updated poll results
+                    loadStatusAndContext()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to vote on poll")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -248,4 +270,5 @@ sealed class StatusDetailAction {
     data class UnboostStatus(val status: Status) : StatusDetailAction()
     data class BookmarkStatus(val status: Status) : StatusDetailAction()
     data class UnbookmarkStatus(val status: Status) : StatusDetailAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : StatusDetailAction()
 }

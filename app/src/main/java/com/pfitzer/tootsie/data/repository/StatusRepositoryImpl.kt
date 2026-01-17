@@ -59,7 +59,8 @@ class StatusRepositoryImpl @Inject constructor(
         inReplyToId: String?,
         mediaIds: List<String>?,
         sensitive: Boolean,
-        spoilerText: String?
+        spoilerText: String?,
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig?
     ): Result<Status> {
         return try {
             val statusDto = mastodonApi.postStatus(
@@ -68,7 +69,11 @@ class StatusRepositoryImpl @Inject constructor(
                 inReplyToId = inReplyToId,
                 mediaIds = mediaIds,
                 sensitive = sensitive,
-                spoilerText = spoilerText
+                spoilerText = spoilerText,
+                pollOptions = pollConfig?.options,
+                pollExpiresIn = pollConfig?.expiresIn,
+                pollMultiple = pollConfig?.multiple,
+                pollHideTotals = pollConfig?.hideTotals
             )
             // Cache the posted status
             statusDao.insertStatus(statusDto.toEntity())
@@ -231,6 +236,15 @@ class StatusRepositoryImpl @Inject constructor(
             Result.Success(context)
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to load conversation context")
+        }
+    }
+
+    override suspend fun voteOnPoll(pollId: String, choices: List<Int>): Result<com.pfitzer.tootsie.domain.model.Poll> {
+        return try {
+            val pollDto = mastodonApi.voteOnPoll(pollId, choices)
+            Result.Success(pollDto.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to vote on poll")
         }
     }
 }

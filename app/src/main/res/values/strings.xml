@@ -73,6 +73,22 @@
     <string name="compose_button_post">Post</string>
     <string name="compose_button_posting">Posting…</string>
 
+    <!-- Poll Creation -->
+    <string name="poll_option_placeholder">Choice %1$d</string>
+    <string name="add_poll_option">Add a choice</string>
+    <string name="remove_poll_option">Remove choice</string>
+    <string name="poll_multiple_choice">Multiple choice</string>
+    <string name="poll_hide_totals">Hide totals until finished</string>
+    <string name="poll_expiry">Poll duration</string>
+    <string name="poll_expiry_5_minutes">5 minutes</string>
+    <string name="poll_expiry_30_minutes">30 minutes</string>
+    <string name="poll_expiry_1_hour">1 hour</string>
+    <string name="poll_expiry_6_hours">6 hours</string>
+    <string name="poll_expiry_1_day">1 day</string>
+    <string name="poll_expiry_3_days">3 days</string>
+    <string name="poll_expiry_7_days">7 days</string>
+    <string name="remove_poll">Remove poll</string>
+
     <!-- Post Visibility -->
     <string name="visibility_public">Public</string>
     <string name="visibility_unlisted">Unlisted</string>
@@ -316,4 +332,12 @@
     <!-- UI Components -->
     <string name="cd_filter_applied">Filter applied</string>
     <string name="cd_no_filter_applied">No filter applied</string>
+    <!-- Poll -->
+    <string name="poll_vote">Vote</string>
+    <string name="poll_voted">Voted</string>
+    <string name="poll_expired">Expired</string>
+    <string name="poll_expires_at">Ends at %1$s</string>
+    <string name="poll_total_votes">%1$d votes</string>
+    <string name="poll_voted_hint">You voted for this</string>
+
 </resources>

@@ -54,6 +54,7 @@ fun StatusCard(
     onLinkClick: (String) -> Unit = {},
     onImageClick: (String, String?) -> Unit = { _, _ -> },
     onVideoClick: (String, String?) -> Unit = { _, _ -> },
+    onVoteClick: (String, List<Int>) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     // If this is a boost/reblog, show the boosted status
@@ -118,6 +119,15 @@ fun StatusCard(
                     sensitive = displayStatus.sensitive,
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
+            // Poll
+            displayStatus.poll?.let { poll ->
+                PollComponent(
+                    poll = poll,
+                    onVoteClick = onVoteClick,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }

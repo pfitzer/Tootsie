@@ -245,7 +245,11 @@ interface MastodonApiService {
         @Field("sensitive") sensitive: Boolean = false,
         @Field("spoiler_text") spoilerText: String? = null,
         @Field("visibility") visibility: String = "public",
-        @Field("language") language: String? = null
+        @Field("language") language: String? = null,
+        @Field("poll[options][]") pollOptions: List<String>? = null,
+        @Field("poll[expires_in]") pollExpiresIn: Int? = null,
+        @Field("poll[multiple]") pollMultiple: Boolean? = null,
+        @Field("poll[hide_totals]") pollHideTotals: Boolean? = null
     ): StatusDto
 
     /**
@@ -685,6 +689,23 @@ interface MastodonApiService {
      * Get all custom emojis available on this instance.
      * Returns a list of custom emojis that can be used in statuses.
      */
+    @GET("api/v1/polls/{id}")
+    suspend fun getPoll(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.PollDto
+
+    /**
+     * Vote on a poll.
+     *
+     * @param id Poll ID
+     * @param choices List of option indices to vote for
+     * @return Updated poll
+     */
+    @POST("api/v1/polls/{id}/votes")
+    @FormUrlEncoded
+    suspend fun voteOnPoll(
+        @Path("id") id: String,
+        @Field("choices[]") choices: List<Int>
+    ): com.pfitzer.tootsie.data.remote.dto.PollDto
+
     @GET("api/v1/custom_emojis")
     suspend fun getCustomEmojis(): List<com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto>
 }

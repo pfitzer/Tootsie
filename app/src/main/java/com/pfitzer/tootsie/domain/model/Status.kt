@@ -111,6 +111,16 @@ data class Poll(
 )
 
 /**
+ * Configuration for a poll being created.
+ */
+data class PollConfig(
+    val options: List<String>,
+    val expiresIn: Int, // In seconds
+    val multiple: Boolean = false,
+    val hideTotals: Boolean = false
+)
+
+/**
  * Poll option.
  */
 data class PollOption(

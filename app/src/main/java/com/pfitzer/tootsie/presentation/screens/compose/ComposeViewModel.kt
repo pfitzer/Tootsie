@@ -115,6 +115,14 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.LoadDraft -> loadDraft(action.draftId)
             is ComposeAction.SaveDraftNow -> saveDraftNow()
             is ComposeAction.DeleteDraft -> deleteDraft()
+            ComposeAction.AddPoll -> addPoll()
+            ComposeAction.RemovePoll -> removePoll()
+            is ComposeAction.UpdatePollOption -> updatePollOption(action.index, action.text)
+            ComposeAction.AddPollOption -> addPollOption()
+            is ComposeAction.RemovePollOption -> removePollOption(action.index)
+            is ComposeAction.UpdatePollExpiry -> updatePollExpiry(action.expiresIn)
+            ComposeAction.TogglePollMultipleChoice -> togglePollMultipleChoice()
+            ComposeAction.TogglePollHideTotals -> togglePollHideTotals()
         }
     }
 
@@ -246,7 +254,8 @@ class ComposeViewModel @Inject constructor(
                 visibility = _uiState.value.visibility.value,
                 inReplyToId = replyToId,
                 mediaIds = mediaIds.takeIf { it.isNotEmpty() },
-                spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() }
+                spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() },
+                pollConfig = _uiState.value.pollConfig
             )
 
             when (result) {
@@ -420,6 +429,117 @@ class ComposeViewModel @Inject constructor(
         // Cancel auto-save job
         autoSaveJob?.cancel()
     }
+
+    /**
+     * Add a poll to the post.
+     */
+    private fun addPoll() {
+        if (_uiState.value.mediaAttachments.isNotEmpty()) {
+            _uiState.update { it.copy(errorMessage = "Cannot add poll to a post with media") }
+            return
+        }
+        _uiState.update {
+            it.copy(
+                pollConfig = com.pfitzer.tootsie.domain.model.PollConfig(
+                    options = listOf("", ""),
+                    expiresIn = 86400 // 1 day
+                )
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Remove the poll from the post.
+     */
+    private fun removePoll() {
+        _uiState.update { it.copy(pollConfig = null) }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Update a poll option text.
+     */
+    private fun updatePollOption(index: Int, text: String) {
+        _uiState.update { state ->
+            state.copy(
+                pollConfig = state.pollConfig?.copy(
+                    options = state.pollConfig.options.mapIndexed { i, s ->
+                        if (i == index) text else s
+                    }
+                )
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Add a new option to the poll.
+     */
+    private fun addPollOption() {
+        _uiState.update { state ->
+            val options = state.pollConfig?.options ?: return@update state
+            if (options.size >= 4) return@update state
+            state.copy(
+                pollConfig = state.pollConfig.copy(
+                    options = options + ""
+                )
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Remove an option from the poll.
+     */
+    private fun removePollOption(index: Int) {
+        _uiState.update { state ->
+            val options = state.pollConfig?.options ?: return@update state
+            if (options.size <= 2) return@update state
+            state.copy(
+                pollConfig = state.pollConfig.copy(
+                    options = options.filterIndexed { i, _ -> i != index }
+                )
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Update poll expiry time.
+     */
+    private fun updatePollExpiry(expiresIn: Int) {
+        _uiState.update { state ->
+            state.copy(
+                pollConfig = state.pollConfig?.copy(expiresIn = expiresIn)
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Toggle poll multiple choice setting.
+     */
+    private fun togglePollMultipleChoice() {
+        _uiState.update { state ->
+            state.copy(
+                pollConfig = state.pollConfig?.copy(multiple = !state.pollConfig.multiple)
+            )
+        }
+        scheduleAutoSave()
+    }
+
+    /**
+     * Toggle poll hide totals setting.
+     */
+    private fun togglePollHideTotals() {
+        _uiState.update { state ->
+            state.copy(
+                pollConfig = state.pollConfig?.copy(hideTotals = !state.pollConfig.hideTotals)
+            )
+        }
+        scheduleAutoSave()
+    }
 }
 
 /**
@@ -441,14 +561,21 @@ data class ComposeUiState(
     val isSavingDraft: Boolean = false,
     val lastDraftSavedAt: Long? = null,
     val customEmojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji> = emptyList(),
-    val isLoadingEmojis: Boolean = true
+    val isLoadingEmojis: Boolean = true,
+    val pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
 ) {
     val characterCount: Int get() = content.length
     val hasMedia: Boolean get() = mediaAttachments.isNotEmpty()
-    val canPost: Boolean get() = (content.isNotBlank() || hasMedia) && !isPosting && !isUploadingMedia && characterCount <= 500
+    val hasPoll: Boolean get() = pollConfig != null
+    val canPost: Boolean get() {
+        val hasContent = content.isNotBlank()
+        val hasCompletePoll = hasPoll && pollConfig?.options?.all { it.isNotBlank() } == true
+        return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && characterCount <= 500
+    }
     val isReply: Boolean get() = replyToId != null
-    val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia
-    val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank()
+    val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia && !hasPoll
+    val canAddPoll: Boolean get() = !hasPoll && !hasMedia
+    val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank() || hasPoll
 }
 
 /**
@@ -467,6 +594,16 @@ sealed class ComposeAction {
     data class LoadDraft(val draftId: Long) : ComposeAction()
     data object SaveDraftNow : ComposeAction()
     data object DeleteDraft : ComposeAction()
+
+    // Poll actions
+    data object AddPoll : ComposeAction()
+    data object RemovePoll : ComposeAction()
+    data class UpdatePollOption(val index: Int, val text: String) : ComposeAction()
+    data object AddPollOption : ComposeAction()
+    data class RemovePollOption(val index: Int) : ComposeAction()
+    data class UpdatePollExpiry(val expiresIn: Int) : ComposeAction()
+    data object TogglePollMultipleChoice : ComposeAction()
+    data object TogglePollHideTotals : ComposeAction()
 }
 
 /**

@@ -324,6 +324,9 @@ fun HomeScreen(
                 },
                 onImageClick = onNavigateToImageViewer,
                 onVideoClick = onNavigateToVideoPlayer,
+                onVoteClick = { pollId, choices ->
+                    viewModel.onAction(HomeAction.VoteOnPoll(pollId, choices))
+                },
                 onRefresh = {
                     viewModel.onAction(HomeAction.RefreshTimeline)
                 },
@@ -361,6 +364,7 @@ private fun TimelineList(
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     onRefresh: () -> Unit,
     isRefreshing: Boolean,
     modifier: Modifier = Modifier
@@ -403,6 +407,7 @@ private fun TimelineList(
                     onLinkClick = { url -> context.openInBrowser(url) },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    onVoteClick = onVoteClick,
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,

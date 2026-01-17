@@ -34,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
     private val unreblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
+    private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: com.pfitzer.tootsie.domain.usecase.status.VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -89,6 +90,28 @@ class HomeViewModel @Inject constructor(
             is HomeAction.DismissError -> dismissError()
             is HomeAction.UpdateFilter -> updateFilter(action.filter)
             is HomeAction.ChangeTimelineType -> changeTimelineType(action.timelineType)
+            is HomeAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Success - Poll will refresh automatically via Room Flow if it's cached.
+                    // If not cached, we might need a manual refresh or observe poll directly.
+                    // For now, we assume it's part of a status and will refresh when the status updates.
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = "Failed to vote on poll")
+                    }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -270,4 +293,5 @@ sealed class HomeAction {
     data object DismissError : HomeAction()
     data class UpdateFilter(val filter: TimelineFilter) : HomeAction()
     data class ChangeTimelineType(val timelineType: TimelineType) : HomeAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : HomeAction()
 }

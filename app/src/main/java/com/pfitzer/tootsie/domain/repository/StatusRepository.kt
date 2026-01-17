@@ -35,6 +35,7 @@ interface StatusRepository {
      * @param mediaIds List of media attachment IDs (optional)
      * @param sensitive Whether media is sensitive (optional)
      * @param spoilerText Content warning text (optional)
+     * @param pollConfig Configuration for a poll (optional)
      * @return Posted status
      */
     suspend fun postStatus(
@@ -43,7 +44,8 @@ interface StatusRepository {
         inReplyToId: String? = null,
         mediaIds: List<String>? = null,
         sensitive: Boolean = false,
-        spoilerText: String? = null
+        spoilerText: String? = null,
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
     ): Result<Status>
 
     /**
@@ -123,4 +125,13 @@ interface StatusRepository {
      * @return Context with ancestors and descendants
      */
     suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context>
+
+    /**
+     * Vote on a poll.
+     *
+     * @param pollId Poll ID
+     * @param choices List of option indices to vote for
+     * @return Updated status containing the updated poll
+     */
+    suspend fun voteOnPoll(pollId: String, choices: List<Int>): Result<com.pfitzer.tootsie.domain.model.Poll>
 }

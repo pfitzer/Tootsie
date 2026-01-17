@@ -21,6 +21,7 @@ class PostStatusUseCase @Inject constructor(
      * @param mediaIds Optional list of media attachment IDs
      * @param sensitive Whether content should be marked as sensitive
      * @param spoilerText Optional content warning text
+     * @param pollConfig Optional configuration for a poll
      * @return Result containing the newly created Status
      */
     suspend operator fun invoke(
@@ -29,7 +30,8 @@ class PostStatusUseCase @Inject constructor(
         inReplyToId: String? = null,
         mediaIds: List<String>? = null,
         sensitive: Boolean = false,
-        spoilerText: String? = null
+        spoilerText: String? = null,
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
     ): Result<Status> {
         return statusRepository.postStatus(
             content = content,
@@ -37,7 +39,8 @@ class PostStatusUseCase @Inject constructor(
             inReplyToId = inReplyToId,
             mediaIds = mediaIds,
             sensitive = sensitive,
-            spoilerText = spoilerText
+            spoilerText = spoilerText,
+            pollConfig = pollConfig
         )
     }
 }

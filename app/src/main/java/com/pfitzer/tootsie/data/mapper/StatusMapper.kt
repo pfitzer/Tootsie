@@ -202,7 +202,7 @@ private fun TagDto.toDomain(): Tag {
     )
 }
 
-private fun PollDto.toDomain(): Poll {
+fun PollDto.toDomain(): Poll {
     return Poll(
         id = id,
         expiresAt = expiresAt,

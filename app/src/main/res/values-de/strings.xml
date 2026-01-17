@@ -74,6 +74,22 @@
     <string name="compose_button_post">Posten</string>
     <string name="compose_button_posting">Wird gepostet…</string>
 
+    <!-- Poll Creation -->
+    <string name="poll_option_placeholder">Auswahl %1$d</string>
+    <string name="add_poll_option">Auswahl hinzufügen</string>
+    <string name="remove_poll_option">Auswahl entfernen</string>
+    <string name="poll_multiple_choice">Mehrfachauswahl</string>
+    <string name="poll_hide_totals">Ergebnisse bis zum Ende verbergen</string>
+    <string name="poll_expiry">Dauer der Umfrage</string>
+    <string name="poll_expiry_5_minutes">5 Minuten</string>
+    <string name="poll_expiry_30_minutes">30 Minuten</string>
+    <string name="poll_expiry_1_hour">1 Stunde</string>
+    <string name="poll_expiry_6_hours">6 Stunden</string>
+    <string name="poll_expiry_1_day">1 Tag</string>
+    <string name="poll_expiry_3_days">3 Tage</string>
+    <string name="poll_expiry_7_days">7 Tage</string>
+    <string name="remove_poll">Umfrage entfernen</string>
+
     <!-- Post Visibility -->
     <string name="visibility_public">Öffentlich</string>
     <string name="visibility_unlisted">Nicht gelistet</string>
@@ -317,4 +333,12 @@
     <!-- Content Descriptions -->
     <string name="cd_filter_applied">Filter angewendet</string>
     <string name="cd_no_filter_applied">Kein Filter angewendet</string>
+    <!-- Poll -->
+    <string name="poll_vote">Abstimmen</string>
+    <string name="poll_voted">Abgestimmt</string>
+    <string name="poll_expired">Abgelaufen</string>
+    <string name="poll_expires_at">Endet am %1$s</string>
+    <string name="poll_total_votes">%1$d Stimmen</string>
+    <string name="poll_voted_hint">Du hast dafür gestimmt</string>
+
 </resources>

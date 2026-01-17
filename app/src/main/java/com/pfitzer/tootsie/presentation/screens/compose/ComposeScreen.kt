@@ -25,6 +25,7 @@ import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.compose.AltTextDialog
 import com.pfitzer.tootsie.presentation.components.compose.EmojiPickerDialog
 import com.pfitzer.tootsie.presentation.components.compose.MediaPreviewGrid
+import com.pfitzer.tootsie.presentation.components.compose.ComposePollComponent
 import com.pfitzer.tootsie.util.toFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -219,6 +220,35 @@ fun ComposeScreen(
                 )
             }
 
+            // Poll Creator
+            uiState.pollConfig?.let { pollConfig ->
+                Spacer(modifier = Modifier.height(16.dp))
+                ComposePollComponent(
+                    pollConfig = pollConfig,
+                    onUpdateOption = { index, text ->
+                        viewModel.onAction(ComposeAction.UpdatePollOption(index, text))
+                    },
+                    onAddOption = {
+                        viewModel.onAction(ComposeAction.AddPollOption)
+                    },
+                    onRemoveOption = { index ->
+                        viewModel.onAction(ComposeAction.RemovePollOption(index))
+                    },
+                    onUpdateExpiry = { expiresIn ->
+                        viewModel.onAction(ComposeAction.UpdatePollExpiry(expiresIn))
+                    },
+                    onToggleMultipleChoice = {
+                        viewModel.onAction(ComposeAction.TogglePollMultipleChoice)
+                    },
+                    onToggleHideTotals = {
+                        viewModel.onAction(ComposeAction.TogglePollHideTotals)
+                    },
+                    onRemovePoll = {
+                        viewModel.onAction(ComposeAction.RemovePoll)
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Character counter
@@ -293,6 +323,22 @@ fun ComposeScreen(
                         Text(
                             text = "😊",
                             style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+
+                    // Poll button
+                    IconButton(
+                        onClick = { viewModel.onAction(ComposeAction.AddPoll) },
+                        enabled = uiState.canAddPoll
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.List,
+                            contentDescription = stringResource(R.string.poll),
+                            tint = if (uiState.canAddPoll) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                            }
                         )
                     }
                 }

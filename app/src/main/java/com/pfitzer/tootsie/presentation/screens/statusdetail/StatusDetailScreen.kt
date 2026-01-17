@@ -118,6 +118,9 @@ fun StatusDetailScreen(
                             } else {
                                 viewModel.onAction(StatusDetailAction.BookmarkStatus(status))
                             }
+                        },
+                        onVoteClick = { pollId, choices ->
+                            viewModel.onAction(StatusDetailAction.VoteOnPoll(pollId, choices))
                         }
                     )
                 }
@@ -153,6 +156,7 @@ private fun ConversationThread(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -174,6 +178,7 @@ private fun ConversationThread(
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
                 onBookmarkClick = onBookmarkClick,
+                onVoteClick = onVoteClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .alpha(0.7f) // Slightly dimmed
@@ -202,7 +207,8 @@ private fun ConversationThread(
                     onFavoriteClick = onFavoriteClick,
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
-                    onBookmarkClick = onBookmarkClick
+                    onBookmarkClick = onBookmarkClick,
+                    onVoteClick = onVoteClick
                 )
             }
         }
@@ -223,7 +229,8 @@ private fun ConversationThread(
                 onFavoriteClick = onFavoriteClick,
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
-                onBookmarkClick = onBookmarkClick
+                onBookmarkClick = onBookmarkClick,
+                onVoteClick = onVoteClick
             )
         }
 
@@ -262,6 +269,7 @@ private fun ReplyItem(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -299,6 +307,7 @@ private fun ReplyItem(
             onBoostClick = onBoostClick,
             onReplyClick = onReplyClick,
             onBookmarkClick = onBookmarkClick,
+            onVoteClick = onVoteClick,
             modifier = Modifier.weight(1f)
         )
     }
