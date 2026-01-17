@@ -216,6 +216,14 @@
     <string name="cd_delete_all_drafts">Alle Entwürfe löschen</string>
     <string name="cd_create_list">Neue Liste erstellen</string>
     <string name="cd_delete_list">Liste löschen</string>
+    <string name="cd_manage_list_members">Listenmitglieder verwalten</string>
+    <string name="manage_list_title">Liste verwalten: %1$s</string>
+    <string name="manage_list_members_section">Mitglieder</string>
+    <string name="manage_list_add_member_section">Mitglied hinzufügen</string>
+    <string name="manage_list_search_placeholder">Gefolgte Konten durchsuchen…</string>
+    <string name="manage_list_no_members">Noch keine Mitglieder in dieser Liste.</string>
+    <string name="manage_list_member_removed">Mitglied entfernt</string>
+    <string name="manage_list_member_added">Mitglied hinzugefügt</string>
     <string name="cd_emoji_picker">Emoji-Auswahl öffnen</string>
     <string name="cd_clear_search">Suche löschen</string>
     <string name="cd_avatar">Avatar</string>

@@ -23,6 +23,8 @@ import com.pfitzer.tootsie.presentation.screens.settings.SettingsScreen
 import com.pfitzer.tootsie.presentation.screens.splash.SplashScreen
 import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
 import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
+import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
+import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
 
 /**
  * Main navigation host for the Tootsie app.
@@ -462,12 +464,35 @@ fun TootsieNavHost(
 
         // Lists screen - view and manage lists
         composable(route = TootsieDestinations.Lists.route) {
-            com.pfitzer.tootsie.presentation.screens.lists.ListsScreen(
+            ListsScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
                 onNavigateToList = { listId, listName ->
                     navController.navigate(TootsieDestinations.ListTimeline.createRoute(listId, listName))
+                },
+                onNavigateToManageList = { listId, listName ->
+                    navController.navigate(TootsieDestinations.ManageList.createRoute(listId, listName))
+                }
+            )
+        }
+
+        // Manage List screen - manage members of a specific list
+        composable(
+            route = TootsieDestinations.ManageList.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.ManageList.ARG_LIST_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(TootsieDestinations.ManageList.ARG_LIST_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) {
+            ManageListScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

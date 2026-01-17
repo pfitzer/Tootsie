@@ -116,6 +116,19 @@ sealed class TootsieDestinations(val route: String) {
     data object Lists : TootsieDestinations("lists")
 
     /**
+     * Manage List screen - manage members of a specific list.
+     * Requires listId and listName parameters.
+     */
+    data object ManageList : TootsieDestinations("manage_list/{listId}?listName={listName}") {
+        fun createRoute(listId: String, listName: String): String {
+            val encodedName = java.net.URLEncoder.encode(listName, "UTF-8")
+            return "manage_list/$listId?listName=$encodedName"
+        }
+        const val ARG_LIST_ID = "listId"
+        const val ARG_LIST_NAME = "listName"
+    }
+
+    /**
      * Followed Tags screen - view and manage followed hashtags.
      */
     data object FollowedTags : TootsieDestinations("followed_tags")

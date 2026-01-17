@@ -215,6 +215,14 @@
     <string name="cd_delete_all_drafts">Delete all drafts</string>
     <string name="cd_create_list">Create new list</string>
     <string name="cd_delete_list">Delete list</string>
+    <string name="cd_manage_list_members">Manage list members</string>
+    <string name="manage_list_title">Manage List: %1$s</string>
+    <string name="manage_list_members_section">Members</string>
+    <string name="manage_list_add_member_section">Add Member</string>
+    <string name="manage_list_search_placeholder">Search followed accounts…</string>
+    <string name="manage_list_no_members">No members in this list yet.</string>
+    <string name="manage_list_member_removed">Member removed</string>
+    <string name="manage_list_member_added">Member added</string>
     <string name="cd_emoji_picker">Open emoji picker</string>
     <string name="cd_clear_search">Clear search</string>
     <string name="cd_avatar">Avatar</string>

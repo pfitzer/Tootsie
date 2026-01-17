@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import com.pfitzer.tootsie.domain.model.RepliesPolicy
 fun ListsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToList: (String, String) -> Unit = { _, _ -> },
+    onNavigateToManageList: (String, String) -> Unit = { _, _ -> },
     viewModel: ListsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -109,6 +111,7 @@ fun ListsScreen(
                             ListItem(
                                 list = list,
                                 onClick = { onNavigateToList(list.id, list.title) },
+                                onEdit = { onNavigateToManageList(list.id, list.title) },
                                 onDelete = {
                                     viewModel.onAction(ListsAction.DeleteList(list.id))
                                 }
@@ -144,6 +147,7 @@ fun ListsScreen(
 private fun ListItem(
     list: MastodonList,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -181,12 +185,22 @@ private fun ListItem(
                 )
             }
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.cd_delete_list),
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.cd_manage_list_members),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.cd_delete_list),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
