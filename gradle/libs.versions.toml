@@ -93,8 +93,8 @@ compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fo
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 # ExoPlayer
-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoplayer" }
-exoplayer-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "exoplayer" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoplayer" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "exoplayer" }
 
 # Accompanist (for Pager and other utilities)
 accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanist" }

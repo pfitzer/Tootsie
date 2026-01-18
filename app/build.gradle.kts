@@ -73,7 +73,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.googlefonts)
     implementation(libs.compose.material3)
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.activity)
     debugImplementation(libs.compose.ui.tooling)
 
@@ -119,8 +119,8 @@ dependencies {
     implementation(libs.coil.compose)
 
     // ExoPlayer
-    implementation(libs.exoplayer)
-    implementation(libs.exoplayer.ui)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
 
     // Accompanist
     implementation(libs.accompanist.pager)
