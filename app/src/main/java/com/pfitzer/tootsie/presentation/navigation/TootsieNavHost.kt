@@ -5,12 +5,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.pfitzer.tootsie.presentation.MainViewModel
 import com.pfitzer.tootsie.presentation.components.navigation.BottomNavigationBar
 import com.pfitzer.tootsie.presentation.screens.auth.LoginScreen
 import com.pfitzer.tootsie.presentation.screens.compose.ComposeScreen
@@ -25,6 +27,7 @@ import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
 import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
+import androidx.compose.runtime.collectAsState
 
 /**
  * Main navigation host for the Tootsie app.
@@ -42,10 +45,13 @@ fun TootsieNavHost(
     modifier: Modifier = Modifier,
     startDestination: String = TootsieDestinations.Splash.route,
     authorizationCode: String? = null,
-    onAuthCodeConsumed: () -> Unit = {}
+    onAuthCodeConsumed: () -> Unit = {},
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val activeAccount by mainViewModel.activeAccount.collectAsState()
 
     // Determine if we should show bottom navigation
     val showBottomBar = when {

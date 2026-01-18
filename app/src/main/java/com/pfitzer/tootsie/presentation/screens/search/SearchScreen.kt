@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 
@@ -39,6 +40,7 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
 
     // Pre-fill search with initial query if provided (e.g., from hashtag click)
     androidx.compose.runtime.LaunchedEffect(initialQuery) {
@@ -64,6 +66,18 @@ fun SearchScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.search)) },
+                actions = {
+                    // Active Account Avatar
+                    activeAccount?.let { account ->
+                        IconButton(onClick = { onNavigateToProfile(account.id) }) {
+                            AvatarImage(
+                                url = account.avatar,
+                                contentDescription = stringResource(R.string.profile),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

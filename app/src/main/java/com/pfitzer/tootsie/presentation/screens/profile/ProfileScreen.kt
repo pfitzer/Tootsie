@@ -24,6 +24,7 @@ import coil.compose.AsyncImage
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
+import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
@@ -50,6 +51,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData?.collectAsLazyPagingItems()
     val context = LocalContext.current
 
@@ -70,6 +72,22 @@ fun ProfileScreen(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = stringResource(R.string.cd_back)
                             )
+                        }
+                    }
+                },
+                actions = {
+                    // Active Account Avatar (only show if not viewing own profile or if we want it consistently everywhere)
+                    // If uiState.isOwnProfile is true, we might not need to show the small avatar as the big one is right there.
+                    // But for consistency across screens, let's show it if it's NOT the own profile being viewed.
+                    if (!uiState.isOwnProfile) {
+                        activeAccount?.let { account ->
+                            IconButton(onClick = { onNavigateToProfile(account.id) }) {
+                                AvatarImage(
+                                    url = account.avatar,
+                                    contentDescription = stringResource(R.string.profile),
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
                         }
                     }
                 },

@@ -41,6 +41,16 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    /**
+     * Observe the currently active account.
+     */
+    val activeAccount: StateFlow<com.pfitzer.tootsie.domain.model.Account?> = accountManagementRepository.observeActiveAccount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     private val _activeTimelineType = MutableStateFlow(TimelineType.HOME)
     val activeTimelineType: StateFlow<TimelineType> = _activeTimelineType.asStateFlow()
 

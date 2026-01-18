@@ -8,6 +8,7 @@ import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
 import com.pfitzer.tootsie.domain.usecase.account.FollowAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.account.GetAccountStatusesUseCase
 import com.pfitzer.tootsie.domain.usecase.account.GetAccountUseCase
@@ -15,11 +16,7 @@ import com.pfitzer.tootsie.domain.usecase.account.GetRelationshipUseCase
 import com.pfitzer.tootsie.domain.usecase.account.UnfollowAccountUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,6 +32,7 @@ class ProfileViewModel @Inject constructor(
     private val unfollowAccountUseCase: UnfollowAccountUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
     private val accountRepository: com.pfitzer.tootsie.domain.repository.AccountRepository,
+    private val accountManagementRepository: AccountManagementRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -42,6 +40,16 @@ class ProfileViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    /**
+     * Observe the currently active account.
+     */
+    val activeAccount: StateFlow<Account?> = accountManagementRepository.observeActiveAccount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     /**
      * Paging data flow for account timeline.

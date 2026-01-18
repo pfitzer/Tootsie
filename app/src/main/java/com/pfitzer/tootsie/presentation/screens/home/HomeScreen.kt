@@ -32,6 +32,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineType
+import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.components.timeline.TimelineFilterDialog
@@ -80,6 +81,7 @@ fun HomeScreen(
     val activeTimelineType by viewModel.activeTimelineType.collectAsStateWithLifecycle()
     val timelineFilter by viewModel.timelineFilter.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData.collectAsLazyPagingItems()
+    val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
 
     var showFilterDialog by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -214,6 +216,17 @@ fun HomeScreen(
                             }
                         },
                         actions = {
+                            // Active Account Avatar
+                            activeAccount?.let { account ->
+                                IconButton(onClick = { onNavigateToProfile(account.id) }) {
+                                    AvatarImage(
+                                        url = account.avatar,
+                                        contentDescription = stringResource(R.string.profile),
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            }
+
                             // Filter button with indicator
                             IconButton(onClick = { showFilterDialog = true }) {
                                 Badge(

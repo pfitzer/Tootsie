@@ -39,7 +39,6 @@ fun BottomNavigationBar(
                         contentDescription = stringResource(item.labelRes)
                     )
                 },
-                label = { Text(stringResource(item.labelRes)) },
                 selected = isSelected,
                 onClick = {
                     when (item) {

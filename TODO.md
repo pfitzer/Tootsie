@@ -22,6 +22,9 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [ ] **Trending Section Enhancements**
     - **Description**: Improve the UI for trending hashtags, posts, and links.
     - **Scope**: Create specialized cards and layouts for trending items.
+- [ ] **Private Messaging (Direct Messages)**
+    - **Description**: Implement Mastodon's direct messaging (now "Conversations") feature to allow private communication between users.
+    - **Scope**: Create a `ConversationsScreen`, implement `ConversationRepository`, and add a direct message option in the `ComposeScreen`.
 
 ### 🛠 Architectural & Technical Debt
 

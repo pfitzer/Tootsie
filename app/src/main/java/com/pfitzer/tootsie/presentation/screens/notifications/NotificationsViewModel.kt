@@ -4,17 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Notification
+import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
 import com.pfitzer.tootsie.domain.usecase.notification.ClearAllNotificationsUseCase
 import com.pfitzer.tootsie.domain.usecase.notification.DismissNotificationUseCase
 import com.pfitzer.tootsie.domain.usecase.notification.GetNotificationsUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,11 +24,22 @@ import javax.inject.Inject
 class NotificationsViewModel @Inject constructor(
     private val getNotificationsUseCase: GetNotificationsUseCase,
     private val dismissNotificationUseCase: DismissNotificationUseCase,
-    private val clearAllNotificationsUseCase: ClearAllNotificationsUseCase
+    private val clearAllNotificationsUseCase: ClearAllNotificationsUseCase,
+    private val accountManagementRepository: AccountManagementRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationsUiState())
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
+
+    /**
+     * Observe the currently active account.
+     */
+    val activeAccount: StateFlow<Account?> = accountManagementRepository.observeActiveAccount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     /**
      * Paging data flow for notifications.

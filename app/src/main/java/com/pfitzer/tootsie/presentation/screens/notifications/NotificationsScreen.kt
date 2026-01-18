@@ -17,6 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.notification.NotificationCard
 import com.pfitzer.tootsie.util.openInBrowser
@@ -38,6 +39,7 @@ fun NotificationsScreen(
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
     val notificationsPagingItems = viewModel.notificationsPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
 
@@ -46,6 +48,17 @@ fun NotificationsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.notifications_title)) },
                 actions = {
+                    // Active Account Avatar
+                    activeAccount?.let { account ->
+                        IconButton(onClick = { onNavigateToProfile(account.id) }) {
+                            AvatarImage(
+                                url = account.avatar,
+                                contentDescription = stringResource(R.string.profile),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+
                     // Clear all button
                     IconButton(
                         onClick = { viewModel.onAction(NotificationsAction.ClearAll) },
