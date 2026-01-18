@@ -19,9 +19,9 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [x] **Followed Tags Management**
     - **Description**: Ability to view and manage followed hashtags.
     - **Scope**: Implemented `FollowedTagsScreen`, unfollow functionality, and follow/unfollow capability in `HashtagTimelineScreen` header.
-- [ ] **Trending Section Enhancements**
+- [x] **Trending Section Enhancements**
     - **Description**: Improve the UI for trending hashtags, posts, and links.
-    - **Scope**: Create specialized cards and layouts for trending items.
+    - **Scope**: Created unified Trending screen with tabs and improved cards with trend charts.
 - [ ] **Private Messaging (Direct Messages)**
     - **Description**: Implement Mastodon's direct messaging (now "Conversations") feature to allow private communication between users.
     - **Scope**: Create a `ConversationsScreen`, implement `ConversationRepository`, and add a direct message option in the `ComposeScreen`.

@@ -70,9 +70,7 @@ fun HomeScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToLists: () -> Unit = {},
     onNavigateToFollowedTags: () -> Unit = {},
-    onNavigateToTrendingHashtags: () -> Unit = {},
-    onNavigateToTrendingPosts: () -> Unit = {},
-    onNavigateToTrendingLinks: () -> Unit = {},
+    onNavigateToTrending: () -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: HomeViewModel = hiltViewModel()
@@ -155,34 +153,12 @@ fun HomeScreen(
                 )
 
                 NavigationDrawerItem(
-                    icon = { Icon(CustomIcons.Hash, contentDescription = null) },
-                    label = { Text(stringResource(R.string.drawer_trending_hashtags)) },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToTrendingHashtags()
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-
-                NavigationDrawerItem(
                     icon = { Icon(CustomIcons.TrendingUp, contentDescription = null) },
-                    label = { Text(stringResource(R.string.drawer_trending_statuses)) },
+                    label = { Text(stringResource(R.string.trending_title)) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        onNavigateToTrendingPosts()
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-
-                NavigationDrawerItem(
-                    icon = { Icon(CustomIcons.Link, contentDescription = null) },
-                    label = { Text(stringResource(R.string.drawer_trending_links)) },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToTrendingLinks()
+                        onNavigateToTrending()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

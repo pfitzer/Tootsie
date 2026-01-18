@@ -201,8 +201,8 @@
     <!-- Trending Labels -->
     <string name="trending_posts_count">%1$d posts</string>
     <string name="trending_people_talking">%1$d people talking</string>
-    <string name="trending_accounts_count">%1$d accounts</string>
-    <string name="trending_shares_count">%1$d shares</string>
+    <string name="trending_accounts_count_label">accounts</string>
+    <string name="trending_shares_count_label">shares</string>
 
     <!-- Loading Messages -->
     <string name="uploading_media">Uploading media…</string>
@@ -260,10 +260,11 @@
     <string name="filter_show_media_only">Show only posts with media</string>
 
     <!-- Trending Screens -->
-    <string name="trending_hashtags_title">Trending Hashtags</string>
-    <string name="trending_statuses_title">Trending Statuses</string>
-    <string name="trending_posts_title">Trending Posts</string>
-    <string name="trending_links_title">Trending Links</string>
+    <string name="trending_title">Trending</string>
+    <string name="trending_hashtags_title">Hashtags</string>
+    <string name="trending_statuses_title">Statuses</string>
+    <string name="trending_posts_title">Posts</string>
+    <string name="trending_links_title">Links</string>
     <string name="empty_trending_hashtags">No trending hashtags</string>
 
     <!-- Followed Tags -->
