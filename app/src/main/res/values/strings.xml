@@ -355,4 +355,8 @@
     <string name="poll_total_votes">%1$d votes</string>
     <string name="poll_voted_hint">You voted for this</string>
 
+    <string name="back">Back</string>
+    <string name="direct_messages">Direct Messages</string>
+    <string name="empty_conversations">No direct messages yet.</string>
+    <string name="cd_delete_conversation">Delete conversation</string>
 </resources>

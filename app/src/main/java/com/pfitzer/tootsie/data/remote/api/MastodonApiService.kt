@@ -708,4 +708,33 @@ interface MastodonApiService {
 
     @GET("api/v1/custom_emojis")
     suspend fun getCustomEmojis(): List<com.pfitzer.tootsie.data.remote.dto.CustomEmojiDto>
+
+    // --- Conversations ---
+
+    /**
+     * Return all conversations the user has participated in.
+     */
+    @GET("api/v1/conversations")
+    suspend fun getConversations(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("min_id") minId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): List<com.pfitzer.tootsie.data.remote.dto.ConversationDto>
+
+    /**
+     * Remove a conversation from the list of conversations.
+     */
+    @DELETE("api/v1/conversations/{id}")
+    suspend fun deleteConversation(
+        @Path("id") id: String
+    )
+
+    /**
+     * Mark a conversation as read.
+     */
+    @POST("api/v1/conversations/{id}/read")
+    suspend fun markConversationAsRead(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.ConversationDto
 }

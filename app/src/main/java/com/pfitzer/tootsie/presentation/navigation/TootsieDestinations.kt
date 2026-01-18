@@ -203,4 +203,6 @@ sealed class TootsieDestinations(val route: String) {
      * Push Settings screen - configure push notification preferences.
      */
     data object PushSettings : TootsieDestinations("push_settings")
+
+    data object Conversations : TootsieDestinations("conversations")
 }

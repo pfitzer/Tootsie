@@ -71,6 +71,7 @@ fun HomeScreen(
     onNavigateToLists: () -> Unit = {},
     onNavigateToFollowedTags: () -> Unit = {},
     onNavigateToTrending: () -> Unit = {},
+    onNavigateToConversations: () -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: HomeViewModel = hiltViewModel()
@@ -126,6 +127,17 @@ fun HomeScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToFavorites()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    label = { Text(stringResource(R.string.direct_messages)) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToConversations()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

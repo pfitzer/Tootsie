@@ -27,6 +27,7 @@ import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
 import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
+import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import androidx.compose.runtime.collectAsState
 
 /**
@@ -205,6 +206,9 @@ fun TootsieNavHost(
                 onNavigateToTrending = {
                     navController.navigate(TootsieDestinations.Trending.route)
                 },
+                onNavigateToConversations = {
+                    navController.navigate(TootsieDestinations.Conversations.route)
+                },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
                 },
@@ -287,6 +291,16 @@ fun TootsieNavHost(
                 },
                 onNavigateToVideoPlayer = { url, description ->
                     navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
+                }
+            )
+        }
+
+        // Conversations screen
+        composable(route = TootsieDestinations.Conversations.route) {
+            ConversationsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
                 }
             )
         }

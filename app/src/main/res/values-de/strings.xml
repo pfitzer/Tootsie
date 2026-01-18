@@ -356,4 +356,8 @@
     <string name="poll_total_votes">%1$d Stimmen</string>
     <string name="poll_voted_hint">Du hast dafür gestimmt</string>
 
+    <string name="back">Zurück</string>
+    <string name="direct_messages">Direktnachrichten</string>
+    <string name="empty_conversations">Noch keine Direktnachrichten.</string>
+    <string name="cd_delete_conversation">Unterhaltung löschen</string>
 </resources>
