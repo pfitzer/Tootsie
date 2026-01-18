@@ -21,6 +21,12 @@
     <string name="remove">Entfernen</string>
     <string name="apply">Anwenden</string>
     <string name="unfollow">Entfolgen</string>
+    <string name="follow">Folgen</string>
+    <string name="follow_tag">Hashtag folgen</string>
+    <string name="unfollow_tag">Hashtag entfolgen</string>
+    <string name="hashtag_name">Hashtag-Name</string>
+    <string name="unfollow_tag_confirmation_title">Hashtag entfolgen</string>
+    <string name="unfollow_tag_confirmation_message">Sind Sie sicher, dass Sie #%1$s entfolgen möchten?</string>
 
     <!-- Navigation Drawer -->
     <string name="drawer_home">Startseite</string>

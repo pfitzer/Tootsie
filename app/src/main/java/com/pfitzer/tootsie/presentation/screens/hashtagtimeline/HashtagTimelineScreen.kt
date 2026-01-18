@@ -5,8 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +25,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.util.openInBrowser
@@ -49,7 +55,9 @@ fun HashtagTimelineScreen(
     viewModel: HashtagTimelineViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
     val hashtagTimelinePagingItems = viewModel.hashtagTimelinePagingData.collectAsLazyPagingItems()
+    var showUnfollowConfirmation by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -61,6 +69,51 @@ fun HashtagTimelineScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
                         )
+                    }
+                },
+                actions = {
+                    // Active Account Avatar
+                    activeAccount?.let { account ->
+                        IconButton(onClick = { onNavigateToProfile(account.id) }) {
+                            AvatarImage(
+                                url = account.avatar,
+                                contentDescription = stringResource(R.string.profile),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+
+                    // Follow/Unfollow button
+                    if (uiState.isProcessingFollow) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        IconButton(
+                            onClick = {
+                                if (uiState.isFollowing) {
+                                    showUnfollowConfirmation = true
+                                } else {
+                                    viewModel.onAction(HashtagTimelineAction.FollowTag)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.isFollowing) {
+                                    Icons.Default.Notifications
+                                } else {
+                                    Icons.Outlined.Notifications
+                                },
+                                contentDescription = if (uiState.isFollowing) {
+                                    stringResource(R.string.unfollow_tag)
+                                } else {
+                                    stringResource(R.string.follow_tag)
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -118,6 +171,39 @@ fun HashtagTimelineScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(16.dp)
+                )
+            }
+
+            // Unfollow Confirmation Dialog
+            if (showUnfollowConfirmation) {
+                AlertDialog(
+                    onDismissRequest = { showUnfollowConfirmation = false },
+                    title = { Text(stringResource(R.string.unfollow_tag_confirmation_title)) },
+                    text = {
+                        Text(
+                            stringResource(
+                                R.string.unfollow_tag_confirmation_message,
+                                hashtag
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.onAction(HashtagTimelineAction.UnfollowTag)
+                                showUnfollowConfirmation = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.unfollow))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showUnfollowConfirmation = false }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
                 )
             }
         }

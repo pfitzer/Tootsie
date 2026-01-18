@@ -20,6 +20,12 @@
     <string name="remove">Remove</string>
     <string name="apply">Apply</string>
     <string name="unfollow">Unfollow</string>
+    <string name="follow">Follow</string>
+    <string name="follow_tag">Follow Hashtag</string>
+    <string name="unfollow_tag">Unfollow Hashtag</string>
+    <string name="hashtag_name">Hashtag Name</string>
+    <string name="unfollow_tag_confirmation_title">Unfollow Hashtag</string>
+    <string name="unfollow_tag_confirmation_message">Are you sure you want to unfollow #%1$s?</string>
 
     <!-- Navigation Drawer -->
     <string name="drawer_home">Home</string>

@@ -5,12 +5,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import com.pfitzer.tootsie.presentation.icons.CustomIcons
 import com.pfitzer.tootsie.presentation.icons.Tags
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -47,6 +52,14 @@ fun FollowedTagsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.onAction(FollowedTagsAction.ShowFollowDialog) }) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.follow_tag)
                         )
                     }
                 },
@@ -94,7 +107,7 @@ fun FollowedTagsScreen(
                                     tag = tag,
                                     onTagClick = { onNavigateToHashtag(tag.name) },
                                     onUnfollowClick = {
-                                        viewModel.onAction(FollowedTagsAction.UnfollowTag(tag))
+                                        viewModel.onAction(FollowedTagsAction.RequestUnfollowTag(tag))
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -113,6 +126,72 @@ fun FollowedTagsScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(16.dp)
+                )
+            }
+
+            // Unfollow Confirmation Dialog
+            uiState.showUnfollowConfirmation?.let { tag ->
+                AlertDialog(
+                    onDismissRequest = { viewModel.onAction(FollowedTagsAction.DismissUnfollowConfirmation) },
+                    title = { Text(stringResource(R.string.unfollow_tag_confirmation_title)) },
+                    text = {
+                        Text(
+                            stringResource(
+                                R.string.unfollow_tag_confirmation_message,
+                                tag.name
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { viewModel.onAction(FollowedTagsAction.UnfollowTag(tag)) }
+                        ) {
+                            Text(stringResource(R.string.unfollow))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { viewModel.onAction(FollowedTagsAction.DismissUnfollowConfirmation) }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
+            }
+
+            // Follow Tag Dialog
+            if (uiState.showFollowDialog) {
+                var tagName by remember { mutableStateOf("") }
+
+                AlertDialog(
+                    onDismissRequest = { viewModel.onAction(FollowedTagsAction.DismissFollowDialog) },
+                    title = { Text(stringResource(R.string.follow_tag)) },
+                    text = {
+                        OutlinedTextField(
+                            value = tagName,
+                            onValueChange = { tagName = it },
+                            label = { Text(stringResource(R.string.hashtag_name)) },
+                            placeholder = { Text("hashtag") },
+                            singleLine = true,
+                            prefix = { Text("#") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { viewModel.onAction(FollowedTagsAction.FollowTag(tagName)) },
+                            enabled = tagName.isNotBlank()
+                        ) {
+                            Text(stringResource(R.string.follow))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { viewModel.onAction(FollowedTagsAction.DismissFollowDialog) }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
                 )
             }
         }

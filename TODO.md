@@ -16,9 +16,9 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [x] **Lists Management UI**
     - **Description**: Ability to create, delete, and add/remove accounts from lists within the app.
     - **Scope**: Created `ListsScreen`, `ManageListScreen`, and associated ViewModels/UseCases.
-- [ ] **Followed Tags Management**
+- [x] **Followed Tags Management**
     - **Description**: Ability to view and manage followed hashtags.
-    - **Scope**: Create a `FollowedTagsScreen` (partially implemented) and implement unfollow functionality.
+    - **Scope**: Implemented `FollowedTagsScreen`, unfollow functionality, and follow/unfollow capability in `HashtagTimelineScreen` header.
 - [ ] **Trending Section Enhancements**
     - **Description**: Improve the UI for trending hashtags, posts, and links.
     - **Scope**: Create specialized cards and layouts for trending items.

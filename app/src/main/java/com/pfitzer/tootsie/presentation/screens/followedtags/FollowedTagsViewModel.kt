@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.presentation.screens.followedtags
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.FollowedTag
+import com.pfitzer.tootsie.domain.usecase.followedtags.FollowTagUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.GetFollowedTagsUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.UnfollowTagUseCase
 import com.pfitzer.tootsie.util.Result
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FollowedTagsViewModel @Inject constructor(
     private val getFollowedTagsUseCase: GetFollowedTagsUseCase,
+    private val followTagUseCase: FollowTagUseCase,
     private val unfollowTagUseCase: UnfollowTagUseCase
 ) : ViewModel() {
 
@@ -36,9 +38,55 @@ class FollowedTagsViewModel @Inject constructor(
      */
     fun onAction(action: FollowedTagsAction) {
         when (action) {
-            is FollowedTagsAction.UnfollowTag -> unfollowTag(action.tag)
+            is FollowedTagsAction.RequestUnfollowTag -> {
+                _uiState.update { it.copy(showUnfollowConfirmation = action.tag) }
+            }
+            is FollowedTagsAction.UnfollowTag -> {
+                _uiState.update { it.copy(showUnfollowConfirmation = null) }
+                unfollowTag(action.tag)
+            }
+            is FollowedTagsAction.DismissUnfollowConfirmation -> {
+                _uiState.update { it.copy(showUnfollowConfirmation = null) }
+            }
             is FollowedTagsAction.DismissError -> dismissError()
             is FollowedTagsAction.Refresh -> loadFollowedTags()
+            is FollowedTagsAction.ShowFollowDialog -> {
+                _uiState.update { it.copy(showFollowDialog = true) }
+            }
+            is FollowedTagsAction.DismissFollowDialog -> {
+                _uiState.update { it.copy(showFollowDialog = false) }
+            }
+            is FollowedTagsAction.FollowTag -> {
+                _uiState.update { it.copy(showFollowDialog = false) }
+                followTag(action.tagName)
+            }
+        }
+    }
+
+    /**
+     * Follow a hashtag.
+     */
+    private fun followTag(tagName: String) {
+        val cleanTagName = tagName.removePrefix("#").trim()
+        if (cleanTagName.isEmpty()) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = followTagUseCase(cleanTagName)) {
+                is Result.Success -> {
+                    // Refresh the list to include the new tag
+                    loadFollowedTags()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Failed to follow #$cleanTagName",
+                            isLoading = false
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -113,14 +161,21 @@ class FollowedTagsViewModel @Inject constructor(
 data class FollowedTagsUiState(
     val followedTags: List<FollowedTag> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val showUnfollowConfirmation: FollowedTag? = null,
+    val showFollowDialog: Boolean = false
 )
 
 /**
  * User actions for Followed Tags Screen.
  */
 sealed class FollowedTagsAction {
+    data class RequestUnfollowTag(val tag: FollowedTag) : FollowedTagsAction()
     data class UnfollowTag(val tag: FollowedTag) : FollowedTagsAction()
+    data object DismissUnfollowConfirmation : FollowedTagsAction()
     data object DismissError : FollowedTagsAction()
     data object Refresh : FollowedTagsAction()
+    data object ShowFollowDialog : FollowedTagsAction()
+    data object DismissFollowDialog : FollowedTagsAction()
+    data class FollowTag(val tagName: String) : FollowedTagsAction()
 }
