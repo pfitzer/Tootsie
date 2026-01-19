@@ -2,6 +2,7 @@ package com.pfitzer.tootsie.presentation.screens.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
@@ -12,6 +13,7 @@ import com.pfitzer.tootsie.presentation.icons.TrendingUp
 import com.pfitzer.tootsie.presentation.icons.Link
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -365,17 +367,29 @@ private fun TimelineList(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
     // Determine if we're actually refreshing based on paging state
-    val isActuallyRefreshing = timelinePagingItems.loadState.refresh is LoadState.Loading
+    val loadState = timelinePagingItems.loadState.refresh
+    val isActuallyRefreshing = loadState is LoadState.Loading
+
+    // Scroll to top on refresh
+    LaunchedEffect(loadState) {
+        if (loadState is LoadState.NotLoading && timelinePagingItems.itemCount > 0) {
+            listState.scrollToItem(0)
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isActuallyRefreshing,
         onRefresh = {
+            onRefresh()
             timelinePagingItems.refresh()
         },
         modifier = modifier.fillMaxSize()
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {

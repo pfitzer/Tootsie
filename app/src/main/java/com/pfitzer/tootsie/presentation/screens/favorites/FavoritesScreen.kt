@@ -2,10 +2,12 @@ package com.pfitzer.tootsie.presentation.screens.favorites
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -141,8 +143,18 @@ private fun FavoritesList(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    val loadState = favoritesPagingItems.loadState.refresh
+    LaunchedEffect(loadState) {
+        if (loadState is LoadState.NotLoading && favoritesPagingItems.itemCount > 0) {
+            listState.scrollToItem(0)
+        }
+    }
 
     LazyColumn(
+        state = listState,
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {

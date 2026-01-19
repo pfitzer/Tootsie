@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.presentation.screens.trending
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -147,6 +148,14 @@ private fun TrendingPostsContent(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading && uiState.trendingPosts.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = uiState.isLoading,
@@ -161,7 +170,10 @@ private fun TrendingPostsContent(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(items = uiState.trendingPosts) { status ->
                     StatusCard(
                         status = status,
@@ -213,6 +225,14 @@ private fun TrendingHashtagsContent(
     onNavigateToSearch: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading && uiState.trendingTags.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = uiState.isLoading,
@@ -228,6 +248,7 @@ private fun TrendingHashtagsContent(
             )
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
@@ -252,6 +273,14 @@ private fun TrendingLinksContent(
     onNavigateToLink: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading && uiState.trendingLinks.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = uiState.isLoading,
@@ -267,6 +296,7 @@ private fun TrendingLinksContent(
             )
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {

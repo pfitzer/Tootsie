@@ -245,11 +245,14 @@ class HomeViewModel @Inject constructor(
     private fun refreshTimeline() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
-            when (_activeTimelineType.value) {
-                TimelineType.HOME -> timelineRepository.refreshHomeTimeline()
-                TimelineType.PUBLIC_LOCAL, TimelineType.PUBLIC_FEDERATED -> timelineRepository.refreshPublicTimeline()
+            try {
+                when (_activeTimelineType.value) {
+                    TimelineType.HOME -> timelineRepository.refreshHomeTimeline()
+                    TimelineType.PUBLIC_LOCAL, TimelineType.PUBLIC_FEDERATED -> timelineRepository.refreshPublicTimeline()
+                }
+            } finally {
+                _uiState.update { it.copy(isRefreshing = false) }
             }
-            _uiState.update { it.copy(isRefreshing = false) }
         }
     }
 

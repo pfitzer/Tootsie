@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.presentation.screens.followedtags
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -12,6 +13,7 @@ import com.pfitzer.tootsie.presentation.icons.CustomIcons
 import com.pfitzer.tootsie.presentation.icons.Tags
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +44,14 @@ fun FollowedTagsScreen(
     viewModel: FollowedTagsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading && uiState.followedTags.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -96,6 +106,7 @@ fun FollowedTagsScreen(
                     }
                     else -> {
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(vertical = 8.dp)
                         ) {

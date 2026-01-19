@@ -3,11 +3,13 @@ package com.pfitzer.tootsie.presentation.screens.conversations
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +29,14 @@ fun ConversationsScreen(
     viewModel: ConversationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
+
+    // Scroll to top on refresh
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading && uiState.conversations.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -64,7 +74,10 @@ fun ConversationsScreen(
                     )
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(uiState.conversations, key = { it.id }) { conversation ->
                         ConversationCard(
                             conversation = conversation,
