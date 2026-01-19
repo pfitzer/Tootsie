@@ -12,12 +12,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.RichTextContent
+import com.pfitzer.tootsie.util.openInBrowser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +29,7 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -100,6 +104,29 @@ fun EditProfileScreen(
                             .heightIn(min = 120.dp),
                         enabled = !uiState.isSaving
                     )
+
+                    if (uiState.note.isNotBlank()) {
+                        Text(
+                            text = stringResource(R.string.profile_preview),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            RichTextContent(
+                                content = uiState.note,
+                                mentions = emptyList(),
+                                tags = emptyList(),
+                                onMentionClick = {},
+                                onHashtagClick = {},
+                                onLinkClick = { context.openInBrowser(it) },
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    }
                 }
             }
 

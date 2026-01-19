@@ -14,6 +14,7 @@ import com.pfitzer.tootsie.domain.model.Tag
  * @return Plain text with HTML stripped
  */
 fun htmlToPlainText(html: String): String {
+    if (html.isBlank()) return ""
     return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString().trim()
 }
 

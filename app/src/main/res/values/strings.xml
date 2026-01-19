@@ -106,6 +106,7 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="display_name">Display Name</string>
     <string name="bio">Bio</string>
+    <string name="profile_preview">Preview</string>
     <string name="profile_updated">Profile updated successfully</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>

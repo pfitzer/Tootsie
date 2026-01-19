@@ -6,6 +6,7 @@ import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.usecase.account.GetAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.account.UpdateProfileUseCase
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import com.pfitzer.tootsie.presentation.util.htmlToPlainText
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,7 @@ class EditProfileViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         displayName = activeAccount.displayName,
-                        note = activeAccount.note
+                        note = htmlToPlainText(activeAccount.note)
                     )
                 }
             } else {
