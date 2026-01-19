@@ -98,4 +98,16 @@ interface AccountRepository {
      * @return Flow of paged accounts
      */
     fun getFollowing(accountId: String): Flow<PagingData<Account>>
+
+    /**
+     * Update account profile.
+     *
+     * @param displayName New display name
+     * @param note New bio/note
+     * @return Updated account details
+     */
+    suspend fun updateProfile(
+        displayName: String? = null,
+        note: String? = null
+    ): Result<Account>
 }

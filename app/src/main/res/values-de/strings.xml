@@ -105,6 +105,9 @@
     <!-- Profile -->
     <string name="profile">Profil</string>
     <string name="edit_profile">Profil bearbeiten</string>
+    <string name="display_name">Anzeigename</string>
+    <string name="bio">Bio</string>
+    <string name="profile_updated">Profil erfolgreich aktualisiert</string>
     <string name="followers">Follower</string>
     <string name="following">Gefolgt</string>
     <string name="posts">Beiträge</string>

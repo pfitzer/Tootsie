@@ -12,12 +12,16 @@ class GetAccountUseCase @Inject constructor(
     private val accountRepository: AccountRepository
 ) {
     /**
-     * Get account by ID.
+     * Get account by ID or current account.
      *
-     * @param accountId Account ID
+     * @param accountId Account ID, or null for current account
      * @return Account details
      */
-    suspend operator fun invoke(accountId: String): Result<Account> {
-        return accountRepository.getAccount(accountId)
+    suspend operator fun invoke(accountId: String? = null): Result<Account> {
+        return if (accountId != null) {
+            accountRepository.getAccount(accountId)
+        } else {
+            accountRepository.getCurrentAccount()
+        }
     }
 }

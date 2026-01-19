@@ -123,4 +123,16 @@ class AccountRepositoryImpl @Inject constructor(
         // TODO: Implement following paging source (Phase 2c or later)
         throw NotImplementedError("Following list not yet implemented")
     }
+
+    override suspend fun updateProfile(displayName: String?, note: String?): Result<Account> {
+        return try {
+            val accountDto = mastodonApi.updateCredentials(
+                displayName = displayName,
+                note = note
+            )
+            Result.Success(accountDto.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to update profile")
+        }
+    }
 }

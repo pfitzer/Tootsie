@@ -28,6 +28,7 @@ import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
+import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
 
 /**
@@ -258,6 +259,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToVideoPlayer = { url, description ->
                     navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(TootsieDestinations.EditProfile.route)
                 }
             )
         }
@@ -291,6 +295,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToVideoPlayer = { url, description ->
                     navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(TootsieDestinations.EditProfile.route)
+                }
+            )
+        }
+
+        // Edit profile screen
+        composable(route = TootsieDestinations.EditProfile.route) {
+            EditProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

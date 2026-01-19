@@ -205,4 +205,9 @@ sealed class TootsieDestinations(val route: String) {
     data object PushSettings : TootsieDestinations("push_settings")
 
     data object Conversations : TootsieDestinations("conversations")
+
+    /**
+     * Edit Profile screen - edit authenticated user's profile.
+     */
+    data object EditProfile : TootsieDestinations("edit_profile")
 }

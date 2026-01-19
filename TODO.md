@@ -7,12 +7,18 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [ ] **Keyword and Context Filters (High Priority)**
     - **Description**: Implement the ability for users to filter out posts containing specific keywords or from specific contexts (e.g., home, notifications). This is a core Mastodon feature.
     - **Scope**: Create a `FiltersScreen`, update `StatusRepository` to handle Mastodon Filter APIs, and integrate filtering logic into `RemoteMediator` or `StatusDao`.
+- [x] **Notification Management & Swipe-to-Dismiss**
+    - **Description**: Fix notification deletion and implement swipe-to-dismiss for better UX.
+    - **Scope**: Updated `NotificationsViewModel` and `NotificationsScreen` with `SwipeToDismissBox`.
+- [x] **UX Polish: Swipe-to-Refresh & Scroll-to-Top**
+    - **Description**: Ensure pull-to-refresh works everywhere and automatically scroll to top when new content arrives.
+    - **Scope**: Fixed `TimelineList` refresh logic and added `LaunchedEffect` scroll triggers in all main screens.
 - [x] **Poll Support**
     - **Description**: Specialized UI and logic for viewing, interacting with, and creating Mastodon polls.
     - **Scope**: Create a `PollComponent` for the status item, implement `VoteUseCase`, update the `Status` domain model, and implement poll creation in the compose screen.
-- [ ] **Account Profile Editing**
+- [x] **Account Profile Editing**
     - **Description**: Allow users to update their own profile (display name, bio, avatar, header, and metadata fields).
-    - **Scope**: Add an "Edit Profile" button to the `ProfileScreen` (when viewing own profile), create an `EditProfileViewModel`, and implement the corresponding API calls in `AccountRepository`.
+    - **Scope**: Added "Edit Profile" button to the `ProfileScreen` (when viewing own profile), created `EditProfileViewModel`, and implemented the corresponding API calls in `AccountRepository`.
 - [x] **Lists Management UI**
     - **Description**: Ability to create, delete, and add/remove accounts from lists within the app.
     - **Scope**: Created `ListsScreen`, `ManageListScreen`, and associated ViewModels/UseCases.
@@ -22,7 +28,7 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 - [x] **Trending Section Enhancements**
     - **Description**: Improve the UI for trending hashtags, posts, and links.
     - **Scope**: Created unified Trending screen with tabs and improved cards with trend charts.
-- [ ] **Private Messaging (Direct Messages)**
+- [x] **Private Messaging (Direct Messages)**
     - **Description**: Implement Mastodon's direct messaging (now "Conversations") feature to allow private communication between users.
     - **Scope**: Create a `ConversationsScreen`, implement `ConversationRepository`, and add a direct message option in the `ComposeScreen`.
 

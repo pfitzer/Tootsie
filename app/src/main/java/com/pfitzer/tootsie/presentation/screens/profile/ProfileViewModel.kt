@@ -31,7 +31,6 @@ class ProfileViewModel @Inject constructor(
     private val followAccountUseCase: FollowAccountUseCase,
     private val unfollowAccountUseCase: UnfollowAccountUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
-    private val accountRepository: com.pfitzer.tootsie.domain.repository.AccountRepository,
     private val accountManagementRepository: AccountManagementRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -75,11 +74,7 @@ class ProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             // Load account info
-            val accountResult = if (accountId != null) {
-                getAccountUseCase(accountId)
-            } else {
-                accountRepository.getCurrentAccount()
-            }
+            val accountResult = getAccountUseCase(accountId)
 
             when (accountResult) {
                 is Result.Success -> {

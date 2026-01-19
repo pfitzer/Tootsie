@@ -48,6 +48,7 @@ fun ProfileScreen(
     onNavigateToSearch: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToEditProfile: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -134,7 +135,8 @@ fun ProfileScreen(
                                 },
                                 onLinkClick = { url ->
                                     context.openInBrowser(url)
-                                }
+                                },
+                                onEditProfileClick = onNavigateToEditProfile
                             )
                         }
 
@@ -238,6 +240,7 @@ private fun ProfileHeader(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onEditProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -270,11 +273,19 @@ private fun ProfileHeader(
                     Text(
                         text = when {
                             isProcessingFollow -> "..."
-                            relationship?.following == true -> "Unfollow"
-                            relationship?.requested == true -> "Requested"
-                            else -> "Follow"
+                            relationship?.following == true -> stringResource(R.string.unfollow)
+                            relationship?.requested == true -> stringResource(R.string.notification_requested_follow)
+                            else -> stringResource(R.string.follow)
                         }
                     )
+                }
+            } else {
+                // Edit profile button for own profile
+                OutlinedButton(
+                    onClick = onEditProfileClick,
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(text = stringResource(R.string.edit_profile))
                 }
             }
         }
