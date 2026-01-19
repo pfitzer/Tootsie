@@ -41,11 +41,19 @@ class NotificationsViewModel @Inject constructor(
             initialValue = null
         )
 
-    /**
-     * Paging data flow for notifications.
-     */
-    val notificationsPagingData: Flow<PagingData<Notification>> = getNotificationsUseCase()
-        .cachedIn(viewModelScope)
+    private val _notificationsPagingData = MutableStateFlow<PagingData<Notification>>(PagingData.empty())
+    val notificationsPagingData: Flow<PagingData<Notification>> = _notificationsPagingData.asStateFlow()
+
+    init {
+        loadNotifications()
+    }
+
+    private fun loadNotifications() {
+        getNotificationsUseCase()
+            .cachedIn(viewModelScope)
+            .onEach { _notificationsPagingData.value = it }
+            .launchIn(viewModelScope)
+    }
 
     /**
      * Handle user actions.
@@ -55,6 +63,7 @@ class NotificationsViewModel @Inject constructor(
             is NotificationsAction.DismissNotification -> dismissNotification(action.notificationId)
             is NotificationsAction.ClearAll -> clearAllNotifications()
             is NotificationsAction.DismissError -> dismissError()
+            NotificationsAction.Refresh -> loadNotifications()
         }
     }
 
@@ -65,7 +74,8 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = dismissNotificationUseCase(notificationId)) {
                 is Result.Success -> {
-                    // Success - paging will refresh automatically
+                    // Success - refresh the paging data to remove the dismissed notification
+                    loadNotifications()
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -88,6 +98,7 @@ class NotificationsViewModel @Inject constructor(
                 is Result.Success -> {
                     _uiState.update { it.copy(isClearingAll = false) }
                     // Paging will refresh automatically
+                    loadNotifications()
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -124,5 +135,6 @@ data class NotificationsUiState(
 sealed class NotificationsAction {
     data class DismissNotification(val notificationId: String) : NotificationsAction()
     data object ClearAll : NotificationsAction()
+    data object Refresh : NotificationsAction()
     data object DismissError : NotificationsAction()
 }
