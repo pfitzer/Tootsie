@@ -27,6 +27,7 @@ import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
 import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
+import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import androidx.compose.runtime.collectAsState
 
 /**
@@ -202,14 +203,11 @@ fun TootsieNavHost(
                 onNavigateToFollowedTags = {
                     navController.navigate(TootsieDestinations.FollowedTags.route)
                 },
-                onNavigateToTrendingHashtags = {
-                    navController.navigate(TootsieDestinations.TrendingHashtags.route)
+                onNavigateToTrending = {
+                    navController.navigate(TootsieDestinations.Trending.route)
                 },
-                onNavigateToTrendingPosts = {
-                    navController.navigate(TootsieDestinations.TrendingPosts.route)
-                },
-                onNavigateToTrendingLinks = {
-                    navController.navigate(TootsieDestinations.TrendingLinks.route)
+                onNavigateToConversations = {
+                    navController.navigate(TootsieDestinations.Conversations.route)
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -293,6 +291,16 @@ fun TootsieNavHost(
                 },
                 onNavigateToVideoPlayer = { url, description ->
                     navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
+                }
+            )
+        }
+
+        // Conversations screen
+        composable(route = TootsieDestinations.Conversations.route) {
+            ConversationsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToStatus = { statusId ->
+                    navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
                 }
             )
         }
@@ -592,23 +600,9 @@ fun TootsieNavHost(
             )
         }
 
-        // Trending Hashtags screen - view trending hashtags
-        composable(route = TootsieDestinations.TrendingHashtags.route) {
-            com.pfitzer.tootsie.presentation.screens.trending.TrendingHashtagsScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToSearch = { query ->
-                    // Remove the # if present
-                    val hashtag = query.removePrefix("#")
-                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
-                }
-            )
-        }
-
-        // Trending Posts screen - view trending posts/statuses
-        composable(route = TootsieDestinations.TrendingPosts.route) {
-            com.pfitzer.tootsie.presentation.screens.trendingposts.TrendingPostsScreen(
+        // Trending screen - view trending posts, hashtags and links
+        composable(route = TootsieDestinations.Trending.route) {
+            com.pfitzer.tootsie.presentation.screens.trending.TrendingScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -622,22 +616,15 @@ fun TootsieNavHost(
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
                 onNavigateToSearch = { query ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                    // Remove the # if present
+                    val hashtag = query.removePrefix("#")
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
                 },
                 onNavigateToVideoPlayer = { url, description ->
                     navController.navigate(TootsieDestinations.VideoPlayer.createRoute(url, description))
-                }
-            )
-        }
-
-        // Trending Links screen - view trending links/articles
-        composable(route = TootsieDestinations.TrendingLinks.route) {
-            com.pfitzer.tootsie.presentation.screens.trendinglinks.TrendingLinksScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
                 }
             )
         }

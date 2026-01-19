@@ -1,41 +1,7 @@
 package com.pfitzer.tootsie.di
 
-import com.pfitzer.tootsie.data.repository.AccountRepositoryImpl
-import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
-import com.pfitzer.tootsie.data.repository.BookmarksRepositoryImpl
-import com.pfitzer.tootsie.data.repository.DraftRepositoryImpl
-import com.pfitzer.tootsie.data.repository.EmojiRepositoryImpl
-import com.pfitzer.tootsie.data.repository.FavoritesRepositoryImpl
-import com.pfitzer.tootsie.data.repository.FollowedTagsRepositoryImpl
-import com.pfitzer.tootsie.data.repository.ListsRepositoryImpl
-import com.pfitzer.tootsie.data.repository.ListTimelineRepositoryImpl
-import com.pfitzer.tootsie.data.repository.HashtagTimelineRepositoryImpl
-import com.pfitzer.tootsie.data.repository.NotificationRepositoryImpl
-import com.pfitzer.tootsie.data.repository.SearchRepositoryImpl
-import com.pfitzer.tootsie.data.repository.StatusRepositoryImpl
-import com.pfitzer.tootsie.data.repository.TimelineRepositoryImpl
-import com.pfitzer.tootsie.data.repository.TrendingRepositoryImpl
-import com.pfitzer.tootsie.data.repository.TrendingPostsRepositoryImpl
-import com.pfitzer.tootsie.data.repository.TrendingLinksRepositoryImpl
-import com.pfitzer.tootsie.data.repository.PushRepositoryImpl
-import com.pfitzer.tootsie.domain.repository.AccountRepository
-import com.pfitzer.tootsie.domain.repository.AuthRepository
-import com.pfitzer.tootsie.domain.repository.BookmarksRepository
-import com.pfitzer.tootsie.domain.repository.DraftRepository
-import com.pfitzer.tootsie.domain.repository.EmojiRepository
-import com.pfitzer.tootsie.domain.repository.FavoritesRepository
-import com.pfitzer.tootsie.domain.repository.FollowedTagsRepository
-import com.pfitzer.tootsie.domain.repository.ListsRepository
-import com.pfitzer.tootsie.domain.repository.ListTimelineRepository
-import com.pfitzer.tootsie.domain.repository.HashtagTimelineRepository
-import com.pfitzer.tootsie.domain.repository.NotificationRepository
-import com.pfitzer.tootsie.domain.repository.SearchRepository
-import com.pfitzer.tootsie.domain.repository.StatusRepository
-import com.pfitzer.tootsie.domain.repository.TimelineRepository
-import com.pfitzer.tootsie.domain.repository.TrendingRepository
-import com.pfitzer.tootsie.domain.repository.TrendingPostsRepository
-import com.pfitzer.tootsie.domain.repository.TrendingLinksRepository
-import com.pfitzer.tootsie.domain.repository.PushRepository
+import com.pfitzer.tootsie.data.repository.*
+import com.pfitzer.tootsie.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -211,4 +177,10 @@ abstract class RepositoryModule {
     abstract fun bindPushRepository(
         pushRepositoryImpl: PushRepositoryImpl
     ): PushRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindConversationRepository(
+        conversationRepositoryImpl: ConversationRepositoryImpl
+    ): ConversationRepository
 }

@@ -202,8 +202,8 @@
     <!-- Trending Labels -->
     <string name="trending_posts_count">%1$d Beiträge</string>
     <string name="trending_people_talking">%1$d Personen sprechen darüber</string>
-    <string name="trending_accounts_count">%1$d Konten</string>
-    <string name="trending_shares_count">%1$d Mal geteilt</string>
+    <string name="trending_accounts_count_label">Konten</string>
+    <string name="trending_shares_count_label">Mal geteilt</string>
 
     <!-- Loading Messages -->
     <string name="uploading_media">Medien werden hochgeladen…</string>
@@ -261,10 +261,11 @@
     <string name="filter_show_media_only">Nur Beiträge mit Medien anzeigen</string>
 
     <!-- Trending Screens -->
-    <string name="trending_hashtags_title">Trending Hashtags</string>
-    <string name="trending_statuses_title">Trending-Beiträge</string>
-    <string name="trending_posts_title">Trending-Beiträge</string>
-    <string name="trending_links_title">Trending-Links</string>
+    <string name="trending_title">Trending</string>
+    <string name="trending_hashtags_title">Hashtags</string>
+    <string name="trending_statuses_title">Status-Beiträge</string>
+    <string name="trending_posts_title">Beiträge</string>
+    <string name="trending_links_title">Links</string>
     <string name="empty_trending_hashtags">Keine Trending Hashtags</string>
 
     <!-- Followed Tags -->
@@ -355,4 +356,8 @@
     <string name="poll_total_votes">%1$d Stimmen</string>
     <string name="poll_voted_hint">Du hast dafür gestimmt</string>
 
+    <string name="back">Zurück</string>
+    <string name="direct_messages">Direktnachrichten</string>
+    <string name="empty_conversations">Noch keine Direktnachrichten.</string>
+    <string name="cd_delete_conversation">Unterhaltung löschen</string>
 </resources>
