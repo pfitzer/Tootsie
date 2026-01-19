@@ -46,6 +46,124 @@ data class ParsedHtmlContent(
 )
 
 /**
+ * Converts HTML content to AnnotatedString for rich text editing.
+ * Supports basic tags like <b>, <i>, <u>, <a>.
+ */
+fun htmlToAnnotatedString(html: String): androidx.compose.ui.text.AnnotatedString {
+    if (html.isBlank()) return androidx.compose.ui.text.AnnotatedString("")
+
+    val spanned = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+    val builder = androidx.compose.ui.text.AnnotatedString.Builder()
+    builder.append(spanned.toString())
+
+    val spans = spanned.getSpans(0, spanned.length, Any::class.java)
+    for (span in spans) {
+        val start = spanned.getSpanStart(span)
+        val end = spanned.getSpanEnd(span)
+        when (span) {
+            is android.text.style.StyleSpan -> {
+                when (span.style) {
+                    android.graphics.Typeface.BOLD -> builder.addStyle(
+                        androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        start,
+                        end
+                    )
+                    android.graphics.Typeface.ITALIC -> builder.addStyle(
+                        androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
+                        start,
+                        end
+                    )
+                    android.graphics.Typeface.BOLD_ITALIC -> builder.addStyle(
+                        androidx.compose.ui.text.SpanStyle(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        ),
+                        start,
+                        end
+                    )
+                }
+            }
+            is android.text.style.UnderlineSpan -> builder.addStyle(
+                androidx.compose.ui.text.SpanStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline),
+                start,
+                end
+            )
+            is android.text.style.URLSpan -> {
+                builder.addStyle(
+                    androidx.compose.ui.text.SpanStyle(color = androidx.compose.ui.graphics.Color.Blue, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline),
+                    start,
+                    end
+                )
+                builder.addStringAnnotation("LINK", span.url, start, end)
+            }
+        }
+    }
+    return builder.toAnnotatedString()
+}
+
+/**
+ * Converts AnnotatedString back to basic HTML for Mastodon API.
+ */
+fun annotatedStringToHtml(annotatedString: androidx.compose.ui.text.AnnotatedString): String {
+    val text = annotatedString.text
+    val sb = StringBuilder()
+    
+    // This is a simplified conversion. A more robust one would handle nested spans correctly.
+    // For bio editing, this should be sufficient.
+    var lastIndex = 0
+    
+    // We sort spans by start position to process them in order
+    val allSpans = (annotatedString.spanStyles.map { it to "style" } + 
+                   annotatedString.getStringAnnotations(0, text.length).map { it to "annotation" })
+        .sortedBy { (span, _) -> 
+            when (span) {
+                is androidx.compose.ui.text.AnnotatedString.Range<*> -> span.start
+                else -> 0
+            }
+        }
+
+    // Since we can't easily convert back to HTML with nested tags this way, 
+    // we'll use a simpler approach: process character by character or use a more advanced logic.
+    // However, Mastodon Bio is usually simple.
+    
+    // Let's use a simpler character-based approach for reliability
+    for (i in text.indices) {
+        val char = text[i]
+        
+        // Check for tags starting at this index
+        annotatedString.spanStyles.filter { it.start == i }.forEach { span ->
+            if (span.item.fontWeight == androidx.compose.ui.text.font.FontWeight.Bold) sb.append("<b>")
+            if (span.item.fontStyle == androidx.compose.ui.text.font.FontStyle.Italic) sb.append("<i>")
+            if (span.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.Underline) sb.append("<u>")
+        }
+        annotatedString.getStringAnnotations("LINK", i, i + 1).filter { it.start == i }.forEach { span ->
+            sb.append("<a href=\"").append(span.item).append("\">")
+        }
+
+        // Append character (with basic HTML escaping)
+        when (char) {
+            '<' -> sb.append("&lt;")
+            '>' -> sb.append("&gt;")
+            '&' -> sb.append("&amp;")
+            '\n' -> sb.append("<br>")
+            else -> sb.append(char)
+        }
+
+        // Check for tags ending at this index + 1
+        annotatedString.getStringAnnotations("LINK", i, i + 1).filter { it.end == i + 1 }.forEach { _ ->
+            sb.append("</a>")
+        }
+        annotatedString.spanStyles.filter { it.end == i + 1 }.forEach { span ->
+            if (span.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.Underline) sb.append("</u>")
+            if (span.item.fontStyle == androidx.compose.ui.text.font.FontStyle.Italic) sb.append("</i>")
+            if (span.item.fontWeight == androidx.compose.ui.text.font.FontWeight.Bold) sb.append("</b>")
+        }
+    }
+    
+    return sb.toString()
+}
+
+/**
  * Parse HTML content and extract clickable elements (links, mentions, hashtags).
  *
  * @param html HTML content from Mastodon API

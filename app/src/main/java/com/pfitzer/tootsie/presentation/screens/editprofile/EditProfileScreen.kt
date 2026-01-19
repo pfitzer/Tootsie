@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.common.RichTextEditor
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.util.openInBrowser
 
@@ -95,17 +96,15 @@ fun EditProfileScreen(
                         enabled = !uiState.isSaving
                     )
 
-                    OutlinedTextField(
+                    RichTextEditor(
                         value = uiState.note,
                         onValueChange = { viewModel.onAction(EditProfileAction.NoteChanged(it)) },
                         label = { Text(stringResource(R.string.bio)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 120.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         enabled = !uiState.isSaving
                     )
 
-                    if (uiState.note.isNotBlank()) {
+                    if (uiState.note.text.isNotBlank()) {
                         Text(
                             text = stringResource(R.string.profile_preview),
                             style = MaterialTheme.typography.titleSmall,
@@ -117,7 +116,7 @@ fun EditProfileScreen(
                             shape = MaterialTheme.shapes.medium
                         ) {
                             RichTextContent(
-                                content = uiState.note,
+                                content = com.pfitzer.tootsie.presentation.util.annotatedStringToHtml(uiState.note.annotatedString),
                                 mentions = emptyList(),
                                 tags = emptyList(),
                                 onMentionClick = {},

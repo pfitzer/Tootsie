@@ -2,10 +2,13 @@ package com.pfitzer.tootsie.presentation.screens.editprofile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.ui.text.input.TextFieldValue
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.usecase.account.GetAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.account.UpdateProfileUseCase
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import com.pfitzer.tootsie.presentation.util.annotatedStringToHtml
+import com.pfitzer.tootsie.presentation.util.htmlToAnnotatedString
 import com.pfitzer.tootsie.presentation.util.htmlToPlainText
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,11 +40,12 @@ class EditProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             val activeAccount = accountManagementRepository.getActiveAccount()
             if (activeAccount != null) {
+                val annotatedString = htmlToAnnotatedString(activeAccount.note)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         displayName = activeAccount.displayName,
-                        note = htmlToPlainText(activeAccount.note)
+                        note = TextFieldValue(annotatedString)
                     )
                 }
             } else {
@@ -75,7 +79,7 @@ class EditProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             val result = updateProfileUseCase(
                 displayName = _uiState.value.displayName,
-                note = _uiState.value.note
+                note = annotatedStringToHtml(_uiState.value.note.annotatedString)
             )
             when (result) {
                 is Result.Success -> {
@@ -97,7 +101,7 @@ class EditProfileViewModel @Inject constructor(
 
 data class EditProfileUiState(
     val displayName: String = "",
-    val note: String = "",
+    val note: TextFieldValue = TextFieldValue(""),
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isSuccess: Boolean = false,
@@ -106,7 +110,7 @@ data class EditProfileUiState(
 
 sealed class EditProfileAction {
     data class DisplayNameChanged(val displayName: String) : EditProfileAction()
-    data class NoteChanged(val note: String) : EditProfileAction()
+    data class NoteChanged(val note: TextFieldValue) : EditProfileAction()
     data object SaveProfile : EditProfileAction()
     data object DismissError : EditProfileAction()
 }
