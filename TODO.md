@@ -43,6 +43,6 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 
 ### 🎨 UI/UX Improvements
 
-- [ ] **Media Viewer Enhancements**
+- [x] **Media Viewer Enhancements**
     - **Description**: Add zoom-to-pinch and swipe-to-dismiss gestures to the image viewer.
     - **Scope**: Update the `ImageViewerScreen` using Compose's transformation gestures.
