@@ -99,22 +99,14 @@ fun ImageViewerScreen(
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 1f - (swipeOffset.coerceIn(0f, 500f) / 500f)))
                 .padding(paddingValues)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onDoubleTap = {
-                            if (scale > 1f) {
-                                scale = 1f
-                                offset = Offset.Zero
-                            } else {
-                                scale = 3f
-                            }
-                        }
-                    )
-                }
                 .pointerInput(scale) {
                     if (scale == 1f) {
                         detectDragGestures(
-                            onDrag = { _, dragAmount ->
+                            onDragStart = {
+                                swipeOffset = 0f
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
                                 swipeOffset += dragAmount.y
                             },
                             onDragEnd = {
@@ -129,6 +121,18 @@ fun ImageViewerScreen(
                             }
                         )
                     }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            if (scale > 1f) {
+                                scale = 1f
+                                offset = Offset.Zero
+                            } else {
+                                scale = 3f
+                            }
+                        }
+                    )
                 }
                 .offset { IntOffset(0, swipeOffset.roundToInt()) },
             contentAlignment = Alignment.Center
