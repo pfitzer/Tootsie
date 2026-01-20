@@ -8,12 +8,7 @@ import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
-import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
-import com.pfitzer.tootsie.domain.usecase.account.FollowAccountUseCase
-import com.pfitzer.tootsie.domain.usecase.account.GetAccountStatusesUseCase
-import com.pfitzer.tootsie.domain.usecase.account.GetAccountUseCase
-import com.pfitzer.tootsie.domain.usecase.account.GetRelationshipUseCase
-import com.pfitzer.tootsie.domain.usecase.account.UnfollowAccountUseCase
+import com.pfitzer.tootsie.domain.usecase.account.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -31,7 +26,7 @@ class ProfileViewModel @Inject constructor(
     private val followAccountUseCase: FollowAccountUseCase,
     private val unfollowAccountUseCase: UnfollowAccountUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
-    private val accountManagementRepository: AccountManagementRepository,
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -43,7 +38,7 @@ class ProfileViewModel @Inject constructor(
     /**
      * Observe the currently active account.
      */
-    val activeAccount: StateFlow<Account?> = accountManagementRepository.observeActiveAccount()
+    val activeAccount: StateFlow<Account?> = observeActiveAccountUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

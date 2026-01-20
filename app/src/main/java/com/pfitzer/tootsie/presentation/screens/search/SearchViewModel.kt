@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Hashtag
 import com.pfitzer.tootsie.domain.model.Status
-import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.search.SearchUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchUseCase: SearchUseCase,
-    private val accountManagementRepository: AccountManagementRepository
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -31,7 +31,7 @@ class SearchViewModel @Inject constructor(
     /**
      * Observe the currently active account.
      */
-    val activeAccount: StateFlow<Account?> = accountManagementRepository.observeActiveAccount()
+    val activeAccount: StateFlow<Account?> = observeActiveAccountUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

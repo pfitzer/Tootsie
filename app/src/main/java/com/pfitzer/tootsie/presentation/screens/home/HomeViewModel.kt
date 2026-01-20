@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.model.TimelineType
-import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
-import com.pfitzer.tootsie.domain.repository.StatusRepository
-import com.pfitzer.tootsie.domain.repository.TimelineRepository
+import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
+import com.pfitzer.tootsie.domain.usecase.timeline.GetTimelineUseCase
+import com.pfitzer.tootsie.domain.usecase.timeline.RefreshTimelineUseCase
+import com.pfitzer.tootsie.domain.usecase.timeline.UpdateTimelineFilterUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,17 +28,18 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val timelineRepository: TimelineRepository,
-    private val statusRepository: StatusRepository,
-    private val accountManagementRepository: AccountManagementRepository,
+    private val getTimelineUseCase: GetTimelineUseCase,
+    private val refreshTimelineUseCase: RefreshTimelineUseCase,
+    private val updateTimelineFilterUseCase: UpdateTimelineFilterUseCase,
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val preferencesManager: PreferencesManager,
-    private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
-    private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
-    private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
-    private val unreblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase,
-    private val bookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase,
-    private val voteOnPollUseCase: com.pfitzer.tootsie.domain.usecase.status.VoteOnPollUseCase
+    private val favoriteStatusUseCase: FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: ReblogStatusUseCase,
+    private val unreblogStatusUseCase: UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -44,7 +48,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Observe the currently active account.
      */
-    val activeAccount: StateFlow<com.pfitzer.tootsie.domain.model.Account?> = accountManagementRepository.observeActiveAccount()
+    val activeAccount: StateFlow<Account?> = observeActiveAccountUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -71,17 +75,13 @@ class HomeViewModel @Inject constructor(
     val timelinePagingData: Flow<PagingData<Status>> = combine(
         timelineFilter,
         _activeTimelineType,
-        accountManagementRepository.observeActiveAccount()
+        observeActiveAccountUseCase()
     ) { filter, timelineType, activeAccount ->
         Triple(filter, timelineType, activeAccount?.id)
     }
         .flatMapLatest { (filter, timelineType, _) ->
             // The account change or timeline type change triggers flatMapLatest to cancel old flow and start new one
-            when (timelineType) {
-                TimelineType.HOME -> timelineRepository.getHomeTimeline(filter)
-                TimelineType.PUBLIC_LOCAL -> timelineRepository.getPublicTimeline(local = true, filter = filter)
-                TimelineType.PUBLIC_FEDERATED -> timelineRepository.getPublicTimeline(local = false, filter = filter)
-            }
+            getTimelineUseCase(timelineType, filter)
         }
         .cachedIn(viewModelScope)
 
@@ -246,10 +246,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
             try {
-                when (_activeTimelineType.value) {
-                    TimelineType.HOME -> timelineRepository.refreshHomeTimeline()
-                    TimelineType.PUBLIC_LOCAL, TimelineType.PUBLIC_FEDERATED -> timelineRepository.refreshPublicTimeline()
-                }
+                refreshTimelineUseCase(_activeTimelineType.value)
             } finally {
                 _uiState.update { it.copy(isRefreshing = false) }
             }
@@ -275,11 +272,7 @@ class HomeViewModel @Inject constructor(
      */
     private fun updateFilter(filter: TimelineFilter) {
         viewModelScope.launch {
-            preferencesManager.saveTimelineFilter(
-                hideBoosts = filter.hideBoosts,
-                hideReplies = filter.hideReplies,
-                showOnlyMedia = filter.showOnlyMedia
-            )
+            updateTimelineFilterUseCase(filter)
         }
     }
 }

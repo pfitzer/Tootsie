@@ -4,20 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Account
-import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
-import com.pfitzer.tootsie.domain.usecase.account.GetAllAccountsUseCase
-import com.pfitzer.tootsie.domain.usecase.account.RemoveAccountUseCase
-import com.pfitzer.tootsie.domain.usecase.account.SwitchAccountUseCase
+import com.pfitzer.tootsie.domain.usecase.account.*
 import com.pfitzer.tootsie.domain.usecase.auth.LogoutUseCase
+import com.pfitzer.tootsie.domain.usecase.settings.UpdateThemeUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,15 +21,27 @@ private const val TAG = "SettingsViewModel"
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val accountManagementRepository: AccountManagementRepository,
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
+    private val getActiveAccountUseCase: GetActiveAccountUseCase,
     private val preferencesManager: com.pfitzer.tootsie.data.local.datastore.PreferencesManager,
     private val getAllAccountsUseCase: GetAllAccountsUseCase,
     private val switchAccountUseCase: SwitchAccountUseCase,
     private val removeAccountUseCase: RemoveAccountUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
+    private val updateThemeUseCase: UpdateThemeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
+
+    /**
+     * Observe the currently active account.
+     */
+    val activeAccount: StateFlow<Account?> = observeActiveAccountUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     /**
      * Combined UI state observing both accounts and theme.
@@ -88,7 +92,7 @@ class SettingsViewModel @Inject constructor(
 
             try {
                 val accounts = getAllAccountsUseCase()
-                val activeAccount = accountManagementRepository.getActiveAccount()
+                val activeAccount = getActiveAccountUseCase()
 
                 Log.d(TAG, "Loaded ${accounts.size} accounts, active account: ${activeAccount?.acct}")
 
@@ -240,8 +244,7 @@ class SettingsViewModel @Inject constructor(
      */
     private fun changeTheme(theme: String) {
         viewModelScope.launch {
-            Log.d(TAG, "Changing theme to: $theme")
-            preferencesManager.saveTheme(theme)
+            updateThemeUseCase(theme)
         }
     }
 }

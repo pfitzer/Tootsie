@@ -34,7 +34,7 @@ This list contains suggested next tasks for the Tootsie Mastodon client, ranging
 
 ### 🛠 Architectural & Technical Debt
 
-- [ ] **Use Case Consistency Refactoring**
+- [x] **Use Case Consistency Refactoring**
     - **Description**: Standardize all business logic into UseCases across all ViewModels to fully align with Clean Architecture.
     - **Refactor**: Move remaining direct repository logic in `HomeViewModel`, `ProfileViewModel`, etc., to specialized UseCases.
 - [ ] **Accessibility Audit & Implementation**
