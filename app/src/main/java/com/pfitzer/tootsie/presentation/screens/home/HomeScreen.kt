@@ -3,6 +3,8 @@ package com.pfitzer.tootsie.presentation.screens.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
@@ -21,6 +23,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -87,6 +92,40 @@ fun HomeScreen(
     var showFilterDialog by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val pagerState = rememberPagerState(
+        initialPage = when (activeTimelineType) {
+            TimelineType.HOME -> 0
+            TimelineType.PUBLIC_LOCAL -> 1
+            TimelineType.PUBLIC_FEDERATED -> 2
+        },
+        pageCount = { 3 }
+    )
+
+    // Sync pager state with activeTimelineType when it changes from outside (e.g. Tab click)
+    LaunchedEffect(activeTimelineType) {
+        val page = when (activeTimelineType) {
+            TimelineType.HOME -> 0
+            TimelineType.PUBLIC_LOCAL -> 1
+            TimelineType.PUBLIC_FEDERATED -> 2
+        }
+        if (pagerState.currentPage != page) {
+            pagerState.animateScrollToPage(page)
+        }
+    }
+
+    // Sync activeTimelineType with pager state when user swipes
+    LaunchedEffect(pagerState.currentPage) {
+        val newType = when (pagerState.currentPage) {
+            0 -> TimelineType.HOME
+            1 -> TimelineType.PUBLIC_LOCAL
+            2 -> TimelineType.PUBLIC_FEDERATED
+            else -> TimelineType.HOME
+        }
+        if (activeTimelineType != newType) {
+            viewModel.onAction(HomeAction.ChangeTimelineType(newType))
+        }
+    }
 
     // Filter dialog
     if (showFilterDialog) {
@@ -281,66 +320,91 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+        var isEdgeSwipe by remember { mutableStateOf(false) }
+
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) {
-            TimelineList(
-                timelinePagingItems = timelinePagingItems,
-                onStatusClick = onNavigateToStatus,
-                onAvatarClick = onNavigateToProfile,
-                onMentionClick = onNavigateToProfile,  // Mentions navigate to profile
-                onHashtagClick = { tagName ->
-                    // Navigate to hashtag timeline
-                    onNavigateToHashtag(tagName)
-                },
-                onFavoriteClick = { status ->
-                    if (status.favourited) {
-                        viewModel.onAction(HomeAction.UnfavoriteStatus(status))
-                    } else {
-                        viewModel.onAction(HomeAction.FavoriteStatus(status))
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val position = event.changes.first().position
+                            // If the first touch is within the left 40dp (approximate edge threshold),
+                            // we flag it as an edge swipe to potentially disable pager's internal gesture consumption.
+                            // Note: 40dp is a common threshold for edge gestures.
+                            if (event.changes.any { it.pressed }) {
+                                isEdgeSwipe = position.x < 40.dp.toPx() && pagerState.currentPage == 0
+                            }
+                        }
                     }
                 },
-                onBoostClick = { status ->
-                    if (status.reblogged) {
-                        viewModel.onAction(HomeAction.UnboostStatus(status))
-                    } else {
-                        viewModel.onAction(HomeAction.BoostStatus(status))
-                    }
-                },
-                onBookmarkClick = { status ->
-                    if (status.bookmarked) {
-                        viewModel.onAction(HomeAction.UnbookmarkStatus(status))
-                    } else {
-                        viewModel.onAction(HomeAction.BookmarkStatus(status))
-                    }
-                },
-                onReplyClick = { status ->
-                    onNavigateToReply(status.id)
-                },
-                onImageClick = onNavigateToImageViewer,
-                onVideoClick = onNavigateToVideoPlayer,
-                onVoteClick = { pollId, choices ->
-                    viewModel.onAction(HomeAction.VoteOnPoll(pollId, choices))
-                },
-                onRefresh = {
-                    viewModel.onAction(HomeAction.RefreshTimeline)
-                },
-                isRefreshing = uiState.isRefreshing
-            )
-
-            // Error message
-            uiState.errorMessage?.let { error ->
-                ErrorMessage(
-                    message = error,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
+            // UserRequested: "the gesture must not conflicting with the swipe to open the left menu"
+            // We disable user scroll when an edge swipe is detected to allow the drawer to intercept the gesture.
+            userScrollEnabled = !isEdgeSwipe,
+            beyondViewportPageCount = 1
+        ) { page ->
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                TimelineList(
+                    timelinePagingItems = timelinePagingItems,
+                    onStatusClick = onNavigateToStatus,
+                    onAvatarClick = onNavigateToProfile,
+                    onMentionClick = onNavigateToProfile,  // Mentions navigate to profile
+                    onHashtagClick = { tagName ->
+                        // Navigate to hashtag timeline
+                        onNavigateToHashtag(tagName)
+                    },
+                    onFavoriteClick = { status ->
+                        if (status.favourited) {
+                            viewModel.onAction(HomeAction.UnfavoriteStatus(status))
+                        } else {
+                            viewModel.onAction(HomeAction.FavoriteStatus(status))
+                        }
+                    },
+                    onBoostClick = { status ->
+                        if (status.reblogged) {
+                            viewModel.onAction(HomeAction.UnboostStatus(status))
+                        } else {
+                            viewModel.onAction(HomeAction.BoostStatus(status))
+                        }
+                    },
+                    onBookmarkClick = { status ->
+                        if (status.bookmarked) {
+                            viewModel.onAction(HomeAction.UnbookmarkStatus(status))
+                        } else {
+                            viewModel.onAction(HomeAction.BookmarkStatus(status))
+                        }
+                    },
+                    onReplyClick = { status ->
+                        onNavigateToReply(status.id)
+                    },
+                    onImageClick = onNavigateToImageViewer,
+                    onVideoClick = onNavigateToVideoPlayer,
+                    onVoteClick = { pollId, choices ->
+                        viewModel.onAction(HomeAction.VoteOnPoll(pollId, choices))
+                    },
+                    onRefresh = {
+                        viewModel.onAction(HomeAction.RefreshTimeline)
+                    },
+                    isRefreshing = uiState.isRefreshing
                 )
+
+                // Error message
+                uiState.errorMessage?.let { error ->
+                    ErrorMessage(
+                        message = error,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    )
+                }
             }
         }
-        }
+    }
     }
 }
 
