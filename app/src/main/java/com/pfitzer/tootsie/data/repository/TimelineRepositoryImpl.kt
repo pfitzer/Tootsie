@@ -81,4 +81,9 @@ class TimelineRepositoryImpl @Inject constructor(
             statusDao.deleteStatusesByTimelineType("public", activeAccount.id)
         }
     }
+
+    override suspend fun cleanupOldStatuses(retentionHours: Int) {
+        val cutoffTimestamp = System.currentTimeMillis() - (retentionHours * 60 * 60 * 1000L)
+        statusDao.deleteOldStatuses(cutoffTimestamp)
+    }
 }

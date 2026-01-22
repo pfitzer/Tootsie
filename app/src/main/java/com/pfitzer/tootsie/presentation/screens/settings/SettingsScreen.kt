@@ -181,6 +181,23 @@ private fun SuccessContent(
                     onThemeChange = { onAction(SettingsAction.ChangeTheme(it)) }
                 )
             }
+
+            // Database Cleanup Section
+            item {
+                Text(
+                    text = stringResource(R.string.database_cleanup),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+            }
+
+            item {
+                DatabaseRetentionCard(
+                    currentRetentionHours = state.databaseRetentionHours,
+                    onRetentionChange = { onAction(SettingsAction.ChangeDatabaseRetentionHours(it)) }
+                )
+            }
         }
 
         // Error message
@@ -258,6 +275,46 @@ private fun ThemeOption(
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 8.dp)
         )
+    }
+}
+
+/**
+ * Card for selecting database retention period.
+ */
+@Composable
+private fun DatabaseRetentionCard(
+    currentRetentionHours: String,
+    onRetentionChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.retention_period),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            ThemeOption(
+                label = stringResource(R.string.retention_12h),
+                selected = currentRetentionHours == "12",
+                onClick = { onRetentionChange("12") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.retention_24h),
+                selected = currentRetentionHours == "24",
+                onClick = { onRetentionChange("24") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.retention_48h),
+                selected = currentRetentionHours == "48",
+                onClick = { onRetentionChange("48") }
+            )
+        }
     }
 }
 

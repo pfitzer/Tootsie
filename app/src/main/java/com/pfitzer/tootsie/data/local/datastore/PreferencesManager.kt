@@ -48,6 +48,9 @@ class PreferencesManager @Inject constructor(
         private val KEY_TIMELINE_HIDE_BOOSTS = booleanPreferencesKey("timeline_hide_boosts")
         private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
         private val KEY_TIMELINE_SHOW_ONLY_MEDIA = booleanPreferencesKey("timeline_show_only_media")
+
+        // Database Cleanup
+        private val KEY_DATABASE_RETENTION_HOURS = stringPreferencesKey("database_retention_hours")
     }
 
     // Push Config Keys (account-scoped)
@@ -260,6 +263,32 @@ class PreferencesManager @Inject constructor(
      */
     suspend fun getTimelineFilter(): com.pfitzer.tootsie.domain.model.TimelineFilter {
         return timelineFilter.first()
+    }
+
+    // ========== Database Cleanup ==========
+
+    /**
+     * Save database retention period in hours.
+     */
+    suspend fun saveDatabaseRetentionHours(hours: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_DATABASE_RETENTION_HOURS] = hours
+        }
+    }
+
+    /**
+     * Get database retention period in hours as Flow.
+     * Returns "24" by default.
+     */
+    val databaseRetentionHours: Flow<String> = dataStore.data.map { preferences ->
+        preferences[KEY_DATABASE_RETENTION_HOURS] ?: "24"
+    }
+
+    /**
+     * Get database retention period in hours (suspend function for one-time read).
+     */
+    suspend fun getDatabaseRetentionHours(): String {
+        return databaseRetentionHours.first()
     }
 
     // ========== Push Notifications ==========

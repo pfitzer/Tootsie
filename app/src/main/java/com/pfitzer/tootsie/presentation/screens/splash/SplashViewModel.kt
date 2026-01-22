@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.domain.usecase.auth.CheckLoginStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.timeline.CleanupDatabaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ private const val TAG = "SplashViewModel"
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
+    private val cleanupDatabaseUseCase: CleanupDatabaseUseCase,
     private val authRepository: AuthRepositoryImpl
 ) : ViewModel() {
 
@@ -46,6 +48,8 @@ class SplashViewModel @Inject constructor(
             // Use IO dispatcher to avoid DataStore deadlock on main thread
             withContext(Dispatchers.IO) {
                 authRepository.initializeProviders()
+                Log.d(TAG, "checkAuthStatus() - Cleaning up database...")
+                cleanupDatabaseUseCase()
             }
 
             Log.d(TAG, "checkAuthStatus() - Checking login status...")

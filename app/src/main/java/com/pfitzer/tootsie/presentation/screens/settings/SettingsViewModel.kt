@@ -44,14 +44,15 @@ class SettingsViewModel @Inject constructor(
         )
 
     /**
-     * Combined UI state observing both accounts and theme.
+     * Combined UI state observing both accounts, theme and database retention.
      */
     val combinedUiState: StateFlow<SettingsUiState> = combine(
         _uiState,
-        preferencesManager.theme
-    ) { state, theme ->
+        preferencesManager.theme,
+        preferencesManager.databaseRetentionHours
+    ) { state, theme, retentionHours ->
         if (state is SettingsUiState.Success) {
-            state.copy(theme = theme)
+            state.copy(theme = theme, databaseRetentionHours = retentionHours)
         } else {
             state
         }
@@ -79,6 +80,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsAction.Refresh -> loadAccounts()
             is SettingsAction.DismissError -> dismissError()
             is SettingsAction.ChangeTheme -> changeTheme(action.theme)
+            is SettingsAction.ChangeDatabaseRetentionHours -> changeDatabaseRetentionHours(action.hours)
         }
     }
 
@@ -247,6 +249,15 @@ class SettingsViewModel @Inject constructor(
             updateThemeUseCase(theme)
         }
     }
+
+    /**
+     * Change database retention hours.
+     */
+    private fun changeDatabaseRetentionHours(hours: String) {
+        viewModelScope.launch {
+            preferencesManager.saveDatabaseRetentionHours(hours)
+        }
+    }
 }
 
 /**
@@ -262,7 +273,8 @@ sealed class SettingsUiState {
         val isRemoving: Boolean = false,
         val accountToRemove: String? = null,
         val errorMessage: String? = null,
-        val theme: String = "system"
+        val theme: String = "system",
+        val databaseRetentionHours: String = "24"
     ) : SettingsUiState()
 
     data class Error(val message: String) : SettingsUiState()
@@ -281,4 +293,5 @@ sealed class SettingsAction {
     data object Refresh : SettingsAction()
     data object DismissError : SettingsAction()
     data class ChangeTheme(val theme: String) : SettingsAction()
+    data class ChangeDatabaseRetentionHours(val hours: String) : SettingsAction()
 }

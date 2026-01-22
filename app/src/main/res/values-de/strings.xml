@@ -168,6 +168,11 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System-Standard</string>
     <string name="language">Sprache</string>
+    <string name="database_cleanup">Datenbank-Bereinigung</string>
+    <string name="retention_period">Aufbewahrungszeitraum</string>
+    <string name="retention_12h">12 Stunden</string>
+    <string name="retention_24h">24 Stunden</string>
+    <string name="retention_48h">48 Stunden</string>
     <string name="settings_title">Kontoeinstellungen</string>
     <string name="settings_account_title">Kontoeinstellungen</string>
     <string name="settings_active_account">Aktives Konto</string>

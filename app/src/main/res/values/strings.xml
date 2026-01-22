@@ -167,6 +167,11 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System default</string>
     <string name="language">Language</string>
+    <string name="database_cleanup">Database Cleanup</string>
+    <string name="retention_period">Retention Period</string>
+    <string name="retention_12h">12 hours</string>
+    <string name="retention_24h">24 hours</string>
+    <string name="retention_48h">48 hours</string>
     <string name="settings_title">Account Settings</string>
     <string name="settings_account_title">Account Settings</string>
     <string name="settings_active_account">Active account</string>

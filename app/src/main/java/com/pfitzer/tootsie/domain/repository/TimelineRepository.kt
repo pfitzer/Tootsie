@@ -39,4 +39,11 @@ interface TimelineRepository {
      * Refresh public timeline.
      */
     suspend fun refreshPublicTimeline()
+
+    /**
+     * Cleanup old statuses from the local database based on retention period.
+     *
+     * @param retentionHours Number of hours to keep statuses
+     */
+    suspend fun cleanupOldStatuses(retentionHours: Int)
 }
