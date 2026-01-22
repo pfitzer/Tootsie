@@ -43,7 +43,7 @@ fun TrendingScreen(
     onNavigateToReply: (String) -> Unit = {},
     onNavigateToStatus: (String) -> Unit = {},
     onNavigateToProfile: (String) -> Unit = {},
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     postsViewModel: TrendingPostsViewModel = hiltViewModel(),
@@ -112,7 +112,7 @@ fun TrendingScreen(
                         viewModel = postsViewModel,
                         onNavigateToStatus = onNavigateToStatus,
                         onNavigateToProfile = onNavigateToProfile,
-                        onNavigateToSearch = onNavigateToSearch,
+                        onNavigateToHashtag = onNavigateToHashtag,
                         onNavigateToReply = onNavigateToReply,
                         onNavigateToImageViewer = onNavigateToImageViewer,
                         onNavigateToVideoPlayer = onNavigateToVideoPlayer
@@ -121,7 +121,7 @@ fun TrendingScreen(
                 TrendingTab.HASHTAGS -> {
                     TrendingHashtagsContent(
                         viewModel = hashtagsViewModel,
-                        onNavigateToSearch = onNavigateToSearch
+                        onNavigateToHashtag = onNavigateToHashtag
                     )
                 }
                 TrendingTab.LINKS -> {
@@ -141,7 +141,7 @@ private fun TrendingPostsContent(
     viewModel: TrendingPostsViewModel,
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
-    onNavigateToSearch: (String) -> Unit,
+    onNavigateToHashtag: (String) -> Unit,
     onNavigateToReply: (String) -> Unit,
     onNavigateToImageViewer: (String, String?) -> Unit,
     onNavigateToVideoPlayer: (String, String?) -> Unit
@@ -180,7 +180,7 @@ private fun TrendingPostsContent(
                         onStatusClick = { onNavigateToStatus(status.id) },
                         onAvatarClick = { onNavigateToProfile(status.account.id) },
                         onMentionClick = onNavigateToProfile,
-                        onHashtagClick = { onNavigateToSearch("#$it") },
+                        onHashtagClick = onNavigateToHashtag,
                         onFavoriteClick = {
                             viewModel.onAction(
                                 if (status.favourited) TrendingPostsAction.UnfavoriteStatus(status)
@@ -222,7 +222,7 @@ private fun TrendingPostsContent(
 @Composable
 private fun TrendingHashtagsContent(
     viewModel: TrendingHashtagsViewModel,
-    onNavigateToSearch: (String) -> Unit
+    onNavigateToHashtag: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
@@ -255,7 +255,7 @@ private fun TrendingHashtagsContent(
                 items(items = uiState.trendingTags) { tag ->
                     TrendingHashtagCard(
                         trendingTag = tag,
-                        onClick = { onNavigateToSearch("#${tag.name}") }
+                        onClick = { onNavigateToHashtag(tag.name) }
                     )
                 }
             }

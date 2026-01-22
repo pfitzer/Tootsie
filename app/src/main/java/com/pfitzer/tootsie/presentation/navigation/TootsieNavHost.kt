@@ -251,8 +251,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { hashtagQuery ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -287,8 +287,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { profileAccountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(profileAccountId))
                 },
-                onNavigateToSearch = { hashtagQuery ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -343,8 +343,8 @@ fun TootsieNavHost(
                 onNavigateToCompose = { statusId ->
                     navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
                 },
-                onNavigateToSearch = { hashtagQuery ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query = hashtagQuery))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -396,8 +396,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { tag ->
-                    navController.navigate(TootsieDestinations.Search.createRoute("#$tag"))
+                onNavigateToHashtag = { tag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(tag))
                 }
             )
         }
@@ -453,8 +453,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { query ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -480,8 +480,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { query ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -568,8 +568,8 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { query ->
-                    navController.navigate(TootsieDestinations.Search.createRoute(query))
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
@@ -631,7 +631,7 @@ fun TootsieNavHost(
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 },
-                onNavigateToSearch = { query ->
+                onNavigateToHashtag = { query ->
                     // Remove the # if present
                     val hashtag = query.removePrefix("#")
                     navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))

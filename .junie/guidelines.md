@@ -36,5 +36,18 @@
 - Uses UnifiedPush with `WorkManager` fallback for polling.
 - Each account has its own push configuration and VAPID keys.
 
+#### Versioning
+- **Semantic Versioning**: `major.minor.patch` (e.g., `1.0.0`).
+- **Git Flow**: `main` branch for production releases.
+- **Release Candidates**: `rc-` branches for testing.
+- **Beta Releases**: `beta-` branches for testing.
+- **Alpha Releases**: `alpha-` branches for testing.
+- **Hotfixes**: `hotfix-` branches for critical fixes.
+- **Version Code**: `1000000 + major * 100000 + minor * 1000 + patch`.
+- **Version Name**: `major.minor.patch`.
+- **Release Notes**: `CHANGELOG.md`.
+- **Versioning Scheme**: `v1.0.0-rc1`.
+- **Versioning Tool**: [Semantic Versioning Tool](https://semver.org/).
+
 ---
 See also: [Junie Agent Definition](agent.md) for persona and working approach.

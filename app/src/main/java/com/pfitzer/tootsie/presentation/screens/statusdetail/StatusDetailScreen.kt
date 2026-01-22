@@ -31,7 +31,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToStatus Callback to navigate to another status
  * @param onNavigateToProfile Callback to navigate to a profile
  * @param onNavigateToCompose Callback to navigate to compose (for reply) with status ID
- * @param onNavigateToSearch Callback to navigate to search (from hashtags)
+ * @param onNavigateToHashtag Callback to navigate to hashtag timeline
  * @param viewModel ViewModel for managing status detail state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +41,7 @@ fun StatusDetailScreen(
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
     onNavigateToCompose: (String) -> Unit,
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: StatusDetailViewModel = hiltViewModel()
@@ -87,9 +87,7 @@ fun StatusDetailScreen(
                         onStatusClick = onNavigateToStatus,
                         onAvatarClick = onNavigateToProfile,
                         onMentionClick = onNavigateToProfile,
-                        onHashtagClick = { tagName ->
-                            onNavigateToSearch("#$tagName")
-                        },
+                        onHashtagClick = onNavigateToHashtag,
                         onLinkClick = { url ->
                             context.openInBrowser(url)
                         },

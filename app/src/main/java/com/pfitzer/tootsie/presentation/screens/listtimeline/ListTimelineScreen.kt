@@ -32,7 +32,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToReply Callback to navigate to compose screen for reply with status ID
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
- * @param onNavigateToSearch Callback to navigate to search with query
+ * @param onNavigateToHashtag Callback to navigate to hashtag timeline
  * @param viewModel ViewModel for managing list timeline screen state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +43,7 @@ fun ListTimelineScreen(
     onNavigateToReply: (String) -> Unit,
     onNavigateToStatus: (String) -> Unit,
     onNavigateToProfile: (String) -> Unit,
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: ListTimelineViewModel = hiltViewModel()
@@ -80,9 +80,7 @@ fun ListTimelineScreen(
                 onStatusClick = onNavigateToStatus,
                 onAvatarClick = onNavigateToProfile,
                 onMentionClick = onNavigateToProfile,
-                onHashtagClick = { tagName ->
-                    onNavigateToSearch("#$tagName")
-                },
+                onHashtagClick = onNavigateToHashtag,
                 onFavoriteClick = { status ->
                     if (status.favourited) {
                         viewModel.onAction(ListTimelineAction.UnfavoriteStatus(status))

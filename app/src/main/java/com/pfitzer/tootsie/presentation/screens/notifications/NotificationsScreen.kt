@@ -33,7 +33,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  *
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
- * @param onNavigateToSearch Callback to navigate to search with hashtag
+ * @param onNavigateToHashtag Callback to navigate to hashtag timeline
  * @param viewModel ViewModel for managing notifications state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +41,7 @@ import com.pfitzer.tootsie.util.openInBrowser
 fun NotificationsScreen(
     onNavigateToStatus: (String) -> Unit = {},
     onNavigateToProfile: (String) -> Unit = {},
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -127,9 +127,7 @@ fun NotificationsScreen(
                                 onMentionClick = { accountId ->
                                     onNavigateToProfile(accountId)
                                 },
-                                onHashtagClick = { tag ->
-                                    onNavigateToSearch(tag)
-                                },
+                                onHashtagClick = onNavigateToHashtag,
                                 onLinkClick = { url ->
                                     context.openInBrowser(url)
                                 },

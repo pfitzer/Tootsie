@@ -36,7 +36,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param accountId The account ID to display (optional for own profile)
  * @param onNavigateBack Callback to navigate back
  * @param onNavigateToProfile Callback to navigate to another profile (from mentions)
- * @param onNavigateToSearch Callback to navigate to search (from hashtags)
+ * @param onNavigateToHashtag Callback to navigate to hashtag timeline
  * @param viewModel ViewModel for managing profile state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +45,7 @@ fun ProfileScreen(
     accountId: String? = null,
     onNavigateBack: (() -> Unit)? = null,
     onNavigateToProfile: (String) -> Unit = {},
-    onNavigateToSearch: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToEditProfile: () -> Unit = {},
@@ -130,9 +130,7 @@ fun ProfileScreen(
                                     }
                                 },
                                 onMentionClick = onNavigateToProfile,
-                                onHashtagClick = { tagName ->
-                                    onNavigateToSearch("#$tagName")
-                                },
+                                onHashtagClick = onNavigateToHashtag,
                                 onLinkClick = { url ->
                                     context.openInBrowser(url)
                                 },
@@ -154,9 +152,7 @@ fun ProfileScreen(
                                         onStatusClick = {},
                                         onAvatarClick = onNavigateToProfile,
                                         onMentionClick = onNavigateToProfile,
-                                        onHashtagClick = { tagName ->
-                                            onNavigateToSearch("#$tagName")
-                                        },
+                                        onHashtagClick = onNavigateToHashtag,
                                         onLinkClick = { url ->
                                             context.openInBrowser(url)
                                         },
