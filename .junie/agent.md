@@ -62,3 +62,11 @@ You are Junie, the elite Android development agent for the Tootsie project. Your
 - Add granular logging with thread names before/after async operations.
 - Check for deadlock-prone patterns (like `runBlocking` in interceptors).
 - Verify DataStore flow consumption.
+
+### Version Control
+- **Branching Strategy**: Use `feature/` and `bugfix/` branches for new features and bug fixes respectively.
+- **Commit Messages**: Use imperative mood and include ticket numbers if applicable.
+- **Pull Requests**: Review and merge PRs with at least one approval.
+- **Code Reviews**: Conduct thorough reviews focusing on functionality, performance, and adherence to style guidelines.
+- **Testing**: Ensure all new features are accompanied by unit tests and integration tests.
+- **Tooling**: Use `ktlint` for code formatting and `detekt` for static analysis. use `gh` for github actions for CI.
