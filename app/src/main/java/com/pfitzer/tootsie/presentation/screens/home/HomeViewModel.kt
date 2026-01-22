@@ -75,12 +75,11 @@ class HomeViewModel @Inject constructor(
     val timelinePagingData: Flow<PagingData<Status>> = combine(
         timelineFilter,
         _activeTimelineType,
-        observeActiveAccountUseCase()
-    ) { filter, timelineType, activeAccount ->
-        Triple(filter, timelineType, activeAccount?.id)
+        activeAccount.map { it?.id }.distinctUntilChanged()
+    ) { filter, timelineType, _ ->
+        Triple(filter, timelineType, null)
     }
         .flatMapLatest { (filter, timelineType, _) ->
-            // The account change or timeline type change triggers flatMapLatest to cancel old flow and start new one
             getTimelineUseCase(timelineType, filter)
         }
         .cachedIn(viewModelScope)

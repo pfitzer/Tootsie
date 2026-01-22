@@ -437,12 +437,9 @@ private fun TimelineList(
     val loadState = timelinePagingItems.loadState.refresh
     val isActuallyRefreshing = loadState is LoadState.Loading
 
-    // Scroll to top on refresh
-    LaunchedEffect(loadState) {
-        if (loadState is LoadState.NotLoading && timelinePagingItems.itemCount > 0) {
-            listState.scrollToItem(0)
-        }
-    }
+    // Scroll to top only when explicitly requested (e.g., after an account change or manual refresh)
+    // Removed automatic scroll to top on every load state change to NotLoading to preserve scroll position
+    // when navigating back from other screens.
 
     PullToRefreshBox(
         isRefreshing = isActuallyRefreshing,
