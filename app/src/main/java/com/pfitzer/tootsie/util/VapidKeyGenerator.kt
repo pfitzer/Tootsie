@@ -25,9 +25,25 @@ data class VapidKeyPair(
  */
 object VapidKeyGenerator {
 
-    init {
-        // Register BouncyCastle provider for EC cryptography
-        Security.addProvider(BouncyCastleProvider())
+    @Volatile
+    private var providerRegistered = false
+
+    /**
+     * Ensures the BouncyCastle provider is registered before use.
+     * Uses double-checked locking for thread safety and performance.
+     */
+    private fun ensureProviderRegistered() {
+        if (!providerRegistered) {
+            synchronized(this) {
+                if (!providerRegistered) {
+                    // Remove any existing BC provider to avoid conflicts with Android's bundled providers
+                    Security.removeProvider("BC")
+                    // Add BouncyCastle provider
+                    Security.addProvider(BouncyCastleProvider())
+                    providerRegistered = true
+                }
+            }
+        }
     }
 
     /**
@@ -37,6 +53,8 @@ object VapidKeyGenerator {
      * @return VapidKeyPair with base64url-encoded public and private keys
      */
     fun generateKeyPair(): VapidKeyPair {
+        ensureProviderRegistered()
+
         val keyPairGenerator = KeyPairGenerator.getInstance("EC", "BC")
         val ecSpec = ECGenParameterSpec("secp256r1") // P-256 curve for Web Push
         keyPairGenerator.initialize(ecSpec, SecureRandom())
