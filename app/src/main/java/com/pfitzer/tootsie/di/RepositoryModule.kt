@@ -183,4 +183,13 @@ abstract class RepositoryModule {
     abstract fun bindConversationRepository(
         conversationRepositoryImpl: ConversationRepositoryImpl
     ): ConversationRepository
+
+    /**
+     * Binds FilterRepositoryImpl to FilterRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindFilterRepository(
+        filterRepositoryImpl: FilterRepositoryImpl
+    ): FilterRepository
 }

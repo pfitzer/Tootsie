@@ -30,7 +30,8 @@ data class Status(
     val bookmarked: Boolean = false, // Whether current user has bookmarked this
     val pinned: Boolean = false, // Whether this status is pinned
     val card: Card? = null, // Preview card for links
-    val language: String? = null // ISO 639 language code
+    val language: String? = null, // ISO 639 language code
+    val filteredByKeyword: String? = null // Name of filter that matched (for "warn" action)
 )
 
 /**

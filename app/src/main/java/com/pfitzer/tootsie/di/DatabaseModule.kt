@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.pfitzer.tootsie.data.local.TootsieDatabase
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.DraftDao
+import com.pfitzer.tootsie.data.local.dao.FilterDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import dagger.Module
@@ -36,7 +37,8 @@ object DatabaseModule {
         )
             .addMigrations(
                 TootsieDatabase.MIGRATION_2_3,
-                TootsieDatabase.MIGRATION_3_4
+                TootsieDatabase.MIGRATION_3_4,
+                TootsieDatabase.MIGRATION_4_5
             )
             .build()
     }
@@ -75,5 +77,14 @@ object DatabaseModule {
     @Singleton
     fun provideDraftDao(database: TootsieDatabase): DraftDao {
         return database.draftDao()
+    }
+
+    /**
+     * Provides FilterDao from the database.
+     */
+    @Provides
+    @Singleton
+    fun provideFilterDao(database: TootsieDatabase): FilterDao {
+        return database.filterDao()
     }
 }

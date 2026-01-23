@@ -77,6 +77,7 @@ fun HomeScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToLists: () -> Unit = {},
     onNavigateToFollowedTags: () -> Unit = {},
+    onNavigateToFilters: () -> Unit = {},
     onNavigateToTrending: () -> Unit = {},
     onNavigateToConversations: () -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
@@ -201,6 +202,17 @@ fun HomeScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToFollowedTags()
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                    label = { Text(stringResource(R.string.drawer_filters)) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToFilters()
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

@@ -134,6 +134,11 @@ sealed class TootsieDestinations(val route: String) {
     data object FollowedTags : TootsieDestinations("followed_tags")
 
     /**
+     * Filters screen - view and manage keyword filters.
+     */
+    data object Filters : TootsieDestinations("filters")
+
+    /**
      * List Timeline screen - view statuses from a specific list.
      * Requires listId and listName parameters.
      */

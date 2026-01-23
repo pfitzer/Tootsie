@@ -27,6 +27,7 @@ import com.pfitzer.tootsie.presentation.screens.bookmarks.BookmarksScreen
 import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
+import com.pfitzer.tootsie.presentation.screens.filters.FiltersScreen
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
@@ -203,6 +204,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToFollowedTags = {
                     navController.navigate(TootsieDestinations.FollowedTags.route)
+                },
+                onNavigateToFilters = {
+                    navController.navigate(TootsieDestinations.Filters.route)
                 },
                 onNavigateToTrending = {
                     navController.navigate(TootsieDestinations.Trending.route)
@@ -535,6 +539,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToHashtag = { hashtag ->
                     navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
+                }
+            )
+        }
+
+        // Filters screen - view and manage keyword filters
+        composable(route = TootsieDestinations.Filters.route) {
+            FiltersScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToFilter = { filterId ->
+                    // TODO: Navigate to filter detail screen for editing
                 }
             )
         }

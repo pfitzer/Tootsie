@@ -6,10 +6,12 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.DraftDao
+import com.pfitzer.tootsie.data.local.dao.FilterDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import com.pfitzer.tootsie.data.local.entities.AccountEntity
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
+import com.pfitzer.tootsie.data.local.entities.FilterEntity
 import com.pfitzer.tootsie.data.local.entities.StatusEntity
 import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
 
@@ -22,9 +24,10 @@ import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
         AccountEntity::class,
         StatusEntity::class,
         TimelineRemoteKeys::class,
-        DraftEntity::class
+        DraftEntity::class,
+        FilterEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class TootsieDatabase : RoomDatabase() {
@@ -48,6 +51,11 @@ abstract class TootsieDatabase : RoomDatabase() {
      * Provides access to Draft operations.
      */
     abstract fun draftDao(): DraftDao
+
+    /**
+     * Provides access to Filter operations.
+     */
+    abstract fun filterDao(): FilterDao
 
     companion object {
         const val DATABASE_NAME = "tootsie_database"
@@ -153,6 +161,27 @@ abstract class TootsieDatabase : RoomDatabase() {
                 // Delete all cached statuses with NULL ownerAccountId
                 // These are orphaned from the v2->v3 migration
                 database.execSQL("DELETE FROM statuses WHERE ownerAccountId IS NULL")
+            }
+        }
+
+        /**
+         * Migration from database version 4 to 5.
+         * Adds the filters table for keyword and context filtering.
+         */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create filters table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS filters (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        contextJson TEXT NOT NULL,
+                        expiresAt TEXT,
+                        filterAction TEXT NOT NULL,
+                        keywordsJson TEXT NOT NULL,
+                        ownerAccountId TEXT NOT NULL
+                    )
+                """.trimIndent())
             }
         }
     }

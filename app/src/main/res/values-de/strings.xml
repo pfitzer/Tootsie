@@ -34,6 +34,7 @@
     <string name="drawer_favorites">Favoriten</string>
     <string name="drawer_lists">Listen</string>
     <string name="drawer_followed_tags">Gefolgte Tags</string>
+    <string name="drawer_filters">Filter</string>
     <string name="drawer_trending_hashtags">Trending Hashtags</string>
     <string name="drawer_trending_statuses">Trending-Beiträge</string>
     <string name="drawer_trending_links">Trending-Links</string>
@@ -131,6 +132,44 @@
     <string name="lists_policy_followed">Antworten von Gefolgten anzeigen</string>
     <string name="lists_policy_list">Antworten von Listenmitgliedern anzeigen</string>
     <string name="lists_policy_none">Alle Antworten ausblenden</string>
+
+    <!-- Filters -->
+    <string name="filters_title">Filter</string>
+    <string name="filters_empty">Noch keine Filter</string>
+    <string name="filters_empty_hint">Erstelle Filter, um Beiträge mit bestimmten Schlüsselwörtern auszublenden oder zu warnen</string>
+    <string name="filter_create">Filter erstellen</string>
+    <string name="filter_edit">Filter bearbeiten</string>
+    <string name="filter_title_label">Titel</string>
+    <string name="filter_title_hint">z.B. Spoiler, Politik</string>
+    <string name="filter_contexts">Filter-Kontexte</string>
+    <string name="filter_context_home">Startseite und Listen</string>
+    <string name="filter_context_notifications">Benachrichtigungen</string>
+    <string name="filter_context_public">Öffentliche Zeitleisten</string>
+    <string name="filter_context_thread">Unterhaltungen</string>
+    <string name="filter_context_account">Profile</string>
+    <string name="filter_action_label">Filter-Aktion</string>
+    <string name="filter_action_warn">Warnung anzeigen</string>
+    <string name="filter_action_hide">Vollständig ausblenden</string>
+    <string name="filter_expiration">Ablauf</string>
+    <string name="filter_expiration_never">Nie</string>
+    <string name="filter_expiration_30min">30 Minuten</string>
+    <string name="filter_expiration_1hour">1 Stunde</string>
+    <string name="filter_expiration_6hours">6 Stunden</string>
+    <string name="filter_expiration_12hours">12 Stunden</string>
+    <string name="filter_expiration_1day">1 Tag</string>
+    <string name="filter_expiration_1week">1 Woche</string>
+    <string name="filter_keywords">Schlüsselwörter</string>
+    <string name="filter_keyword_add">Schlüsselwort hinzufügen</string>
+    <string name="filter_keyword_hint">Schlüsselwort eingeben</string>
+    <string name="filter_keyword_whole_word">Ganzes Wort</string>
+    <string name="filter_delete_confirm">Filter \"%1$s\" löschen?</string>
+    <string name="filter_filtered_content">Gefiltert: %1$s</string>
+    <string name="filter_show_content">Trotzdem anzeigen</string>
+    <string name="filter_saved">Filter gespeichert</string>
+    <string name="filter_deleted">Filter gelöscht</string>
+    <string name="filter_error_title_required">Titel ist erforderlich</string>
+    <string name="filter_error_context_required">Wähle mindestens einen Kontext</string>
+    <string name="filter_error_keyword_required">Füge mindestens ein Schlüsselwort hinzu</string>
 
     <!-- Drafts -->
     <string name="drafts_title">Entwürfe</string>
@@ -231,6 +270,7 @@
     <string name="cd_delete_all_drafts">Alle Entwürfe löschen</string>
     <string name="cd_create_list">Neue Liste erstellen</string>
     <string name="cd_delete_list">Liste löschen</string>
+    <string name="cd_delete_filter">Filter löschen</string>
     <string name="cd_manage_list_members">Listenmitglieder verwalten</string>
     <string name="manage_list_title">Liste verwalten: %1$s</string>
     <string name="manage_list_members_section">Mitglieder</string>

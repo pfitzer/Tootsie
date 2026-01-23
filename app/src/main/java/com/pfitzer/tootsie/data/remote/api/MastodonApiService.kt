@@ -1,15 +1,17 @@
 package com.pfitzer.tootsie.data.remote.api
 
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
+import com.pfitzer.tootsie.data.remote.dto.FilterDto
+import com.pfitzer.tootsie.data.remote.dto.FilterKeywordDto
+import com.pfitzer.tootsie.data.remote.dto.FollowedTagDto
 import com.pfitzer.tootsie.data.remote.dto.InstanceDto
 import com.pfitzer.tootsie.data.remote.dto.ListDto
 import com.pfitzer.tootsie.data.remote.dto.MediaAttachmentDto
 import com.pfitzer.tootsie.data.remote.dto.SearchResultsDto
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
 import com.pfitzer.tootsie.data.remote.dto.TagDto
-import com.pfitzer.tootsie.data.remote.dto.FollowedTagDto
-import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
 import com.pfitzer.tootsie.data.remote.dto.TrendingLinkDto
+import com.pfitzer.tootsie.data.remote.dto.TrendingTagDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Body
@@ -644,6 +646,95 @@ interface MastodonApiService {
     suspend fun unfollowTag(
         @Path("id") id: String
     ): FollowedTagDto
+
+    // ========== Filters Endpoints (v2) ==========
+
+    /**
+     * Get all filters for the authenticated user.
+     */
+    @GET("api/v2/filters")
+    suspend fun getFilters(): List<FilterDto>
+
+    /**
+     * Get a specific filter by ID.
+     *
+     * @param id Filter ID
+     */
+    @GET("api/v2/filters/{id}")
+    suspend fun getFilter(
+        @Path("id") id: String
+    ): FilterDto
+
+    /**
+     * Create a new filter.
+     *
+     * @param title Title of the filter
+     * @param context Contexts where filter applies (home, notifications, public, thread, account)
+     * @param filterAction Action to take: "warn" or "hide"
+     * @param expiresIn Expiration time in seconds, or null for never
+     */
+    @FormUrlEncoded
+    @POST("api/v2/filters")
+    suspend fun createFilter(
+        @Field("title") title: String,
+        @Field("context[]") context: List<String>,
+        @Field("filter_action") filterAction: String,
+        @Field("expires_in") expiresIn: Int? = null
+    ): FilterDto
+
+    /**
+     * Update an existing filter.
+     *
+     * @param id Filter ID
+     * @param title New title (optional)
+     * @param context New contexts (optional)
+     * @param filterAction New action (optional)
+     * @param expiresIn New expiration in seconds (optional)
+     */
+    @FormUrlEncoded
+    @PUT("api/v2/filters/{id}")
+    suspend fun updateFilter(
+        @Path("id") id: String,
+        @Field("title") title: String? = null,
+        @Field("context[]") context: List<String>? = null,
+        @Field("filter_action") filterAction: String? = null,
+        @Field("expires_in") expiresIn: Int? = null
+    ): FilterDto
+
+    /**
+     * Delete a filter.
+     *
+     * @param id Filter ID
+     */
+    @DELETE("api/v2/filters/{id}")
+    suspend fun deleteFilter(
+        @Path("id") id: String
+    )
+
+    /**
+     * Add a keyword to a filter.
+     *
+     * @param filterId Filter ID
+     * @param keyword The keyword text to match
+     * @param wholeWord Whether to match whole words only
+     */
+    @FormUrlEncoded
+    @POST("api/v2/filters/{filter_id}/keywords")
+    suspend fun addFilterKeyword(
+        @Path("filter_id") filterId: String,
+        @Field("keyword") keyword: String,
+        @Field("whole_word") wholeWord: Boolean
+    ): FilterKeywordDto
+
+    /**
+     * Delete a keyword from a filter.
+     *
+     * @param id Keyword ID
+     */
+    @DELETE("api/v2/filters/keywords/{id}")
+    suspend fun deleteFilterKeyword(
+        @Path("id") id: String
+    )
 
     // ========== Push Subscription Endpoints ==========
 

@@ -33,6 +33,7 @@
     <string name="drawer_favorites">Favorites</string>
     <string name="drawer_lists">Lists</string>
     <string name="drawer_followed_tags">Followed Tags</string>
+    <string name="drawer_filters">Filters</string>
     <string name="drawer_trending_hashtags">Trending Hashtags</string>
     <string name="drawer_trending_statuses">Trending Statuses</string>
     <string name="drawer_trending_links">Trending Links</string>
@@ -130,6 +131,44 @@
     <string name="lists_policy_followed">Show replies from followed</string>
     <string name="lists_policy_list">Show replies from list members</string>
     <string name="lists_policy_none">Hide all replies</string>
+
+    <!-- Filters -->
+    <string name="filters_title">Filters</string>
+    <string name="filters_empty">No filters yet</string>
+    <string name="filters_empty_hint">Create filters to hide or warn about posts containing specific keywords</string>
+    <string name="filter_create">Create filter</string>
+    <string name="filter_edit">Edit filter</string>
+    <string name="filter_title_label">Title</string>
+    <string name="filter_title_hint">e.g., Spoilers, Politics</string>
+    <string name="filter_contexts">Filter contexts</string>
+    <string name="filter_context_home">Home and lists</string>
+    <string name="filter_context_notifications">Notifications</string>
+    <string name="filter_context_public">Public timelines</string>
+    <string name="filter_context_thread">Conversations</string>
+    <string name="filter_context_account">Profiles</string>
+    <string name="filter_action_label">Filter action</string>
+    <string name="filter_action_warn">Show warning</string>
+    <string name="filter_action_hide">Hide completely</string>
+    <string name="filter_expiration">Expiration</string>
+    <string name="filter_expiration_never">Never</string>
+    <string name="filter_expiration_30min">30 minutes</string>
+    <string name="filter_expiration_1hour">1 hour</string>
+    <string name="filter_expiration_6hours">6 hours</string>
+    <string name="filter_expiration_12hours">12 hours</string>
+    <string name="filter_expiration_1day">1 day</string>
+    <string name="filter_expiration_1week">1 week</string>
+    <string name="filter_keywords">Keywords</string>
+    <string name="filter_keyword_add">Add keyword</string>
+    <string name="filter_keyword_hint">Enter keyword</string>
+    <string name="filter_keyword_whole_word">Whole word</string>
+    <string name="filter_delete_confirm">Delete filter \"%1$s\"?</string>
+    <string name="filter_filtered_content">Filtered: %1$s</string>
+    <string name="filter_show_content">Show anyway</string>
+    <string name="filter_saved">Filter saved</string>
+    <string name="filter_deleted">Filter deleted</string>
+    <string name="filter_error_title_required">Title is required</string>
+    <string name="filter_error_context_required">Select at least one context</string>
+    <string name="filter_error_keyword_required">Add at least one keyword</string>
 
     <!-- Drafts -->
     <string name="drafts_title">Drafts</string>
@@ -230,6 +269,7 @@
     <string name="cd_delete_all_drafts">Delete all drafts</string>
     <string name="cd_create_list">Create new list</string>
     <string name="cd_delete_list">Delete list</string>
+    <string name="cd_delete_filter">Delete filter</string>
     <string name="cd_manage_list_members">Manage list members</string>
     <string name="manage_list_title">Manage List: %1$s</string>
     <string name="manage_list_members_section">Members</string>

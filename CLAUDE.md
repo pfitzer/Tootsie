@@ -4,9 +4,9 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Development Status
 
-**Current Phase**: Phase 4 In Progress - Polish & Advanced Features 🔨
+**Current Phase**: Phase 5 In Progress - Final Polish & Enhancements 🔨
 **Version**: 1.0.0-rc9 (release candidate 9)
-**Project State**: Full-featured Mastodon client with complete internationalization support
+**Project State**: Full-featured Mastodon client with keyword filters and complete internationalization support
 
 ### Completed Features ✅
 
@@ -124,7 +124,24 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Push notifications (Phase 4h complete) - UnifiedPush with WorkManager fallback
 - ✅ Public Timelines & Tab Navigation (Phase 4i complete) - Home, Local, Federated with tab-based switching
 
+**Phase 5 (Final Polish & Enhancements)** - In Progress 🔨
+- ✅ Keyword and context filters (Phase 5a complete) - hide or warn about posts with specific keywords
+
 ### Recent Updates (January 2025)
+
+**Phase 5a - Keyword and Context Filters:**
+- ✅ **Filter Management**: Create, view, and delete keyword filters via Mastodon API v2
+- ✅ **Multiple Contexts**: Apply filters to Home, Notifications, Public, Thread, or Account views
+- ✅ **Filter Actions**: Choose between "Warn" (show warning overlay) or "Hide" (remove completely)
+- ✅ **Keyword Support**: Add multiple keywords per filter with whole-word matching option
+- ✅ **Local Caching**: Filters cached in Room database for offline access and reactive updates
+- ✅ **Multi-Account**: Filters are account-scoped (each account has independent filters)
+- ✅ **FiltersScreen**: Full UI for managing filters with create dialog
+- ✅ **Navigation Drawer**: "Filters" menu item accessible from home screen
+- ✅ **Complete i18n**: English & German translations (40+ new strings)
+- ✅ **Clean Architecture**: 7 use cases, FilterRepository, FilterDao, database migration v4→v5
+- ✅ **API Integration**: 7 new endpoints for filter and keyword CRUD operations
+
 
 **Public Timelines & Tab Navigation:**
 - ✅ Support for Public (Local and Federated) timelines
@@ -356,10 +373,11 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 - ✅ Complete German translations matching all English strings
 
 ### Next Steps
-Phase 5 - Final Polish & Enhancements:
+Phase 5 - Final Polish & Enhancements (continued):
+- Timeline filtering integration (apply keyword filters to hide/warn posts in timeline)
+- Filter detail/edit screen for modifying existing filters
 - Accessibility improvements (TalkBack optimization, contrast modes)
 - Performance optimizations (timeline scroll, memory usage)
-- Filters support (keyword and context filters)
 - Full RFC 8291 Web Push encryption implementation
 - Notification tracking to avoid duplicates in polling mode
 
