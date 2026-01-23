@@ -8,6 +8,8 @@ import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
+import com.pfitzer.tootsie.domain.model.Filter
+import com.pfitzer.tootsie.domain.model.FilterAction
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import kotlinx.coroutines.flow.first
@@ -27,7 +29,8 @@ class TimelinePagingSource(
     private val accountDao: AccountDao,
     private val timelineType: String,
     private val local: Boolean = false,
-    private val filter: TimelineFilter = TimelineFilter.DEFAULT
+    private val filter: TimelineFilter = TimelineFilter.DEFAULT,
+    private val keywordFilters: List<Filter> = emptyList()
 ) : PagingSource<String, Status>() {
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
@@ -163,27 +166,92 @@ class TimelinePagingSource(
      * Apply timeline filters to a list of statuses.
      */
     private fun applyFilter(statuses: List<Status>): List<Status> {
-        if (!filter.hasActiveFilters) {
-            return statuses
+        var result = statuses
+
+        // Apply basic timeline filters (boosts, replies, media-only)
+        if (filter.hasActiveFilters) {
+            result = result.filter { status ->
+                // Filter boosts (reblogs)
+                if (filter.hideBoosts && status.reblog != null) {
+                    return@filter false
+                }
+
+                // Filter replies
+                if (filter.hideReplies && status.inReplyToId != null) {
+                    return@filter false
+                }
+
+                // Filter posts without media
+                if (filter.showOnlyMedia && status.mediaAttachments.isEmpty()) {
+                    return@filter false
+                }
+
+                true
+            }
         }
 
-        return statuses.filter { status ->
-            // Filter boosts (reblogs)
-            if (filter.hideBoosts && status.reblog != null) {
-                return@filter false
+        // Apply keyword filters
+        if (keywordFilters.isNotEmpty()) {
+            result = result.mapNotNull { status ->
+                applyKeywordFilter(status)
             }
+        }
 
-            // Filter replies
-            if (filter.hideReplies && status.inReplyToId != null) {
-                return@filter false
+        return result
+    }
+
+    /**
+     * Apply keyword filters to a single status.
+     * Returns null if status should be hidden, or status with filteredByKeyword set if warning.
+     */
+    private fun applyKeywordFilter(status: Status): Status? {
+        val matchedFilter = findMatchingFilter(status)
+        return when {
+            matchedFilter == null -> status
+            matchedFilter.filterAction == FilterAction.HIDE -> null
+            matchedFilter.filterAction == FilterAction.WARN -> status.copy(
+                filteredByKeyword = matchedFilter.title
+            )
+            else -> status
+        }
+    }
+
+    /**
+     * Find the first filter that matches the status content.
+     */
+    private fun findMatchingFilter(status: Status): Filter? {
+        // Build content to check (main status + reblog if present)
+        val contentToCheck = buildString {
+            append(status.content)
+            append(" ")
+            append(status.spoilerText)
+            status.reblog?.let { reblog ->
+                append(" ")
+                append(reblog.content)
+                append(" ")
+                append(reblog.spoilerText)
             }
+        }.lowercase()
 
-            // Filter posts without media
-            if (filter.showOnlyMedia && status.mediaAttachments.isEmpty()) {
-                return@filter false
+        return keywordFilters.find { filter ->
+            filter.keywords.any { keyword ->
+                matchesKeyword(contentToCheck, keyword.keyword, keyword.wholeWord)
             }
+        }
+    }
 
-            true
+    /**
+     * Check if content matches a keyword.
+     */
+    private fun matchesKeyword(content: String, keyword: String, wholeWord: Boolean): Boolean {
+        val keywordLower = keyword.lowercase()
+        return if (wholeWord) {
+            // Match whole word using word boundaries
+            val pattern = "\\b${Regex.escape(keywordLower)}\\b"
+            Regex(pattern, RegexOption.IGNORE_CASE).containsMatchIn(content)
+        } else {
+            // Partial match
+            content.contains(keywordLower)
         }
     }
 }

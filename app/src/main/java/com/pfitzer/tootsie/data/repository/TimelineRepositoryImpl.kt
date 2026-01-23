@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.paging.TimelinePagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
+import com.pfitzer.tootsie.domain.model.Filter
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.repository.TimelineRepository
@@ -25,7 +26,10 @@ class TimelineRepositoryImpl @Inject constructor(
     private val accountDao: AccountDao
 ) : TimelineRepository {
 
-    override fun getHomeTimeline(filter: TimelineFilter): Flow<PagingData<Status>> {
+    override fun getHomeTimeline(
+        filter: TimelineFilter,
+        keywordFilters: List<Filter>
+    ): Flow<PagingData<Status>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -39,13 +43,18 @@ class TimelineRepositoryImpl @Inject constructor(
                     statusDao = statusDao,
                     accountDao = accountDao,
                     timelineType = "home",
-                    filter = filter
+                    filter = filter,
+                    keywordFilters = keywordFilters
                 )
             }
         ).flow
     }
 
-    override fun getPublicTimeline(local: Boolean, filter: TimelineFilter): Flow<PagingData<Status>> {
+    override fun getPublicTimeline(
+        local: Boolean,
+        filter: TimelineFilter,
+        keywordFilters: List<Filter>
+    ): Flow<PagingData<Status>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
@@ -60,7 +69,8 @@ class TimelineRepositoryImpl @Inject constructor(
                     accountDao = accountDao,
                     timelineType = "public",
                     local = local,
-                    filter = filter
+                    filter = filter,
+                    keywordFilters = keywordFilters
                 )
             }
         ).flow

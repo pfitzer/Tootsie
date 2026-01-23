@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -61,85 +61,101 @@ fun StatusCard(
     val displayStatus = status.reblog ?: status
     val isReblog = status.reblog != null
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onStatusClick(displayStatus.id) },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+    // Track if user has clicked to show filtered content
+    var showFilteredContent by remember { mutableStateOf(false) }
+
+    // Check if status is filtered with WARN action
+    val isFiltered = status.filteredByKeyword != null && !showFilteredContent
+
+    if (isFiltered) {
+        // Show placeholder for filtered content
+        FilteredContentPlaceholder(
+            filterTitle = status.filteredByKeyword!!,
+            onShowContent = { showFilteredContent = true },
+            modifier = modifier
         )
-    ) {
-        Column(
-            modifier = Modifier
+    } else {
+        // Show normal status content
+        Card(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .clickable { onStatusClick(displayStatus.id) },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
-            // Boost indicator
-            if (isReblog) {
-                BoostIndicator(
-                    boosterName = status.account.displayName,
-                    modifier = Modifier.padding(bottom = 8.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Boost indicator
+                if (isReblog) {
+                    BoostIndicator(
+                        boosterName = status.account.displayName,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                // Account header
+                StatusHeader(
+                    account = displayStatus.account,
+                    timestamp = displayStatus.createdAt,
+                    onAvatarClick = { onAvatarClick(displayStatus.account.id) },
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
-            }
 
-            // Account header
-            StatusHeader(
-                account = displayStatus.account,
-                timestamp = displayStatus.createdAt,
-                onAvatarClick = { onAvatarClick(displayStatus.account.id) },
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+                // Content warning
+                if (displayStatus.spoilerText.isNotBlank()) {
+                    ContentWarning(
+                        text = displayStatus.spoilerText,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
 
-            // Content warning
-            if (displayStatus.spoilerText.isNotBlank()) {
-                ContentWarning(
-                    text = displayStatus.spoilerText,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            // Status content
-            StatusContent(
-                content = displayStatus.content,
-                mentions = displayStatus.mentions,
-                tags = displayStatus.tags,
-                sensitive = displayStatus.sensitive,
-                spoilerText = displayStatus.spoilerText,
-                onMentionClick = onMentionClick,
-                onHashtagClick = onHashtagClick,
-                onLinkClick = onLinkClick,
-                onStatusClick = { onStatusClick(displayStatus.id) },
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            // Media attachments
-            if (displayStatus.mediaAttachments.isNotEmpty()) {
-                MediaAttachmentGrid(
-                    attachments = displayStatus.mediaAttachments,
+                // Status content
+                StatusContent(
+                    content = displayStatus.content,
+                    mentions = displayStatus.mentions,
+                    tags = displayStatus.tags,
                     sensitive = displayStatus.sensitive,
-                    onImageClick = onImageClick,
-                    onVideoClick = onVideoClick,
+                    spoilerText = displayStatus.spoilerText,
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
+                    onLinkClick = onLinkClick,
+                    onStatusClick = { onStatusClick(displayStatus.id) },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-            }
 
-            // Poll
-            displayStatus.poll?.let { poll ->
-                PollComponent(
-                    poll = poll,
-                    onVoteClick = onVoteClick,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                // Media attachments
+                if (displayStatus.mediaAttachments.isNotEmpty()) {
+                    MediaAttachmentGrid(
+                        attachments = displayStatus.mediaAttachments,
+                        sensitive = displayStatus.sensitive,
+                        onImageClick = onImageClick,
+                        onVideoClick = onVideoClick,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
+                // Poll
+                displayStatus.poll?.let { poll ->
+                    PollComponent(
+                        poll = poll,
+                        onVoteClick = onVoteClick,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
+                // Interaction counts and buttons
+                StatusActions(
+                    status = displayStatus,
+                    onFavoriteClick = { onFavoriteClick(displayStatus) },
+                    onBoostClick = { onBoostClick(displayStatus) },
+                    onReplyClick = { onReplyClick(displayStatus) },
+                    onBookmarkClick = { onBookmarkClick(displayStatus) }
                 )
             }
-
-            // Interaction counts and buttons
-            StatusActions(
-                status = displayStatus,
-                onFavoriteClick = { onFavoriteClick(displayStatus) },
-                onBoostClick = { onBoostClick(displayStatus) },
-                onReplyClick = { onReplyClick(displayStatus) },
-                onBookmarkClick = { onBookmarkClick(displayStatus) }
-            )
         }
     }
 }

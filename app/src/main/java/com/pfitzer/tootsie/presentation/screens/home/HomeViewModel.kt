@@ -6,10 +6,13 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.Filter
+import com.pfitzer.tootsie.domain.model.FilterContext
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.model.TimelineType
 import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
+import com.pfitzer.tootsie.domain.usecase.filter.GetFiltersForContextUseCase
 import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.domain.usecase.timeline.GetTimelineUseCase
 import com.pfitzer.tootsie.domain.usecase.timeline.RefreshTimelineUseCase
@@ -32,6 +35,7 @@ class HomeViewModel @Inject constructor(
     private val refreshTimelineUseCase: RefreshTimelineUseCase,
     private val updateTimelineFilterUseCase: UpdateTimelineFilterUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
+    private val getFiltersForContextUseCase: GetFiltersForContextUseCase,
     private val preferencesManager: PreferencesManager,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
     private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
@@ -69,18 +73,40 @@ class HomeViewModel @Inject constructor(
         )
 
     /**
+     * Keyword filters for HOME context.
+     */
+    private val homeKeywordFilters: Flow<List<Filter>> = getFiltersForContextUseCase(FilterContext.HOME)
+
+    /**
+     * Keyword filters for PUBLIC context.
+     */
+    private val publicKeywordFilters: Flow<List<Filter>> = getFiltersForContextUseCase(FilterContext.PUBLIC)
+
+    /**
+     * Get keyword filters for the given timeline type.
+     */
+    private fun getKeywordFiltersForType(type: TimelineType): Flow<List<Filter>> {
+        return when (type) {
+            TimelineType.HOME -> homeKeywordFilters
+            TimelineType.PUBLIC_LOCAL, TimelineType.PUBLIC_FEDERATED -> publicKeywordFilters
+        }
+    }
+
+    /**
      * Paging data flow for timeline with filter applied.
-     * Automatically refreshes when either the filter, the active account OR the timeline type changes.
+     * Automatically refreshes when either the filter, the active account, timeline type, or keyword filters change.
      */
     val timelinePagingData: Flow<PagingData<Status>> = combine(
         timelineFilter,
         _activeTimelineType,
         activeAccount.map { it?.id }.distinctUntilChanged()
     ) { filter, timelineType, _ ->
-        Triple(filter, timelineType, null)
+        Pair(filter, timelineType)
     }
-        .flatMapLatest { (filter, timelineType, _) ->
-            getTimelineUseCase(timelineType, filter)
+        .flatMapLatest { (filter, timelineType) ->
+            getKeywordFiltersForType(timelineType).flatMapLatest { keywordFilters ->
+                getTimelineUseCase(timelineType, filter, keywordFilters)
+            }
         }
         .cachedIn(viewModelScope)
 

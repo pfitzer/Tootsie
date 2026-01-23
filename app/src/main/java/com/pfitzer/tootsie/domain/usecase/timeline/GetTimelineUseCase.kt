@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.domain.usecase.timeline
 
 import androidx.paging.PagingData
+import com.pfitzer.tootsie.domain.model.Filter
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.model.TimelineType
@@ -16,12 +17,21 @@ class GetTimelineUseCase @Inject constructor(
 ) {
     operator fun invoke(
         type: TimelineType,
-        filter: TimelineFilter = TimelineFilter.DEFAULT
+        filter: TimelineFilter = TimelineFilter.DEFAULT,
+        keywordFilters: List<Filter> = emptyList()
     ): Flow<PagingData<Status>> {
         return when (type) {
-            TimelineType.HOME -> timelineRepository.getHomeTimeline(filter)
-            TimelineType.PUBLIC_LOCAL -> timelineRepository.getPublicTimeline(local = true, filter = filter)
-            TimelineType.PUBLIC_FEDERATED -> timelineRepository.getPublicTimeline(local = false, filter = filter)
+            TimelineType.HOME -> timelineRepository.getHomeTimeline(filter, keywordFilters)
+            TimelineType.PUBLIC_LOCAL -> timelineRepository.getPublicTimeline(
+                local = true,
+                filter = filter,
+                keywordFilters = keywordFilters
+            )
+            TimelineType.PUBLIC_FEDERATED -> timelineRepository.getPublicTimeline(
+                local = false,
+                filter = filter,
+                keywordFilters = keywordFilters
+            )
         }
     }
 }
