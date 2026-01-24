@@ -382,6 +382,9 @@ fun TootsieNavHost(
                 onNavigateToStatusDetail = { statusId ->
                     navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))
                 },
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
+                },
                 onNavigateToImageViewer = { url, description ->
                     navController.navigate(TootsieDestinations.ImageViewer.createRoute(url, description))
                 },
