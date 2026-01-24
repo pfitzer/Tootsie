@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.screens.trending.components.TrendingHashtagCard
 import com.pfitzer.tootsie.presentation.screens.trending.components.TrendingLinkCard
@@ -54,6 +56,14 @@ fun TrendingScreen(
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    showShareMenu?.let { status ->
+        ShareBottomSheet(
+            status = status,
+            onDismissRequest = { showShareMenu = null }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -115,7 +125,8 @@ fun TrendingScreen(
                         onNavigateToHashtag = onNavigateToHashtag,
                         onNavigateToReply = onNavigateToReply,
                         onNavigateToImageViewer = onNavigateToImageViewer,
-                        onNavigateToVideoPlayer = onNavigateToVideoPlayer
+                        onNavigateToVideoPlayer = onNavigateToVideoPlayer,
+                        onShareClick = { showShareMenu = it }
                     )
                 }
                 TrendingTab.HASHTAGS -> {
@@ -144,7 +155,8 @@ private fun TrendingPostsContent(
     onNavigateToHashtag: (String) -> Unit,
     onNavigateToReply: (String) -> Unit,
     onNavigateToImageViewer: (String, String?) -> Unit,
-    onNavigateToVideoPlayer: (String, String?) -> Unit
+    onNavigateToVideoPlayer: (String, String?) -> Unit,
+    onShareClick: (Status) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -199,6 +211,7 @@ private fun TrendingPostsContent(
                                 else TrendingPostsAction.BookmarkStatus(status)
                             )
                         },
+                        onShareClick = onShareClick,
                         onReplyClick = { onNavigateToReply(status.id) },
                         onLinkClick = { context.openInBrowser(it) },
                         onImageClick = onNavigateToImageViewer,

@@ -6,8 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,9 +23,11 @@ import coil.compose.AsyncImage
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
+import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
+import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.util.openInBrowser
 
@@ -55,6 +56,14 @@ fun ProfileScreen(
     val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
     val timelinePagingItems = viewModel.timelinePagingData?.collectAsLazyPagingItems()
     val context = LocalContext.current
+    var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    showShareMenu?.let { status ->
+        ShareBottomSheet(
+            status = status,
+            onDismissRequest = { showShareMenu = null }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -162,6 +171,7 @@ fun ProfileScreen(
                                         onBoostClick = {},
                                         onReplyClick = {},
                                         onBookmarkClick = {},
+                                        onShareClick = { showShareMenu = it },
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }

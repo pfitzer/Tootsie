@@ -302,6 +302,11 @@
     <string name="cd_play_video">Video abspielen</string>
     <string name="cd_play">Abspielen</string>
     <string name="cd_compose_post">Neuen Beitrag verfassen</string>
+    <string name="cd_share">Beitrag teilen</string>
+    <string name="share_copy_link">Link kopieren</string>
+    <string name="share_copy_text">Text kopieren</string>
+    <string name="link_copied">Link in Zwischenablage kopiert</string>
+    <string name="text_copied">Text in Zwischenablage kopiert</string>
 
     <!-- Filter Dialog -->
     <string name="filter_dialog_title">Timeline-Filter</string>

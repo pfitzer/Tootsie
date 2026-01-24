@@ -49,6 +49,7 @@ fun StatusCard(
     onBoostClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onShareClick: (Status) -> Unit = {},
     onMentionClick: (String) -> Unit = {},
     onHashtagClick: (String) -> Unit = {},
     onLinkClick: (String) -> Unit = {},
@@ -153,7 +154,8 @@ fun StatusCard(
                     onFavoriteClick = { onFavoriteClick(displayStatus) },
                     onBoostClick = { onBoostClick(displayStatus) },
                     onReplyClick = { onReplyClick(displayStatus) },
-                    onBookmarkClick = { onBookmarkClick(displayStatus) }
+                    onBookmarkClick = { onBookmarkClick(displayStatus) },
+                    onShareClick = { onShareClick(displayStatus) }
                 )
             }
         }

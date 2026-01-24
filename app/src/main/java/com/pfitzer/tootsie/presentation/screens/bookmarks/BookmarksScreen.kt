@@ -6,9 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +21,7 @@ import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.util.openInBrowser
 
@@ -50,6 +49,14 @@ fun BookmarksScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val bookmarksPagingItems = viewModel.bookmarksPagingData.collectAsLazyPagingItems()
+    var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    showShareMenu?.let { status ->
+        ShareBottomSheet(
+            status = status,
+            onDismissRequest = { showShareMenu = null }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -105,6 +112,9 @@ fun BookmarksScreen(
                 onReplyClick = { status ->
                     onNavigateToReply(status.id)
                 },
+                onShareClick = { status ->
+                    showShareMenu = status
+                },
                 onImageClick = onNavigateToImageViewer,
                 onVideoClick = onNavigateToVideoPlayer
             )
@@ -135,6 +145,7 @@ private fun BookmarksList(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onShareClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
@@ -172,6 +183,7 @@ private fun BookmarksList(
                     onBoostClick = { onBoostClick(status) },
                     onBookmarkClick = { onBookmarkClick(status) },
                     onReplyClick = { onReplyClick(status) },
+                    onShareClick = { onShareClick(status) },
                     onLinkClick = { url ->
                         context.openInBrowser(url)
                     },

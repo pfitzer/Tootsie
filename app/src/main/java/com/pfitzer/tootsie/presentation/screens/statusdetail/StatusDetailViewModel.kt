@@ -104,6 +104,9 @@ class StatusDetailViewModel @Inject constructor(
             is StatusDetailAction.BookmarkStatus -> bookmarkStatus(action.status)
             is StatusDetailAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
             is StatusDetailAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+            is StatusDetailAction.ShareStatus -> { /* Handled in UI */ }
+            is StatusDetailAction.CopyLink -> { /* Handled in UI */ }
+            is StatusDetailAction.CopyText -> { /* Handled in UI */ }
         }
     }
 
@@ -271,4 +274,7 @@ sealed class StatusDetailAction {
     data class BookmarkStatus(val status: Status) : StatusDetailAction()
     data class UnbookmarkStatus(val status: Status) : StatusDetailAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : StatusDetailAction()
+    data class ShareStatus(val status: Status) : StatusDetailAction()
+    data class CopyLink(val status: Status) : StatusDetailAction()
+    data class CopyText(val status: Status) : StatusDetailAction()
 }

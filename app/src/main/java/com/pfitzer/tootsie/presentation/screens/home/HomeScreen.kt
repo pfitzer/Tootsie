@@ -30,6 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
+import com.pfitzer.tootsie.util.ShareUtils
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,6 +95,15 @@ fun HomeScreen(
     var showFilterDialog by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    showShareMenu?.let { status ->
+        ShareBottomSheet(
+            status = status,
+            onDismissRequest = { showShareMenu = null }
+        )
+    }
 
     val pagerState = rememberPagerState(
         initialPage = when (activeTimelineType) {
@@ -391,6 +402,9 @@ fun HomeScreen(
                             viewModel.onAction(HomeAction.BookmarkStatus(status))
                         }
                     },
+                    onShareClick = { status ->
+                        showShareMenu = status
+                    },
                     onReplyClick = { status ->
                         onNavigateToReply(status.id)
                     },
@@ -434,6 +448,7 @@ private fun TimelineList(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onShareClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
@@ -494,6 +509,7 @@ private fun TimelineList(
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
                     onBookmarkClick = onBookmarkClick,
+                    onShareClick = onShareClick,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }

@@ -33,6 +33,7 @@ fun StatusActions(
     onBoostClick: () -> Unit,
     onReplyClick: () -> Unit,
     onBookmarkClick: () -> Unit,
+    onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -77,6 +78,15 @@ fun StatusActions(
             onClick = onBookmarkClick,
             contentDescription = if (status.bookmarked) stringResource(R.string.cd_remove_bookmark) else stringResource(R.string.cd_bookmark),
             activeColor = MaterialTheme.colorScheme.secondary
+        )
+
+        // Share
+        ActionButton(
+            icon = Icons.Default.Share,
+            count = null,
+            isActive = false,
+            onClick = onShareClick,
+            contentDescription = stringResource(R.string.cd_share)
         )
     }
 }

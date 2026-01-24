@@ -1,15 +1,18 @@
 package com.pfitzer.tootsie.presentation.screens.statusdetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -21,7 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
+import com.pfitzer.tootsie.util.ShareUtils
 import com.pfitzer.tootsie.util.openInBrowser
 
 /**
@@ -48,6 +53,14 @@ fun StatusDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    showShareMenu?.let { status ->
+        ShareBottomSheet(
+            status = status,
+            onDismissRequest = { showShareMenu = null }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -119,6 +132,9 @@ fun StatusDetailScreen(
                         },
                         onVoteClick = { pollId, choices ->
                             viewModel.onAction(StatusDetailAction.VoteOnPoll(pollId, choices))
+                        },
+                        onShareClick = { status ->
+                            showShareMenu = status
                         }
                     )
                 }
@@ -154,6 +170,7 @@ private fun ConversationThread(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onShareClick: (Status) -> Unit,
     onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -176,6 +193,7 @@ private fun ConversationThread(
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
                 onBookmarkClick = onBookmarkClick,
+                onShareClick = onShareClick,
                 onVoteClick = onVoteClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -206,6 +224,7 @@ private fun ConversationThread(
                     onBoostClick = onBoostClick,
                     onReplyClick = onReplyClick,
                     onBookmarkClick = onBookmarkClick,
+                    onShareClick = onShareClick,
                     onVoteClick = onVoteClick
                 )
             }
@@ -228,6 +247,7 @@ private fun ConversationThread(
                 onBoostClick = onBoostClick,
                 onReplyClick = onReplyClick,
                 onBookmarkClick = onBookmarkClick,
+                onShareClick = onShareClick,
                 onVoteClick = onVoteClick
             )
         }
@@ -267,6 +287,7 @@ private fun ReplyItem(
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
+    onShareClick: (Status) -> Unit,
     onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -305,6 +326,7 @@ private fun ReplyItem(
             onBoostClick = onBoostClick,
             onReplyClick = onReplyClick,
             onBookmarkClick = onBookmarkClick,
+            onShareClick = onShareClick,
             onVoteClick = onVoteClick,
             modifier = Modifier.weight(1f)
         )
