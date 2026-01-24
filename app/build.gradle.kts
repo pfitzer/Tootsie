@@ -15,8 +15,8 @@ android {
         applicationId = "com.pfitzer.tootsie"
         minSdk = 31
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.2.0-alpha"
+        versionCode = 3
+        versionName = "1.2.1-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

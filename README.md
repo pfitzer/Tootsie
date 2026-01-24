@@ -9,14 +9,16 @@ Tootsie is a modern, high-performance, and privacy-respecting Mastodon client fo
 - **Modern UI**: Fully built with Jetpack Compose and Material Design 3.
 - **Privacy First**: Uses **UnifiedPush** for FOSS-friendly notifications (no Firebase/FCM required).
 - **Rich Media**: Support for images, videos (ExoPlayer), and audio attachments.
-- **Advanced Content**: 
+- **Advanced Content**:
     - Draft auto-save and management.
     - Custom emoji support with picker.
     - Full poll support (view, vote, and create).
     - Advanced timeline filters (hide boosts, replies, or show only media).
+    - **Keyword Filters**: Create filters to hide or warn about posts with specific keywords.
     - **List Management**: Create, delete, and manage members of Mastodon lists.
     - **Followed Tags**: View and manage followed hashtags.
     - **Trending**: Explorer for trending hashtags, posts, and links.
+    - **Profile Editing**: Update display name, bio, and avatar.
 - **Global Reach**: Fully internationalized with support for English and German.
 - **Fediverse Ready**: Universal search for accounts, posts, and hashtags; WebFinger support.
 
@@ -98,11 +100,9 @@ When contributing to Tootsie, please adhere to these architectural guardrails:
 ## 📝 TODOs & Future Work
 
 - [ ] Full RFC 8291 Web Push encryption implementation.
-- [ ] Keyword and context filters.
-- [ ] Accessibility optimizations (TalkBack contrast modes).
+- [ ] Accessibility optimizations (TalkBack, contrast modes).
 - [ ] Performance profiling for timeline scrolling.
 - [ ] Notification deduplication in polling mode.
-- [ ] Profile editing (bio, avatar, etc.).
 
 ## 📄 License
 
