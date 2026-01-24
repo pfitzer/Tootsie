@@ -35,6 +35,7 @@ fun SearchScreen(
     initialQuery: String? = null,
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToStatusDetail: (String) -> Unit = {},
+    onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     viewModel: SearchViewModel = hiltViewModel()
@@ -54,12 +55,9 @@ fun SearchScreen(
         }
     }
 
-    // Handle hashtag clicks by searching for posts with that hashtag
+    // Handle hashtag clicks by navigating to hashtag timeline
     val onHashtagClick: (String) -> Unit = { hashtagName ->
-        // First set filter to STATUSES to show only posts
-        viewModel.onAction(SearchAction.SelectFilter(SearchFilter.STATUSES))
-        // Then update query to search for the hashtag
-        viewModel.onAction(SearchAction.UpdateQuery("#$hashtagName"))
+        onNavigateToHashtag(hashtagName)
     }
 
     Scaffold(
@@ -251,6 +249,7 @@ private fun SearchResults(
                     status = status,
                     onStatusClick = { onStatusClick(status.id) },
                     onAvatarClick = { onAccountClick(status.account.id) },
+                    onHashtagClick = onHashtagClick,
                     onReplyClick = { /* TODO */ },
                     onBoostClick = { /* TODO */ },
                     onFavoriteClick = { /* TODO */ },
