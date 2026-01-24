@@ -102,7 +102,6 @@ When contributing to Tootsie, please adhere to these architectural guardrails:
 - [ ] Full RFC 8291 Web Push encryption implementation.
 - [ ] Accessibility optimizations (TalkBack, contrast modes).
 - [ ] Performance profiling for timeline scrolling.
-- [ ] Notification deduplication in polling mode.
 
 ## 📄 License
 
