@@ -414,4 +414,7 @@
     <string name="direct_messages">Direktnachrichten</string>
     <string name="empty_conversations">Noch keine Direktnachrichten.</string>
     <string name="cd_delete_conversation">Unterhaltung löschen</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="filter_detail_title">Filterdetails</string>
+    <string name="add">Hinzufügen</string>
 </resources>

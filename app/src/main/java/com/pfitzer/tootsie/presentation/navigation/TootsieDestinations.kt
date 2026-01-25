@@ -139,6 +139,15 @@ sealed class TootsieDestinations(val route: String) {
     data object Filters : TootsieDestinations("filters")
 
     /**
+     * Filter Detail screen - view and edit a single filter.
+     * Requires filterId parameter.
+     */
+    data object FilterDetail : TootsieDestinations("filters/{filterId}") {
+        fun createRoute(filterId: String): String = "filters/$filterId"
+        const val ARG_FILTER_ID = "filterId"
+    }
+
+    /**
      * List Timeline screen - view statuses from a specific list.
      * Requires listId and listName parameters.
      */

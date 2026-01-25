@@ -28,6 +28,7 @@ import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
 import com.pfitzer.tootsie.presentation.screens.filters.FiltersScreen
+import com.pfitzer.tootsie.presentation.screens.filters.detail.FilterDetailScreen
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
@@ -553,7 +554,23 @@ fun TootsieNavHost(
                     navController.popBackStack()
                 },
                 onNavigateToFilter = { filterId ->
-                    // TODO: Navigate to filter detail screen for editing
+                    navController.navigate(TootsieDestinations.FilterDetail.createRoute(filterId))
+                }
+            )
+        }
+
+        // Filter Detail screen - view and edit a single filter
+        composable(
+            route = TootsieDestinations.FilterDetail.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.FilterDetail.ARG_FILTER_ID) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            FilterDetailScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

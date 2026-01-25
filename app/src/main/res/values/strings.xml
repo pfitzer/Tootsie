@@ -413,4 +413,7 @@
     <string name="direct_messages">Direct Messages</string>
     <string name="empty_conversations">No direct messages yet.</string>
     <string name="cd_delete_conversation">Delete conversation</string>
+    <string name="refresh">Refresh</string>
+    <string name="filter_detail_title">Filter Details</string>
+    <string name="add">Add</string>
 </resources>
