@@ -7,12 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.listtimeline.GetListTimelineUseCase
-import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +31,7 @@ class ListTimelineViewModel @Inject constructor(
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -62,7 +58,25 @@ class ListTimelineViewModel @Inject constructor(
             is ListTimelineAction.UnboostStatus -> unboostStatus(action.status)
             is ListTimelineAction.BookmarkStatus -> bookmarkStatus(action.status)
             is ListTimelineAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is ListTimelineAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is ListTimelineAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Paging is reactive
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -205,5 +219,6 @@ sealed class ListTimelineAction {
     data class UnboostStatus(val status: Status) : ListTimelineAction()
     data class BookmarkStatus(val status: Status) : ListTimelineAction()
     data class UnbookmarkStatus(val status: Status) : ListTimelineAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : ListTimelineAction()
     data object DismissError : ListTimelineAction()
 }

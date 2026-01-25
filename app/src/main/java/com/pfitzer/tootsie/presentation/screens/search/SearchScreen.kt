@@ -126,8 +126,8 @@ fun SearchScreen(
                         uiState = uiState,
                         onAccountClick = onNavigateToProfile,
                         onStatusClick = onNavigateToStatusDetail,
-                        onHashtagClick = onHashtagClick,
-                        onStatusAction = { _, _ -> /* TODO: Handle status actions */ },
+                        onHashtagClick = onNavigateToHashtag,
+                        onStatusAction = { action -> viewModel.onAction(action) },
                         onImageClick = onNavigateToImageViewer,
                         onVideoClick = onNavigateToVideoPlayer
                     )
@@ -208,7 +208,7 @@ private fun SearchResults(
     onAccountClick: (String) -> Unit,
     onStatusClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onStatusAction: (String, String) -> Unit,
+    onStatusAction: (SearchAction) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit
 ) {
@@ -251,9 +251,30 @@ private fun SearchResults(
                     onAvatarClick = { onAccountClick(status.account.id) },
                     onHashtagClick = onHashtagClick,
                     onReplyClick = { /* TODO */ },
-                    onBoostClick = { /* TODO */ },
-                    onFavoriteClick = { /* TODO */ },
-                    onBookmarkClick = { /* TODO */ },
+                    onBoostClick = { s ->
+                        if (s.reblogged) {
+                            onStatusAction(SearchAction.UnboostStatus(s))
+                        } else {
+                            onStatusAction(SearchAction.BoostStatus(s))
+                        }
+                    },
+                    onFavoriteClick = { s ->
+                        if (s.favourited) {
+                            onStatusAction(SearchAction.UnfavoriteStatus(s))
+                        } else {
+                            onStatusAction(SearchAction.FavoriteStatus(s))
+                        }
+                    },
+                    onBookmarkClick = { s ->
+                        if (s.bookmarked) {
+                            onStatusAction(SearchAction.UnbookmarkStatus(s))
+                        } else {
+                            onStatusAction(SearchAction.BookmarkStatus(s))
+                        }
+                    },
+                    onVoteClick = { pollId, choices ->
+                        onStatusAction(SearchAction.VoteOnPoll(pollId, choices))
+                    },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick
                 )

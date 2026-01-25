@@ -106,7 +106,10 @@ fun ListTimelineScreen(
                     onNavigateToReply(status.id)
                 },
                 onImageClick = onNavigateToImageViewer,
-                onVideoClick = onNavigateToVideoPlayer
+                onVideoClick = onNavigateToVideoPlayer,
+                onVoteClick = { pollId, choices ->
+                    viewModel.onAction(ListTimelineAction.VoteOnPoll(pollId, choices))
+                }
             )
 
             // Error message
@@ -138,6 +141,7 @@ private fun ListTimelineList(
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -167,6 +171,7 @@ private fun ListTimelineList(
                     },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    onVoteClick = onVoteClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

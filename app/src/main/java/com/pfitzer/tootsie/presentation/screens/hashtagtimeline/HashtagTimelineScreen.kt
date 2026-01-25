@@ -161,7 +161,10 @@ fun HashtagTimelineScreen(
                     onNavigateToReply(status.id)
                 },
                 onImageClick = onNavigateToImageViewer,
-                onVideoClick = onNavigateToVideoPlayer
+                onVideoClick = onNavigateToVideoPlayer,
+                onVoteClick = { pollId, choices ->
+                    viewModel.onAction(HashtagTimelineAction.VoteOnPoll(pollId, choices))
+                }
             )
 
             // Error message
@@ -226,6 +229,7 @@ private fun HashtagTimelineList(
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -253,6 +257,7 @@ private fun HashtagTimelineList(
                     onLinkClick = { url -> context.openInBrowser(url) },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    onVoteClick = onVoteClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)

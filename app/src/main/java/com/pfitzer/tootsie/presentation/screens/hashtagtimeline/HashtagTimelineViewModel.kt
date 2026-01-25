@@ -12,12 +12,7 @@ import com.pfitzer.tootsie.domain.usecase.followedtags.FollowTagUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.GetFollowedTagsUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.UnfollowTagUseCase
 import com.pfitzer.tootsie.domain.usecase.timeline.GetHashtagTimelineUseCase
-import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +38,7 @@ class HashtagTimelineViewModel @Inject constructor(
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase,
     private val followTagUseCase: FollowTagUseCase,
     private val unfollowTagUseCase: UnfollowTagUseCase,
     private val getFollowedTagsUseCase: GetFollowedTagsUseCase,
@@ -99,9 +95,27 @@ class HashtagTimelineViewModel @Inject constructor(
             is HashtagTimelineAction.UnboostStatus -> unboostStatus(action.status)
             is HashtagTimelineAction.BookmarkStatus -> bookmarkStatus(action.status)
             is HashtagTimelineAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is HashtagTimelineAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is HashtagTimelineAction.DismissError -> dismissError()
             is HashtagTimelineAction.FollowTag -> followTag()
             is HashtagTimelineAction.UnfollowTag -> unfollowTag()
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Paging is reactive
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -304,6 +318,7 @@ sealed class HashtagTimelineAction {
     data class UnboostStatus(val status: Status) : HashtagTimelineAction()
     data class BookmarkStatus(val status: Status) : HashtagTimelineAction()
     data class UnbookmarkStatus(val status: Status) : HashtagTimelineAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : HashtagTimelineAction()
     data object FollowTag : HashtagTimelineAction()
     data object UnfollowTag : HashtagTimelineAction()
     data object DismissError : HashtagTimelineAction()

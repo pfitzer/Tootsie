@@ -5,14 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Status
-import com.pfitzer.tootsie.domain.usecase.bookmarks.GetBookmarksUseCase
 import com.pfitzer.tootsie.domain.usecase.favorites.GetFavoritesUseCase
-import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +29,8 @@ class FavoritesViewModel @Inject constructor(
     private val reblogStatusUseCase: ReblogStatusUseCase,
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoritesUiState())
@@ -58,7 +53,25 @@ class FavoritesViewModel @Inject constructor(
             is FavoritesAction.UnboostStatus -> unboostStatus(action.status)
             is FavoritesAction.BookmarkStatus -> bookmarkStatus(action.status)
             is FavoritesAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is FavoritesAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is FavoritesAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Paging is reactive
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -201,5 +214,6 @@ sealed class FavoritesAction {
     data class UnboostStatus(val status: Status) : FavoritesAction()
     data class BookmarkStatus(val status: Status) : FavoritesAction()
     data class UnbookmarkStatus(val status: Status) : FavoritesAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : FavoritesAction()
     data object DismissError : FavoritesAction()
 }

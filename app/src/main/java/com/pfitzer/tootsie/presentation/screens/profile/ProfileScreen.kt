@@ -167,10 +167,31 @@ fun ProfileScreen(
                                         },
                                         onImageClick = onNavigateToImageViewer,
                                         onVideoClick = onNavigateToVideoPlayer,
-                                        onFavoriteClick = {},
-                                        onBoostClick = {},
-                                        onReplyClick = {},
-                                        onBookmarkClick = {},
+                                        onFavoriteClick = { s ->
+                                            if (s.favourited) {
+                                                viewModel.onAction(ProfileAction.UnfavoriteStatus(s))
+                                            } else {
+                                                viewModel.onAction(ProfileAction.FavoriteStatus(s))
+                                            }
+                                        },
+                                        onBoostClick = { s ->
+                                            if (s.reblogged) {
+                                                viewModel.onAction(ProfileAction.UnboostStatus(s))
+                                            } else {
+                                                viewModel.onAction(ProfileAction.BoostStatus(s))
+                                            }
+                                        },
+                                        onReplyClick = {}, // TODO: Wire reply navigation
+                                        onBookmarkClick = { s ->
+                                            if (s.bookmarked) {
+                                                viewModel.onAction(ProfileAction.UnbookmarkStatus(s))
+                                            } else {
+                                                viewModel.onAction(ProfileAction.BookmarkStatus(s))
+                                            }
+                                        },
+                                        onVoteClick = { pollId, choices ->
+                                            viewModel.onAction(ProfileAction.VoteOnPoll(pollId, choices))
+                                        },
                                         onShareClick = { showShareMenu = it },
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )

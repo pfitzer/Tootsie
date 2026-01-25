@@ -116,7 +116,10 @@ fun FavoritesScreen(
                     showShareMenu = status
                 },
                 onImageClick = onNavigateToImageViewer,
-                onVideoClick = onNavigateToVideoPlayer
+                onVideoClick = onNavigateToVideoPlayer,
+                onVoteClick = { pollId, choices ->
+                    viewModel.onAction(FavoritesAction.VoteOnPoll(pollId, choices))
+                }
             )
 
             // Error message
@@ -149,6 +152,7 @@ private fun FavoritesList(
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -189,6 +193,7 @@ private fun FavoritesList(
                     },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    onVoteClick = onVoteClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

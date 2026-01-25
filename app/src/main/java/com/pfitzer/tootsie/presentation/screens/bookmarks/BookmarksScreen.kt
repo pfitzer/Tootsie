@@ -116,7 +116,10 @@ fun BookmarksScreen(
                     showShareMenu = status
                 },
                 onImageClick = onNavigateToImageViewer,
-                onVideoClick = onNavigateToVideoPlayer
+                onVideoClick = onNavigateToVideoPlayer,
+                onVoteClick = { pollId, choices ->
+                    viewModel.onAction(BookmarksAction.VoteOnPoll(pollId, choices))
+                }
             )
 
             // Error message
@@ -149,6 +152,7 @@ private fun BookmarksList(
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -189,6 +193,7 @@ private fun BookmarksList(
                     },
                     onImageClick = onImageClick,
                     onVideoClick = onVideoClick,
+                    onVoteClick = onVoteClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

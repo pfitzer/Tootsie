@@ -3,12 +3,7 @@ package com.pfitzer.tootsie.presentation.screens.trendingposts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Status
-import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.domain.usecase.trending.GetTrendingPostsUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +25,8 @@ class TrendingPostsViewModel @Inject constructor(
     private val reblogStatusUseCase: ReblogStatusUseCase,
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TrendingPostsUiState())
@@ -52,7 +48,25 @@ class TrendingPostsViewModel @Inject constructor(
             is TrendingPostsAction.UnboostStatus -> unboostStatus(action.status)
             is TrendingPostsAction.BookmarkStatus -> bookmarkStatus(action.status)
             is TrendingPostsAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is TrendingPostsAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is TrendingPostsAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    loadTrendingPosts()
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -260,5 +274,6 @@ sealed class TrendingPostsAction {
     data class UnboostStatus(val status: Status) : TrendingPostsAction()
     data class BookmarkStatus(val status: Status) : TrendingPostsAction()
     data class UnbookmarkStatus(val status: Status) : TrendingPostsAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : TrendingPostsAction()
     data object DismissError : TrendingPostsAction()
 }

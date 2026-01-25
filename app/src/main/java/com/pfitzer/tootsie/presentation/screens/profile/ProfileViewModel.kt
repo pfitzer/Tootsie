@@ -9,6 +9,7 @@ import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.account.*
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -27,6 +28,13 @@ class ProfileViewModel @Inject constructor(
     private val unfollowAccountUseCase: UnfollowAccountUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
+    private val favoriteStatusUseCase: FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: ReblogStatusUseCase,
+    private val unreblogStatusUseCase: UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -125,6 +133,124 @@ class ProfileViewModel @Inject constructor(
             is ProfileAction.UnfollowAccount -> unfollowAccount()
             is ProfileAction.Refresh -> loadProfile()
             is ProfileAction.DismissError -> dismissError()
+            is ProfileAction.FavoriteStatus -> favoriteStatus(action.status)
+            is ProfileAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
+            is ProfileAction.BoostStatus -> boostStatus(action.status)
+            is ProfileAction.UnboostStatus -> unboostStatus(action.status)
+            is ProfileAction.BookmarkStatus -> bookmarkStatus(action.status)
+            is ProfileAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is ProfileAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+        }
+    }
+
+    /**
+     * Favorite a status.
+     */
+    private fun favoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = favoriteStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    // Paging will automatically update if using a reactive Room source,
+                    // otherwise we might need to manually refresh or update the paging data.
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to favorite status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unfavorite a status.
+     */
+    private fun unfavoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unfavoriteStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unfavorite status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Boost a status.
+     */
+    private fun boostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = reblogStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to boost status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unboost a status.
+     */
+    private fun unboostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unreblogStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unboost status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Bookmark a status.
+     */
+    private fun bookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = bookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to bookmark status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unbookmark a status.
+     */
+    private fun unbookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unbookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unbookmark status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // For polls, we often want to refresh to see updated results
+                    loadProfile()
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -218,4 +344,11 @@ sealed class ProfileAction {
     data object UnfollowAccount : ProfileAction()
     data object Refresh : ProfileAction()
     data object DismissError : ProfileAction()
+    data class FavoriteStatus(val status: Status) : ProfileAction()
+    data class UnfavoriteStatus(val status: Status) : ProfileAction()
+    data class BoostStatus(val status: Status) : ProfileAction()
+    data class UnboostStatus(val status: Status) : ProfileAction()
+    data class BookmarkStatus(val status: Status) : ProfileAction()
+    data class UnbookmarkStatus(val status: Status) : ProfileAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : ProfileAction()
 }

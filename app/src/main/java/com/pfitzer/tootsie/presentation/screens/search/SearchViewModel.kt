@@ -7,6 +7,7 @@ import com.pfitzer.tootsie.domain.model.Hashtag
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.search.SearchUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -22,7 +23,14 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchUseCase: SearchUseCase,
-    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
+    private val favoriteStatusUseCase: FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: ReblogStatusUseCase,
+    private val unreblogStatusUseCase: UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -62,6 +70,133 @@ class SearchViewModel @Inject constructor(
             is SearchAction.SelectFilter -> selectFilter(action.filter)
             is SearchAction.ClearSearch -> clearSearch()
             is SearchAction.DismissError -> dismissError()
+            is SearchAction.FavoriteStatus -> favoriteStatus(action.status)
+            is SearchAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
+            is SearchAction.BoostStatus -> boostStatus(action.status)
+            is SearchAction.UnboostStatus -> unboostStatus(action.status)
+            is SearchAction.BookmarkStatus -> bookmarkStatus(action.status)
+            is SearchAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is SearchAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+        }
+    }
+
+    /**
+     * Favorite a status.
+     */
+    private fun favoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = favoriteStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    // Refresh results to show update
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to favorite status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unfavorite a status.
+     */
+    private fun unfavoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unfavoriteStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unfavorite status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Boost a status.
+     */
+    private fun boostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = reblogStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to boost status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unboost a status.
+     */
+    private fun unboostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unreblogStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unboost status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Bookmark a status.
+     */
+    private fun bookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = bookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to bookmark status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unbookmark a status.
+     */
+    private fun unbookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unbookmarkStatusUseCase(status.id)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unbookmark status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    performSearch(_uiState.value.query)
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -205,6 +340,13 @@ enum class SearchFilter(val displayName: String) {
 sealed class SearchAction {
     data class UpdateQuery(val query: String) : SearchAction()
     data class SelectFilter(val filter: SearchFilter) : SearchAction()
-    object ClearSearch : SearchAction()
-    object DismissError : SearchAction()
+    data object ClearSearch : SearchAction()
+    data object DismissError : SearchAction()
+    data class FavoriteStatus(val status: Status) : SearchAction()
+    data class UnfavoriteStatus(val status: Status) : SearchAction()
+    data class BoostStatus(val status: Status) : SearchAction()
+    data class UnboostStatus(val status: Status) : SearchAction()
+    data class BookmarkStatus(val status: Status) : SearchAction()
+    data class UnbookmarkStatus(val status: Status) : SearchAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : SearchAction()
 }

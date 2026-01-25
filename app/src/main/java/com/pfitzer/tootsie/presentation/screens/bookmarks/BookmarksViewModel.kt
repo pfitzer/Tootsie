@@ -6,12 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.bookmarks.GetBookmarksUseCase
-import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
-import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +29,8 @@ class BookmarksViewModel @Inject constructor(
     private val reblogStatusUseCase: ReblogStatusUseCase,
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val voteOnPollUseCase: VoteOnPollUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookmarksUiState())
@@ -57,7 +53,25 @@ class BookmarksViewModel @Inject constructor(
             is BookmarksAction.UnboostStatus -> unboostStatus(action.status)
             is BookmarksAction.BookmarkStatus -> bookmarkStatus(action.status)
             is BookmarksAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is BookmarksAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is BookmarksAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Vote on a poll.
+     */
+    private fun voteOnPoll(pollId: String, choices: List<Int>) {
+        viewModelScope.launch {
+            when (val result = voteOnPollUseCase(pollId, choices)) {
+                is Result.Success -> {
+                    // Refresh not strictly needed if Paging is reactive
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -200,5 +214,6 @@ sealed class BookmarksAction {
     data class UnboostStatus(val status: Status) : BookmarksAction()
     data class BookmarkStatus(val status: Status) : BookmarksAction()
     data class UnbookmarkStatus(val status: Status) : BookmarksAction()
+    data class VoteOnPoll(val pollId: String, val choices: List<Int>) : BookmarksAction()
     data object DismissError : BookmarksAction()
 }

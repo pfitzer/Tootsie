@@ -214,6 +214,9 @@ private fun TrendingPostsContent(
                         onShareClick = onShareClick,
                         onReplyClick = { onNavigateToReply(status.id) },
                         onLinkClick = { context.openInBrowser(it) },
+                        onVoteClick = { pollId, choices ->
+                            viewModel.onAction(TrendingPostsAction.VoteOnPoll(pollId, choices))
+                        },
                         onImageClick = onNavigateToImageViewer,
                         onVideoClick = onNavigateToVideoPlayer,
                         modifier = Modifier.fillMaxWidth()
