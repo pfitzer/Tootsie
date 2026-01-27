@@ -182,6 +182,23 @@ private fun SuccessContent(
                 )
             }
 
+            // Appearance Section
+            item {
+                Text(
+                    text = stringResource(R.string.appearance),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+            }
+
+            item {
+                TextSizeCard(
+                    currentTextSize = state.textSize,
+                    onTextSizeChange = { onAction(SettingsAction.ChangeTextSize(it)) }
+                )
+            }
+
             // Database Cleanup Section
             item {
                 Text(
@@ -275,6 +292,51 @@ private fun ThemeOption(
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 8.dp)
         )
+    }
+}
+
+/**
+ * Card for selecting text size.
+ */
+@Composable
+private fun TextSizeCard(
+    currentTextSize: String,
+    onTextSizeChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.text_size),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            ThemeOption(
+                label = stringResource(R.string.text_size_small),
+                selected = currentTextSize == "SMALL",
+                onClick = { onTextSizeChange("SMALL") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.text_size_medium),
+                selected = currentTextSize == "MEDIUM",
+                onClick = { onTextSizeChange("MEDIUM") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.text_size_large),
+                selected = currentTextSize == "LARGE",
+                onClick = { onTextSizeChange("LARGE") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.text_size_extra_large),
+                selected = currentTextSize == "EXTRA_LARGE",
+                onClick = { onTextSizeChange("EXTRA_LARGE") }
+            )
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.pfitzer.tootsie.domain.model.TextSize
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryDark,
@@ -56,6 +57,7 @@ private val LightColorScheme = lightColorScheme(
 fun TootsieTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    textSize: TextSize = TextSize.MEDIUM,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -68,9 +70,12 @@ fun TootsieTheme(
         else -> LightColorScheme
     }
 
+    // Create scaled typography based on text size preference
+    val scaledTypography = createScaledTypography(textSize.scaleFactor)
+
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = scaledTypography,
         content = content
     )
 }

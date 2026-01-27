@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.pfitzer.tootsie.domain.model.TextSize
 import com.pfitzer.tootsie.presentation.navigation.TootsieNavHost
 import com.pfitzer.tootsie.presentation.theme.TootsieTheme
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
@@ -43,13 +44,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themePreference by preferencesManager.theme.collectAsState(initial = "system")
+            val textSizePreference by preferencesManager.textSize.collectAsState(initial = "MEDIUM")
+
             val darkTheme = when (themePreference) {
                 "light" -> false
                 "dark" -> true
                 else -> isSystemInDarkTheme()
             }
 
-            TootsieTheme(darkTheme = darkTheme) {
+            val textSize = TextSize.fromString(textSizePreference)
+
+            TootsieTheme(
+                darkTheme = darkTheme,
+                textSize = textSize
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

@@ -44,15 +44,20 @@ class SettingsViewModel @Inject constructor(
         )
 
     /**
-     * Combined UI state observing both accounts, theme and database retention.
+     * Combined UI state observing accounts, theme, database retention, and text size.
      */
     val combinedUiState: StateFlow<SettingsUiState> = combine(
         _uiState,
         preferencesManager.theme,
-        preferencesManager.databaseRetentionHours
-    ) { state, theme, retentionHours ->
+        preferencesManager.databaseRetentionHours,
+        preferencesManager.textSize
+    ) { state, theme, retentionHours, textSize ->
         if (state is SettingsUiState.Success) {
-            state.copy(theme = theme, databaseRetentionHours = retentionHours)
+            state.copy(
+                theme = theme,
+                databaseRetentionHours = retentionHours,
+                textSize = textSize
+            )
         } else {
             state
         }
@@ -81,6 +86,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsAction.DismissError -> dismissError()
             is SettingsAction.ChangeTheme -> changeTheme(action.theme)
             is SettingsAction.ChangeDatabaseRetentionHours -> changeDatabaseRetentionHours(action.hours)
+            is SettingsAction.ChangeTextSize -> changeTextSize(action.textSize)
         }
     }
 
@@ -258,6 +264,15 @@ class SettingsViewModel @Inject constructor(
             preferencesManager.saveDatabaseRetentionHours(hours)
         }
     }
+
+    /**
+     * Change text size.
+     */
+    private fun changeTextSize(textSize: String) {
+        viewModelScope.launch {
+            preferencesManager.saveTextSize(textSize)
+        }
+    }
 }
 
 /**
@@ -274,7 +289,8 @@ sealed class SettingsUiState {
         val accountToRemove: String? = null,
         val errorMessage: String? = null,
         val theme: String = "system",
-        val databaseRetentionHours: String = "24"
+        val databaseRetentionHours: String = "24",
+        val textSize: String = "MEDIUM"
     ) : SettingsUiState()
 
     data class Error(val message: String) : SettingsUiState()
@@ -294,4 +310,5 @@ sealed class SettingsAction {
     data object DismissError : SettingsAction()
     data class ChangeTheme(val theme: String) : SettingsAction()
     data class ChangeDatabaseRetentionHours(val hours: String) : SettingsAction()
+    data class ChangeTextSize(val textSize: String) : SettingsAction()
 }

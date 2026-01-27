@@ -41,6 +41,9 @@ class PreferencesManager @Inject constructor(
         private val KEY_LANGUAGE = stringPreferencesKey("language") // "en", "de", "system"
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
 
+        // Display Settings
+        private val KEY_TEXT_SIZE = stringPreferencesKey("text_size") // "SMALL", "MEDIUM", "LARGE", "EXTRA_LARGE"
+
         // Feature Flags
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
@@ -214,6 +217,25 @@ class PreferencesManager @Inject constructor(
      */
     val defaultVisibility: Flow<String> = dataStore.data.map { preferences ->
         preferences[KEY_DEFAULT_VISIBILITY] ?: "public"
+    }
+
+    // ========== Display Settings ==========
+
+    /**
+     * Save text size preference.
+     */
+    suspend fun saveTextSize(textSize: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_TEXT_SIZE] = textSize
+        }
+    }
+
+    /**
+     * Get text size preference as Flow.
+     * Returns "MEDIUM" by default.
+     */
+    val textSize: Flow<String> = dataStore.data.map { preferences ->
+        preferences[KEY_TEXT_SIZE] ?: "MEDIUM"
     }
 
     // ========== Feature Flags ==========
