@@ -27,6 +27,7 @@ import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.notification.NotificationCard
 import com.pfitzer.tootsie.util.openInBrowser
+import com.pfitzer.tootsie.util.ShareUtils
 
 /**
  * Notifications Screen - displays user notifications (follows, favorites, boosts, mentions).
@@ -34,6 +35,7 @@ import com.pfitzer.tootsie.util.openInBrowser
  * @param onNavigateToStatus Callback to navigate to status detail
  * @param onNavigateToProfile Callback to navigate to profile
  * @param onNavigateToHashtag Callback to navigate to hashtag timeline
+ * @param onNavigateToReply Callback to navigate to compose for reply
  * @param viewModel ViewModel for managing notifications state
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +44,7 @@ fun NotificationsScreen(
     onNavigateToStatus: (String) -> Unit = {},
     onNavigateToProfile: (String) -> Unit = {},
     onNavigateToHashtag: (String) -> Unit = {},
+    onNavigateToReply: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -130,6 +133,33 @@ fun NotificationsScreen(
                                 onHashtagClick = onNavigateToHashtag,
                                 onLinkClick = { url ->
                                     context.openInBrowser(url)
+                                },
+                                onReplyClick = { status ->
+                                    onNavigateToReply(status.id)
+                                },
+                                onBoostClick = { status ->
+                                    if (status.reblogged) {
+                                        viewModel.onAction(NotificationsAction.UnboostStatus(status))
+                                    } else {
+                                        viewModel.onAction(NotificationsAction.BoostStatus(status))
+                                    }
+                                },
+                                onFavoriteClick = { status ->
+                                    if (status.favourited) {
+                                        viewModel.onAction(NotificationsAction.UnfavoriteStatus(status))
+                                    } else {
+                                        viewModel.onAction(NotificationsAction.FavoriteStatus(status))
+                                    }
+                                },
+                                onBookmarkClick = { status ->
+                                    if (status.bookmarked) {
+                                        viewModel.onAction(NotificationsAction.UnbookmarkStatus(status))
+                                    } else {
+                                        viewModel.onAction(NotificationsAction.BookmarkStatus(status))
+                                    }
+                                },
+                                onShareClick = { status ->
+                                    ShareUtils.shareStatus(context, status.url, status.content)
                                 },
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )

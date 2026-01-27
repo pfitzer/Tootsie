@@ -406,6 +406,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToHashtag = { tag ->
                     navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(tag))
+                },
+                onNavigateToReply = { statusId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
                 }
             )
         }

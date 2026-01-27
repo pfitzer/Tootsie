@@ -20,7 +20,9 @@ import coil.compose.AsyncImage
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
+import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
+import com.pfitzer.tootsie.presentation.components.status.StatusActions
 
 /**
  * Card component for displaying a notification.
@@ -34,6 +36,11 @@ fun NotificationCard(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
+    onReplyClick: (Status) -> Unit = {},
+    onBoostClick: (Status) -> Unit = {},
+    onFavoriteClick: (Status) -> Unit = {},
+    onBookmarkClick: (Status) -> Unit = {},
+    onShareClick: (Status) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -107,6 +114,19 @@ fun NotificationCard(
                         onTextClick = null, // Don't handle text clicks separately
                         modifier = Modifier.padding(start = 48.dp)
                     )
+
+                    // Action buttons only for mentions (where user can interact with the status)
+                    if (notification.type == NotificationType.MENTION) {
+                        StatusActions(
+                            status = notification.status,
+                            onReplyClick = { onReplyClick(notification.status) },
+                            onBoostClick = { onBoostClick(notification.status) },
+                            onFavoriteClick = { onFavoriteClick(notification.status) },
+                            onBookmarkClick = { onBookmarkClick(notification.status) },
+                            onShareClick = { onShareClick(notification.status) },
+                            modifier = Modifier.padding(start = 48.dp, top = 8.dp)
+                        )
+                    }
                 }
             }
         }

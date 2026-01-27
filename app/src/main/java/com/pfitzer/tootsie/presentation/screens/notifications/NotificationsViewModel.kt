@@ -7,9 +7,16 @@ import androidx.paging.cachedIn
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.notification.ClearAllNotificationsUseCase
 import com.pfitzer.tootsie.domain.usecase.notification.DismissNotificationUseCase
 import com.pfitzer.tootsie.domain.usecase.notification.GetNotificationsUseCase
+import com.pfitzer.tootsie.domain.usecase.status.BookmarkStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.UnbookmarkStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
+import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -25,7 +32,13 @@ class NotificationsViewModel @Inject constructor(
     private val getNotificationsUseCase: GetNotificationsUseCase,
     private val dismissNotificationUseCase: DismissNotificationUseCase,
     private val clearAllNotificationsUseCase: ClearAllNotificationsUseCase,
-    private val accountManagementRepository: AccountManagementRepository
+    private val accountManagementRepository: AccountManagementRepository,
+    private val favoriteStatusUseCase: FavoriteStatusUseCase,
+    private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
+    private val reblogStatusUseCase: ReblogStatusUseCase,
+    private val unreblogStatusUseCase: UnreblogStatusUseCase,
+    private val bookmarkStatusUseCase: BookmarkStatusUseCase,
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationsUiState())
@@ -63,7 +76,13 @@ class NotificationsViewModel @Inject constructor(
             is NotificationsAction.DismissNotification -> dismissNotification(action.notificationId)
             is NotificationsAction.ClearAll -> clearAllNotifications()
             is NotificationsAction.DismissError -> dismissError()
-            NotificationsAction.Refresh -> loadNotifications()
+            is NotificationsAction.Refresh -> loadNotifications()
+            is NotificationsAction.FavoriteStatus -> favoriteStatus(action.status)
+            is NotificationsAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
+            is NotificationsAction.BoostStatus -> boostStatus(action.status)
+            is NotificationsAction.UnboostStatus -> unboostStatus(action.status)
+            is NotificationsAction.BookmarkStatus -> bookmarkStatus(action.status)
+            is NotificationsAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
         }
     }
 
@@ -119,6 +138,84 @@ class NotificationsViewModel @Inject constructor(
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
+    /**
+     * Favorite a status.
+     */
+    private fun favoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = favoriteStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to favorite") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unfavorite a status.
+     */
+    private fun unfavoriteStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unfavoriteStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to unfavorite") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Boost a status.
+     */
+    private fun boostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = reblogStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to boost") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unboost a status.
+     */
+    private fun unboostStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unreblogStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to unboost") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Bookmark a status.
+     */
+    private fun bookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = bookmarkStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to bookmark") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unbookmark a status.
+     */
+    private fun unbookmarkStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unbookmarkStatusUseCase(status.id)) {
+                is Result.Success -> loadNotifications()
+                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to remove bookmark") }
+                is Result.Loading -> Unit
+            }
+        }
+    }
 }
 
 /**
@@ -137,4 +234,10 @@ sealed class NotificationsAction {
     data object ClearAll : NotificationsAction()
     data object Refresh : NotificationsAction()
     data object DismissError : NotificationsAction()
+    data class FavoriteStatus(val status: Status) : NotificationsAction()
+    data class UnfavoriteStatus(val status: Status) : NotificationsAction()
+    data class BoostStatus(val status: Status) : NotificationsAction()
+    data class UnboostStatus(val status: Status) : NotificationsAction()
+    data class BookmarkStatus(val status: Status) : NotificationsAction()
+    data class UnbookmarkStatus(val status: Status) : NotificationsAction()
 }
