@@ -189,6 +189,13 @@ fun ProfileScreen(
                                                 viewModel.onAction(ProfileAction.BookmarkStatus(s))
                                             }
                                         },
+                                        onPinClick = if (uiState.isOwnProfile) { { s ->
+                                            if (s.pinned) {
+                                                viewModel.onAction(ProfileAction.UnpinStatus(s))
+                                            } else {
+                                                viewModel.onAction(ProfileAction.PinStatus(s))
+                                            }
+                                        } } else null,
                                         onVoteClick = { pollId, choices ->
                                             viewModel.onAction(ProfileAction.VoteOnPoll(pollId, choices))
                                         },

@@ -104,6 +104,23 @@ interface StatusRepository {
     suspend fun unbookmarkStatus(statusId: String): Result<Status>
 
     /**
+     * Pin a status to profile.
+     * Only works for own statuses.
+     *
+     * @param statusId Status ID
+     * @return Updated status
+     */
+    suspend fun pinStatus(statusId: String): Result<Status>
+
+    /**
+     * Unpin a status from profile.
+     *
+     * @param statusId Status ID
+     * @return Updated status
+     */
+    suspend fun unpinStatus(statusId: String): Result<Status>
+
+    /**
      * Upload a media file (image, video, audio).
      *
      * @param file The file to upload

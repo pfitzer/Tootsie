@@ -160,6 +160,28 @@ class StatusRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun pinStatus(statusId: String): Result<Status> {
+        return try {
+            val statusDto = mastodonApi.pinStatus(statusId)
+            // Update local cache
+            statusDao.updateStatus(statusDto.toEntity())
+            Result.Success(statusDto.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to pin status")
+        }
+    }
+
+    override suspend fun unpinStatus(statusId: String): Result<Status> {
+        return try {
+            val statusDto = mastodonApi.unpinStatus(statusId)
+            // Update local cache
+            statusDao.updateStatus(statusDto.toEntity())
+            Result.Success(statusDto.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to unpin status")
+        }
+    }
+
     override suspend fun uploadMedia(
         file: File,
         description: String?,

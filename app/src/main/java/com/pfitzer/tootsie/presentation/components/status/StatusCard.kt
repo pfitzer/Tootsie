@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +34,7 @@ import com.pfitzer.tootsie.presentation.util.htmlToPlainText
  * @param onBoostClick Callback when boost button is clicked
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
+ * @param onPinClick Optional callback when pin button is clicked (only shown if provided, for own posts)
  * @param onMentionClick Callback when a mention is clicked (receives accountId)
  * @param onHashtagClick Callback when a hashtag is clicked (receives tag name)
  * @param onLinkClick Callback when a link is clicked (receives URL)
@@ -50,6 +52,7 @@ fun StatusCard(
     onReplyClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
     onShareClick: (Status) -> Unit = {},
+    onPinClick: ((Status) -> Unit)? = null,
     onMentionClick: (String) -> Unit = {},
     onHashtagClick: (String) -> Unit = {},
     onLinkClick: (String) -> Unit = {},
@@ -102,6 +105,7 @@ fun StatusCard(
                 StatusHeader(
                     account = displayStatus.account,
                     timestamp = displayStatus.createdAt,
+                    isPinned = displayStatus.pinned,
                     onAvatarClick = { onAvatarClick(displayStatus.account.id) },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
@@ -155,7 +159,8 @@ fun StatusCard(
                     onBoostClick = { onBoostClick(displayStatus) },
                     onReplyClick = { onReplyClick(displayStatus) },
                     onBookmarkClick = { onBookmarkClick(displayStatus) },
-                    onShareClick = { onShareClick(displayStatus) }
+                    onShareClick = { onShareClick(displayStatus) },
+                    onPinClick = onPinClick?.let { { it(displayStatus) } }
                 )
             }
         }
@@ -196,6 +201,7 @@ private fun BoostIndicator(
 private fun StatusHeader(
     account: com.pfitzer.tootsie.domain.model.Account,
     timestamp: String,
+    isPinned: Boolean = false,
     onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -230,6 +236,17 @@ private fun StatusHeader(
         }
 
         Spacer(modifier = Modifier.width(8.dp))
+
+        // Pinned indicator
+        if (isPinned) {
+            Icon(
+                imageVector = Icons.Filled.PushPin,
+                contentDescription = stringResource(R.string.cd_pinned),
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.tertiary
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
 
         Text(
             text = formatRelativeTime(timestamp),

@@ -303,6 +303,9 @@
     <string name="cd_unfavorite">Nicht mehr favorisieren</string>
     <string name="cd_bookmark">Lesezeichen</string>
     <string name="cd_remove_bookmark">Lesezeichen entfernen</string>
+    <string name="cd_pin">An Profil anheften</string>
+    <string name="cd_unpin">Von Profil lösen</string>
+    <string name="cd_pinned">Angehefteter Beitrag</string>
     <string name="cd_attach_media">Medium anhängen</string>
     <string name="cd_content_warning">Inhaltswarnung</string>
     <string name="cd_play_video">Video abspielen</string>

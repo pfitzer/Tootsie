@@ -34,6 +34,8 @@ class ProfileViewModel @Inject constructor(
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val pinStatusUseCase: PinStatusUseCase,
+    private val unpinStatusUseCase: UnpinStatusUseCase,
     private val voteOnPollUseCase: VoteOnPollUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -139,6 +141,8 @@ class ProfileViewModel @Inject constructor(
             is ProfileAction.UnboostStatus -> unboostStatus(action.status)
             is ProfileAction.BookmarkStatus -> bookmarkStatus(action.status)
             is ProfileAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
+            is ProfileAction.PinStatus -> pinStatus(action.status)
+            is ProfileAction.UnpinStatus -> unpinStatus(action.status)
             is ProfileAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
         }
     }
@@ -230,6 +234,36 @@ class ProfileViewModel @Inject constructor(
                 is Result.Success -> {}
                 is Result.Error -> {
                     _uiState.update { it.copy(errorMessage = "Failed to unbookmark status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Pin a status to profile.
+     */
+    private fun pinStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = pinStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to pin status") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unpin a status from profile.
+     */
+    private fun unpinStatus(status: Status) {
+        viewModelScope.launch {
+            when (val result = unpinStatusUseCase(status.id)) {
+                is Result.Success -> {}
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to unpin status") }
                 }
                 is Result.Loading -> Unit
             }
@@ -350,5 +384,7 @@ sealed class ProfileAction {
     data class UnboostStatus(val status: Status) : ProfileAction()
     data class BookmarkStatus(val status: Status) : ProfileAction()
     data class UnbookmarkStatus(val status: Status) : ProfileAction()
+    data class PinStatus(val status: Status) : ProfileAction()
+    data class UnpinStatus(val status: Status) : ProfileAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : ProfileAction()
 }

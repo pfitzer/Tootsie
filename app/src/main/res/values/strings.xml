@@ -302,6 +302,9 @@
     <string name="cd_unfavorite">Unfavorite</string>
     <string name="cd_bookmark">Bookmark</string>
     <string name="cd_remove_bookmark">Remove bookmark</string>
+    <string name="cd_pin">Pin to profile</string>
+    <string name="cd_unpin">Unpin from profile</string>
+    <string name="cd_pinned">Pinned post</string>
     <string name="cd_attach_media">Attach media</string>
     <string name="cd_content_warning">Content warning</string>
     <string name="cd_play_video">Play video</string>

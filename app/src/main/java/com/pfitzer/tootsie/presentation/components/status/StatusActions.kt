@@ -24,6 +24,7 @@ import com.pfitzer.tootsie.domain.model.Status
  * @param onBoostClick Callback when boost button is clicked
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
+ * @param onPinClick Optional callback when pin button is clicked (only shown if provided)
  * @param modifier Optional modifier
  */
 @Composable
@@ -34,6 +35,7 @@ fun StatusActions(
     onReplyClick: () -> Unit,
     onBookmarkClick: () -> Unit,
     onShareClick: () -> Unit,
+    onPinClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -80,14 +82,26 @@ fun StatusActions(
             activeColor = MaterialTheme.colorScheme.secondary
         )
 
-        // Share
-        ActionButton(
-            icon = Icons.Default.Share,
-            count = null,
-            isActive = false,
-            onClick = onShareClick,
-            contentDescription = stringResource(R.string.cd_share)
-        )
+        // Pin (only shown for own posts)
+        if (onPinClick != null) {
+            ActionButton(
+                icon = if (status.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                count = null,
+                isActive = status.pinned,
+                onClick = onPinClick,
+                contentDescription = if (status.pinned) stringResource(R.string.cd_unpin) else stringResource(R.string.cd_pin),
+                activeColor = MaterialTheme.colorScheme.tertiary
+            )
+        } else {
+            // Share (when not showing pin)
+            ActionButton(
+                icon = Icons.Default.Share,
+                count = null,
+                isActive = false,
+                onClick = onShareClick,
+                contentDescription = stringResource(R.string.cd_share)
+            )
+        }
     }
 }
 

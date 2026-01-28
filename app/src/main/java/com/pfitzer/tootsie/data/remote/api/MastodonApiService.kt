@@ -311,6 +311,23 @@ interface MastodonApiService {
     suspend fun unbookmarkStatus(@Path("id") id: String): StatusDto
 
     /**
+     * Pin a status to profile.
+     * Only works for own statuses. Max 5 pinned statuses typically.
+     *
+     * @param id Status ID
+     */
+    @POST("api/v1/statuses/{id}/pin")
+    suspend fun pinStatus(@Path("id") id: String): StatusDto
+
+    /**
+     * Unpin a status from profile.
+     *
+     * @param id Status ID
+     */
+    @POST("api/v1/statuses/{id}/unpin")
+    suspend fun unpinStatus(@Path("id") id: String): StatusDto
+
+    /**
      * Get conversation context for a status.
      * Returns ancestors (posts before) and descendants (replies after).
      *
