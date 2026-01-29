@@ -189,7 +189,7 @@
     <!-- Search -->
     <string name="search">Suchen</string>
     <string name="search_hint">Suche nach Benutzern, Hashtags oder Beiträgen</string>
-    <string name="search_placeholder">Suche nach Konten, Beiträgen, Hashtags…</string>
+    <string name="search_placeholder">Suche…</string>
     <string name="search_section_accounts">Konten (%1$d)</string>
     <string name="search_section_posts">Beiträge (%1$d)</string>
     <string name="search_section_hashtags">Hashtags (%1$d)</string>

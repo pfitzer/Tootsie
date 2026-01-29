@@ -188,7 +188,7 @@
     <!-- Search -->
     <string name="search">Search</string>
     <string name="search_hint">Search for users, hashtags, or posts</string>
-    <string name="search_placeholder">Search for accounts, posts, hashtags…</string>
+    <string name="search_placeholder">Search…</string>
     <string name="search_section_accounts">Accounts (%1$d)</string>
     <string name="search_section_posts">Posts (%1$d)</string>
     <string name="search_section_hashtags">Hashtags (%1$d)</string>
