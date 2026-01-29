@@ -11,12 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.util.openInBrowser
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
@@ -212,6 +214,8 @@ private fun SearchResults(
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit
 ) {
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -249,7 +253,9 @@ private fun SearchResults(
                     status = status,
                     onStatusClick = { onStatusClick(status.id) },
                     onAvatarClick = { onAccountClick(status.account.id) },
+                    onMentionClick = onAccountClick,
                     onHashtagClick = onHashtagClick,
+                    onLinkClick = { url -> context.openInBrowser(url) },
                     onReplyClick = { /* TODO */ },
                     onBoostClick = { s ->
                         if (s.reblogged) {
