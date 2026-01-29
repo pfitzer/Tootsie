@@ -19,6 +19,7 @@ import com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase
 import com.pfitzer.tootsie.domain.usecase.status.UnreblogStatusUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -57,12 +58,16 @@ class NotificationsViewModel @Inject constructor(
     private val _notificationsPagingData = MutableStateFlow<PagingData<Notification>>(PagingData.empty())
     val notificationsPagingData: Flow<PagingData<Notification>> = _notificationsPagingData.asStateFlow()
 
+    private var notificationsJob: Job? = null
+
     init {
         loadNotifications()
     }
 
     private fun loadNotifications() {
-        getNotificationsUseCase()
+        // Cancel previous collection to avoid multiple competing collectors
+        notificationsJob?.cancel()
+        notificationsJob = getNotificationsUseCase()
             .cachedIn(viewModelScope)
             .onEach { _notificationsPagingData.value = it }
             .launchIn(viewModelScope)
