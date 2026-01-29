@@ -36,7 +36,9 @@ fun PollComponent(
     onVoteClick: (String, List<Int>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val canVote = !poll.expired && !poll.voted
+    // Track if user has voted locally (optimistic UI update)
+    var hasVotedLocally by remember(poll.id) { mutableStateOf(false) }
+    val canVote = !poll.expired && !poll.voted && !hasVotedLocally
     var selectedOptions by remember(poll.id) { mutableStateOf(emptySet<Int>()) }
 
     Column(
@@ -50,8 +52,8 @@ fun PollComponent(
                 option = option,
                 index = index,
                 totalVotes = poll.votesCount,
-                showResults = poll.voted || poll.expired,
-                isVoted = poll.ownVotes.contains(index),
+                showResults = poll.voted || poll.expired || hasVotedLocally,
+                isVoted = poll.ownVotes.contains(index) || (hasVotedLocally && selectedOptions.contains(index)),
                 isSelected = selectedOptions.contains(index),
                 canVote = canVote,
                 onOptionClick = {
@@ -72,7 +74,10 @@ fun PollComponent(
 
         if (canVote && selectedOptions.isNotEmpty()) {
             Button(
-                onClick = { onVoteClick(poll.id, selectedOptions.toList()) },
+                onClick = {
+                    hasVotedLocally = true
+                    onVoteClick(poll.id, selectedOptions.toList())
+                },
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(stringResource(R.string.poll_vote))
