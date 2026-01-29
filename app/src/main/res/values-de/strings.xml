@@ -339,6 +339,13 @@
     <string name="bookmarks_title">Lesezeichen</string>
     <string name="favorites_title">Favoriten</string>
 
+    <!-- Follow Requests -->
+    <string name="follow_requests_title">Folgeanfragen</string>
+    <string name="empty_follow_requests">Keine ausstehenden Folgeanfragen</string>
+    <string name="error_load_follow_requests">Fehler beim Laden der Folgeanfragen</string>
+    <string name="authorize_request">Annehmen</string>
+    <string name="reject_request">Ablehnen</string>
+
     <!-- Status Detail -->
     <string name="status_detail_title">Beitrag</string>
 

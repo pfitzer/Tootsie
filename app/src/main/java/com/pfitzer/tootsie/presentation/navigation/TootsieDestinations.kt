@@ -139,6 +139,11 @@ sealed class TootsieDestinations(val route: String) {
     data object Filters : TootsieDestinations("filters")
 
     /**
+     * Follow Requests screen - manage pending follow requests.
+     */
+    data object FollowRequests : TootsieDestinations("follow_requests")
+
+    /**
      * Filter Detail screen - view and edit a single filter.
      * Requires filterId parameter.
      */

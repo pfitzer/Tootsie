@@ -338,6 +338,13 @@
     <string name="bookmarks_title">Bookmarks</string>
     <string name="favorites_title">Favorites</string>
 
+    <!-- Follow Requests -->
+    <string name="follow_requests_title">Follow Requests</string>
+    <string name="empty_follow_requests">No pending follow requests</string>
+    <string name="error_load_follow_requests">Failed to load follow requests</string>
+    <string name="authorize_request">Authorize</string>
+    <string name="reject_request">Reject</string>
+
     <!-- Status Detail -->
     <string name="status_detail_title">Post</string>
 

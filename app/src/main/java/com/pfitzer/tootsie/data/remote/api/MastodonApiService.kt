@@ -155,6 +155,42 @@ interface MastodonApiService {
         @Path("id") id: String
     ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
 
+    // ========== Follow Requests Endpoints ==========
+
+    /**
+     * Get pending follow requests.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param limit Maximum number of results (default 40)
+     */
+    @GET("api/v1/follow_requests")
+    suspend fun getFollowRequests(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): List<com.pfitzer.tootsie.data.remote.dto.AccountDto>
+
+    /**
+     * Authorize a follow request.
+     *
+     * @param id Account ID to authorize
+     */
+    @POST("api/v1/follow_requests/{id}/authorize")
+    suspend fun authorizeFollowRequest(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Reject a follow request.
+     *
+     * @param id Account ID to reject
+     */
+    @POST("api/v1/follow_requests/{id}/reject")
+    suspend fun rejectFollowRequest(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
     // ========== Timeline Endpoints ==========
 
     /**

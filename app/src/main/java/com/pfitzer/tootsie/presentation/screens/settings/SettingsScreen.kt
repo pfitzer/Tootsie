@@ -44,6 +44,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToPushSettings: () -> Unit = {},
+    onNavigateToFollowRequests: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -87,7 +88,8 @@ fun SettingsScreen(
                         state = state,
                         onAction = viewModel::onAction,
                         onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToPushSettings = onNavigateToPushSettings
+                        onNavigateToPushSettings = onNavigateToPushSettings,
+                        onNavigateToFollowRequests = onNavigateToFollowRequests
                     )
                 }
 
@@ -114,7 +116,8 @@ private fun SuccessContent(
     state: SettingsUiState.Success,
     onAction: (SettingsAction) -> Unit,
     onNavigateToLogin: () -> Unit,
-    onNavigateToPushSettings: () -> Unit
+    onNavigateToPushSettings: () -> Unit,
+    onNavigateToFollowRequests: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -149,6 +152,14 @@ private fun SuccessContent(
             item {
                 PushSettingsButton(
                     onClick = onNavigateToPushSettings,
+                    isEnabled = !state.isSwitching && !state.isRemoving
+                )
+            }
+
+            // Follow requests button
+            item {
+                FollowRequestsButton(
+                    onClick = onNavigateToFollowRequests,
                     isEnabled = !state.isSwitching && !state.isRemoving
                 )
             }
@@ -602,6 +613,39 @@ private fun PushSettingsButton(
         ) {
             Text(
                 text = stringResource(R.string.push_notifications),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Follow requests button.
+ */
+@Composable
+private fun FollowRequestsButton(
+    onClick: () -> Unit,
+    isEnabled: Boolean
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled) { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.follow_requests_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f)
             )

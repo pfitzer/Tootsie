@@ -28,6 +28,7 @@ import com.pfitzer.tootsie.presentation.screens.favorites.FavoritesScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
 import com.pfitzer.tootsie.presentation.screens.filters.FiltersScreen
+import com.pfitzer.tootsie.presentation.screens.followrequests.FollowRequestsScreen
 import com.pfitzer.tootsie.presentation.screens.filters.detail.FilterDetailScreen
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
@@ -436,6 +437,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToPushSettings = {
                     navController.navigate(TootsieDestinations.PushSettings.route)
+                },
+                onNavigateToFollowRequests = {
+                    navController.navigate(TootsieDestinations.FollowRequests.route)
                 }
             )
         }
@@ -558,6 +562,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToFilter = { filterId ->
                     navController.navigate(TootsieDestinations.FilterDetail.createRoute(filterId))
+                }
+            )
+        }
+
+        // Follow Requests screen - manage pending follow requests
+        composable(route = TootsieDestinations.FollowRequests.route) {
+            FollowRequestsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 }
             )
         }

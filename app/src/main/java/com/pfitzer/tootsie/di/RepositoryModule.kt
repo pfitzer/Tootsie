@@ -192,4 +192,13 @@ abstract class RepositoryModule {
     abstract fun bindFilterRepository(
         filterRepositoryImpl: FilterRepositoryImpl
     ): FilterRepository
+
+    /**
+     * Binds FollowRequestsRepositoryImpl to FollowRequestsRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindFollowRequestsRepository(
+        followRequestsRepositoryImpl: FollowRequestsRepositoryImpl
+    ): FollowRequestsRepository
 }
