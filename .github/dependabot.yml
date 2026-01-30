@@ -2,6 +2,13 @@
 # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
 
 version: 2
+
+registries:
+  # JitPack registry for UnifiedPush and other JitPack dependencies
+  jitpack:
+    type: maven-repository
+    url: https://jitpack.io
+
 updates:
   # Gradle dependencies (including version catalog)
   - package-ecosystem: "gradle"
@@ -14,6 +21,11 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    registries:
+      - jitpack
+    # Ignore JitPack packages as Dependabot has limited support for them
+    ignore:
+      - dependency-name: "com.github.*"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
