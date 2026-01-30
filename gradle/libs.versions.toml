@@ -27,7 +27,7 @@ kotlinx-serialization = "1.10.0"
 exoplayer = "1.3.1"
 accompanist = "0.36.0"
 unifiedpush = "2.4.0"
-bouncycastle = "1.70"
+bouncycastle = "1.79"
 hilt-work = "1.2.0"
 compose-googlefonts = "1.6.7"
 
@@ -106,7 +106,7 @@ work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref
 unifiedpush-connector = { group = "com.github.UnifiedPush", name = "android-connector", version.ref = "unifiedpush" }
 
 # BouncyCastle (for VAPID key generation)
-bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk15on", version.ref = "bouncycastle" }
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 
 # Hilt WorkManager
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
