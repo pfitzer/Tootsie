@@ -229,4 +229,9 @@ sealed class TootsieDestinations(val route: String) {
      * Edit Profile screen - edit authenticated user's profile.
      */
     data object EditProfile : TootsieDestinations("edit_profile")
+
+    /**
+     * Announcements screen - view server announcements.
+     */
+    data object Announcements : TootsieDestinations("announcements")
 }

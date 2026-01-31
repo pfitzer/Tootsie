@@ -201,4 +201,13 @@ abstract class RepositoryModule {
     abstract fun bindFollowRequestsRepository(
         followRequestsRepositoryImpl: FollowRequestsRepositoryImpl
     ): FollowRequestsRepository
+
+    /**
+     * Binds AnnouncementRepositoryImpl to AnnouncementRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAnnouncementRepository(
+        announcementRepositoryImpl: AnnouncementRepositoryImpl
+    ): AnnouncementRepository
 }
