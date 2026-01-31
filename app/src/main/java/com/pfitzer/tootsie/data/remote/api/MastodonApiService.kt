@@ -156,6 +156,83 @@ interface MastodonApiService {
         @Path("id") id: String
     ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
 
+    // ========== Mute/Block Endpoints ==========
+
+    /**
+     * Mute an account.
+     * Hides the account's posts from timelines and notifications.
+     *
+     * @param id Account ID to mute
+     * @param notifications Whether to mute notifications (default true)
+     * @param duration Duration of mute in seconds (0 = indefinite)
+     */
+    @FormUrlEncoded
+    @POST("api/v1/accounts/{id}/mute")
+    suspend fun muteAccount(
+        @Path("id") id: String,
+        @Field("notifications") notifications: Boolean = true,
+        @Field("duration") duration: Int = 0
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Unmute an account.
+     *
+     * @param id Account ID to unmute
+     */
+    @POST("api/v1/accounts/{id}/unmute")
+    suspend fun unmuteAccount(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Block an account.
+     * Prevents the account from following you and viewing your content.
+     *
+     * @param id Account ID to block
+     */
+    @POST("api/v1/accounts/{id}/block")
+    suspend fun blockAccount(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Unblock an account.
+     *
+     * @param id Account ID to unblock
+     */
+    @POST("api/v1/accounts/{id}/unblock")
+    suspend fun unblockAccount(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
+     * Get muted accounts.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param limit Maximum number of results (default 40)
+     */
+    @GET("api/v1/mutes")
+    suspend fun getMutedAccounts(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): List<AccountDto>
+
+    /**
+     * Get blocked accounts.
+     *
+     * @param maxId Return results older than this ID
+     * @param sinceId Return results newer than this ID
+     * @param limit Maximum number of results (default 40)
+     */
+    @GET("api/v1/blocks")
+    suspend fun getBlockedAccounts(
+        @Query("max_id") maxId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): List<AccountDto>
+
     // ========== Follow Requests Endpoints ==========
 
     /**

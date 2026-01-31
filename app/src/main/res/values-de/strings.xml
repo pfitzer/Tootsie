@@ -123,6 +123,20 @@
     <string name="profile_blocked">Blockiert</string>
     <string name="profile_muted">Stummgeschaltet</string>
 
+    <!-- Mute/Block -->
+    <string name="mute">Stummschalten</string>
+    <string name="unmute">Stummschaltung aufheben</string>
+    <string name="block">Blockieren</string>
+    <string name="unblock">Blockierung aufheben</string>
+    <string name="muted_accounts_title">Stummgeschaltete Konten</string>
+    <string name="blocked_accounts_title">Blockierte Konten</string>
+    <string name="empty_muted_accounts">Keine stummgeschalteten Konten</string>
+    <string name="empty_blocked_accounts">Keine blockierten Konten</string>
+    <string name="error_mute_account">Fehler beim Stummschalten des Kontos</string>
+    <string name="error_unmute_account">Fehler beim Aufheben der Stummschaltung</string>
+    <string name="error_block_account">Fehler beim Blockieren des Kontos</string>
+    <string name="error_unblock_account">Fehler beim Aufheben der Blockierung</string>
+
     <!-- Lists -->
     <string name="lists_title">Listen</string>
     <string name="lists_empty_state">Noch keine Listen\nTippe auf +, um eine zu erstellen</string>
