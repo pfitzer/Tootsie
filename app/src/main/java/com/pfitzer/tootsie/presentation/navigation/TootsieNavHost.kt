@@ -213,6 +213,9 @@ fun TootsieNavHost(
                 onNavigateToTrending = {
                     navController.navigate(TootsieDestinations.Trending.route)
                 },
+                onNavigateToAnnouncements = {
+                    navController.navigate(TootsieDestinations.Announcements.route)
+                },
                 onNavigateToConversations = {
                     navController.navigate(TootsieDestinations.Conversations.route)
                 },
@@ -752,6 +755,21 @@ fun TootsieNavHost(
                 description = description,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // Announcements screen - view server announcements
+        composable(route = TootsieDestinations.Announcements.route) {
+            com.pfitzer.tootsie.presentation.screens.announcements.AnnouncementsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                },
+                onNavigateToHashtag = { hashtag ->
+                    navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
                 }
             )
         }

@@ -433,4 +433,12 @@
     <string name="refresh">Aktualisieren</string>
     <string name="filter_detail_title">Filterdetails</string>
     <string name="add">Hinzufügen</string>
+
+    <!-- Announcements -->
+    <string name="announcements_title">Ankündigungen</string>
+    <string name="drawer_announcements">Ankündigungen</string>
+    <string name="empty_announcements">Keine Ankündigungen</string>
+    <string name="announcement_new">NEU</string>
+    <string name="cd_dismiss_announcement">Als gelesen markieren</string>
+    <string name="error_load_announcements">Fehler beim Laden der Ankündigungen</string>
 </resources>

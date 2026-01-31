@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.data.remote.api
 
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
+import com.pfitzer.tootsie.data.remote.dto.AnnouncementDto
 import com.pfitzer.tootsie.data.remote.dto.FilterDto
 import com.pfitzer.tootsie.data.remote.dto.FilterKeywordDto
 import com.pfitzer.tootsie.data.remote.dto.FollowedTagDto
@@ -881,4 +882,26 @@ interface MastodonApiService {
     suspend fun markConversationAsRead(
         @Path("id") id: String
     ): com.pfitzer.tootsie.data.remote.dto.ConversationDto
+
+    // ========== Announcements Endpoints ==========
+
+    /**
+     * Get all active announcements from the server.
+     *
+     * @param withDismissed Include announcements that have been dismissed by the user
+     */
+    @GET("api/v1/announcements")
+    suspend fun getAnnouncements(
+        @Query("with_dismissed") withDismissed: Boolean = true
+    ): List<AnnouncementDto>
+
+    /**
+     * Dismiss an announcement (mark as read).
+     *
+     * @param id Announcement ID
+     */
+    @POST("api/v1/announcements/{id}/dismiss")
+    suspend fun dismissAnnouncement(
+        @Path("id") id: String
+    )
 }

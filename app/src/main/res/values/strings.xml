@@ -432,4 +432,12 @@
     <string name="refresh">Refresh</string>
     <string name="filter_detail_title">Filter Details</string>
     <string name="add">Add</string>
+
+    <!-- Announcements -->
+    <string name="announcements_title">Announcements</string>
+    <string name="drawer_announcements">Announcements</string>
+    <string name="empty_announcements">No announcements</string>
+    <string name="announcement_new">NEW</string>
+    <string name="cd_dismiss_announcement">Mark as read</string>
+    <string name="error_load_announcements">Failed to load announcements</string>
 </resources>
