@@ -14,6 +14,7 @@ private const val TAG = "BlockedAccountsPaging"
 /**
  * PagingSource for Blocked Accounts.
  * Fetches accounts that the user has blocked.
+ * Uses Link header for pagination as the API uses internal relationship IDs.
  */
 class BlockedAccountsPagingSource(
     private val mastodonApi: MastodonApiService
@@ -24,22 +25,26 @@ class BlockedAccountsPagingSource(
             val maxId = params.key
             Log.d(TAG, "load() called - maxId=$maxId, loadSize=${params.loadSize}")
 
-            val accountDtos = mastodonApi.getBlockedAccounts(
+            val response = mastodonApi.getBlockedAccounts(
                 maxId = maxId,
                 limit = params.loadSize
             )
 
+            if (!response.isSuccessful) {
+                Log.e(TAG, "API error: ${response.code()} - ${response.message()}")
+                return LoadResult.Error(HttpException(response))
+            }
+
+            val accountDtos = response.body() ?: emptyList()
             Log.d(TAG, "API returned ${accountDtos.size} blocked accounts")
 
             val accounts = accountDtos.map { it.toDomain() }
 
-            val nextKey = if (accounts.isEmpty()) {
-                null
-            } else {
-                accounts.last().id
-            }
+            // Extract next page ID from Link header
+            val linkHeader = response.headers()["Link"]
+            val nextKey = parseLinkHeader(linkHeader)
 
-            Log.d(TAG, "Returning ${accounts.size} accounts, nextKey=$nextKey")
+            Log.d(TAG, "Returning ${accounts.size} accounts, nextKey=$nextKey (from Link header)")
             LoadResult.Page(
                 data = accounts,
                 prevKey = null,
@@ -55,6 +60,19 @@ class BlockedAccountsPagingSource(
             Log.e(TAG, "Unexpected error: ${e.message}", e)
             LoadResult.Error(e)
         }
+    }
+
+    /**
+     * Parse the Link header to extract the max_id for the next page.
+     * Link header format: <url?max_id=123>; rel="next", <url?since_id=456>; rel="prev"
+     */
+    private fun parseLinkHeader(linkHeader: String?): String? {
+        if (linkHeader.isNullOrBlank()) return null
+
+        // Find the "next" link
+        val nextPattern = """<[^>]*[?&]max_id=([^>&]*)>;\s*rel="next"""".toRegex()
+        val match = nextPattern.find(linkHeader)
+        return match?.groupValues?.get(1)
     }
 
     override fun getRefreshKey(state: PagingState<String, Account>): String? {

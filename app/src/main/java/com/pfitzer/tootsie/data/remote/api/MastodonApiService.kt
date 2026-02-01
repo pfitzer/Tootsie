@@ -207,8 +207,9 @@ interface MastodonApiService {
 
     /**
      * Get muted accounts.
+     * Returns Response to access Link header for pagination.
      *
-     * @param maxId Return results older than this ID
+     * @param maxId Return results older than this ID (internal relationship ID from Link header)
      * @param sinceId Return results newer than this ID
      * @param limit Maximum number of results (default 40)
      */
@@ -217,12 +218,13 @@ interface MastodonApiService {
         @Query("max_id") maxId: String? = null,
         @Query("since_id") sinceId: String? = null,
         @Query("limit") limit: Int = 40
-    ): List<AccountDto>
+    ): retrofit2.Response<List<AccountDto>>
 
     /**
      * Get blocked accounts.
+     * Returns Response to access Link header for pagination.
      *
-     * @param maxId Return results older than this ID
+     * @param maxId Return results older than this ID (internal relationship ID from Link header)
      * @param sinceId Return results newer than this ID
      * @param limit Maximum number of results (default 40)
      */
@@ -231,7 +233,7 @@ interface MastodonApiService {
         @Query("max_id") maxId: String? = null,
         @Query("since_id") sinceId: String? = null,
         @Query("limit") limit: Int = 40
-    ): List<AccountDto>
+    ): retrofit2.Response<List<AccountDto>>
 
     // ========== Follow Requests Endpoints ==========
 
