@@ -1,0 +1,101 @@
+package com.pfitzer.tootsie.presentation.screens.mutedaccounts
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.repository.AccountRepository
+import com.pfitzer.tootsie.domain.usecase.account.UnmuteAccountUseCase
+import com.pfitzer.tootsie.util.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * ViewModel for Muted Accounts Screen.
+ * Manages the list of muted accounts with unmute functionality.
+ */
+@HiltViewModel
+class MutedAccountsViewModel @Inject constructor(
+    private val accountRepository: AccountRepository,
+    private val unmuteAccountUseCase: UnmuteAccountUseCase
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(MutedAccountsUiState())
+    val uiState: StateFlow<MutedAccountsUiState> = _uiState.asStateFlow()
+
+    /**
+     * Paging data flow for muted accounts.
+     */
+    val mutedAccountsPagingData: Flow<PagingData<Account>> =
+        accountRepository.getMutedAccounts().cachedIn(viewModelScope)
+
+    /**
+     * Handle user actions.
+     */
+    fun onAction(action: MutedAccountsAction) {
+        when (action) {
+            is MutedAccountsAction.UnmuteAccount -> unmuteAccount(action.account)
+            is MutedAccountsAction.DismissError -> dismissError()
+        }
+    }
+
+    /**
+     * Unmute an account.
+     */
+    private fun unmuteAccount(account: Account) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(processingAccountId = account.id) }
+
+            when (val result = unmuteAccountUseCase(account.id)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            processingAccountId = null,
+                            unmutedAccountId = account.id
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            processingAccountId = null,
+                            errorMessage = result.message ?: "Failed to unmute account"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Dismiss error message.
+     */
+    private fun dismissError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+}
+
+/**
+ * UI state for Muted Accounts Screen.
+ */
+data class MutedAccountsUiState(
+    val processingAccountId: String? = null,
+    val unmutedAccountId: String? = null,
+    val errorMessage: String? = null
+)
+
+/**
+ * User actions for Muted Accounts Screen.
+ */
+sealed class MutedAccountsAction {
+    data class UnmuteAccount(val account: Account) : MutedAccountsAction()
+    data object DismissError : MutedAccountsAction()
+}

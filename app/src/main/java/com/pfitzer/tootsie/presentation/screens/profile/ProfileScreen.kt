@@ -131,11 +131,27 @@ fun ProfileScreen(
                                 relationship = uiState.relationship,
                                 isOwnProfile = uiState.isOwnProfile,
                                 isProcessingFollow = uiState.isProcessingFollow,
+                                isProcessingMute = uiState.isProcessingMute,
+                                isProcessingBlock = uiState.isProcessingBlock,
                                 onFollowClick = {
                                     if (uiState.relationship?.following == true) {
                                         viewModel.onAction(ProfileAction.UnfollowAccount)
                                     } else {
                                         viewModel.onAction(ProfileAction.FollowAccount)
+                                    }
+                                },
+                                onMuteClick = {
+                                    if (uiState.relationship?.muting == true) {
+                                        viewModel.onAction(ProfileAction.UnmuteAccount)
+                                    } else {
+                                        viewModel.onAction(ProfileAction.MuteAccount)
+                                    }
+                                },
+                                onBlockClick = {
+                                    if (uiState.relationship?.blocking == true) {
+                                        viewModel.onAction(ProfileAction.UnblockAccount)
+                                    } else {
+                                        viewModel.onAction(ProfileAction.BlockAccount)
                                     }
                                 },
                                 onMentionClick = onNavigateToProfile,
@@ -262,7 +278,7 @@ fun ProfileScreen(
 }
 
 /**
- * Profile header with avatar, stats, and follow button.
+ * Profile header with avatar, stats, and follow/mute/block buttons.
  */
 @Composable
 private fun ProfileHeader(
@@ -270,7 +286,11 @@ private fun ProfileHeader(
     relationship: Relationship?,
     isOwnProfile: Boolean,
     isProcessingFollow: Boolean,
+    isProcessingMute: Boolean,
+    isProcessingBlock: Boolean,
     onFollowClick: () -> Unit,
+    onMuteClick: () -> Unit,
+    onBlockClick: () -> Unit,
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
@@ -297,21 +317,27 @@ private fun ProfileHeader(
                 contentScale = ContentScale.Crop
             )
 
-            // Follow button (only for other users)
+            // Action buttons (only for other users)
             if (!isOwnProfile) {
-                Button(
-                    onClick = onFollowClick,
-                    enabled = !isProcessingFollow,
-                    modifier = Modifier.height(36.dp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = when {
-                            isProcessingFollow -> "..."
-                            relationship?.following == true -> stringResource(R.string.unfollow)
-                            relationship?.requested == true -> stringResource(R.string.notification_requested_follow)
-                            else -> stringResource(R.string.follow)
-                        }
-                    )
+                    // Follow button
+                    Button(
+                        onClick = onFollowClick,
+                        enabled = !isProcessingFollow,
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Text(
+                            text = when {
+                                isProcessingFollow -> "..."
+                                relationship?.following == true -> stringResource(R.string.unfollow)
+                                relationship?.requested == true -> stringResource(R.string.notification_requested_follow)
+                                else -> stringResource(R.string.follow)
+                            }
+                        )
+                    }
                 }
             } else {
                 // Edit profile button for own profile
@@ -320,6 +346,60 @@ private fun ProfileHeader(
                     modifier = Modifier.height(36.dp)
                 ) {
                     Text(text = stringResource(R.string.edit_profile))
+                }
+            }
+        }
+
+        // Mute and Block buttons for other users
+        if (!isOwnProfile) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Mute button
+                OutlinedButton(
+                    onClick = onMuteClick,
+                    enabled = !isProcessingMute,
+                    modifier = Modifier.height(32.dp),
+                    colors = if (relationship?.muting == true) {
+                        ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    } else {
+                        ButtonDefaults.outlinedButtonColors()
+                    }
+                ) {
+                    Text(
+                        text = when {
+                            isProcessingMute -> "..."
+                            relationship?.muting == true -> stringResource(R.string.unmute)
+                            else -> stringResource(R.string.mute)
+                        },
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                // Block button
+                OutlinedButton(
+                    onClick = onBlockClick,
+                    enabled = !isProcessingBlock,
+                    modifier = Modifier.height(32.dp),
+                    colors = if (relationship?.blocking == true) {
+                        ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    } else {
+                        ButtonDefaults.outlinedButtonColors()
+                    }
+                ) {
+                    Text(
+                        text = when {
+                            isProcessingBlock -> "..."
+                            relationship?.blocking == true -> stringResource(R.string.unblock)
+                            else -> stringResource(R.string.block)
+                        },
+                        style = MaterialTheme.typography.labelMedium
+                    )
                 }
             }
         }

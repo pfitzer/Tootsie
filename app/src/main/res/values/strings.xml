@@ -122,6 +122,20 @@
     <string name="profile_blocked">Blocked</string>
     <string name="profile_muted">Muted</string>
 
+    <!-- Mute/Block -->
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="block">Block</string>
+    <string name="unblock">Unblock</string>
+    <string name="muted_accounts_title">Muted Accounts</string>
+    <string name="blocked_accounts_title">Blocked Accounts</string>
+    <string name="empty_muted_accounts">No muted accounts</string>
+    <string name="empty_blocked_accounts">No blocked accounts</string>
+    <string name="error_mute_account">Failed to mute account</string>
+    <string name="error_unmute_account">Failed to unmute account</string>
+    <string name="error_block_account">Failed to block account</string>
+    <string name="error_unblock_account">Failed to unblock account</string>
+
     <!-- Lists -->
     <string name="lists_title">Lists</string>
     <string name="lists_empty_state">No lists yet\nTap + to create one</string>

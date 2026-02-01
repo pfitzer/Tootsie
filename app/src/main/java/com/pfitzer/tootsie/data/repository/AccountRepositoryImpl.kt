@@ -5,6 +5,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.paging.AccountStatusesPagingSource
+import com.pfitzer.tootsie.data.paging.BlockedAccountsPagingSource
+import com.pfitzer.tootsie.data.paging.MutedAccountsPagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
@@ -88,6 +90,76 @@ class AccountRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unfollow account")
         }
+    }
+
+    override suspend fun muteAccount(
+        accountId: String,
+        notifications: Boolean,
+        duration: Int
+    ): Result<Relationship> {
+        return try {
+            val relationship = mastodonApi.muteAccount(
+                id = accountId,
+                notifications = notifications,
+                duration = duration
+            )
+            Result.Success(relationship.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to mute account")
+        }
+    }
+
+    override suspend fun unmuteAccount(accountId: String): Result<Relationship> {
+        return try {
+            val relationship = mastodonApi.unmuteAccount(accountId)
+            Result.Success(relationship.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to unmute account")
+        }
+    }
+
+    override suspend fun blockAccount(accountId: String): Result<Relationship> {
+        return try {
+            val relationship = mastodonApi.blockAccount(accountId)
+            Result.Success(relationship.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to block account")
+        }
+    }
+
+    override suspend fun unblockAccount(accountId: String): Result<Relationship> {
+        return try {
+            val relationship = mastodonApi.unblockAccount(accountId)
+            Result.Success(relationship.toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to unblock account")
+        }
+    }
+
+    override fun getMutedAccounts(): Flow<PagingData<Account>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 40,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = {
+                MutedAccountsPagingSource(mastodonApi)
+            }
+        ).flow
+    }
+
+    override fun getBlockedAccounts(): Flow<PagingData<Account>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 40,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = {
+                BlockedAccountsPagingSource(mastodonApi)
+            }
+        ).flow
     }
 
     override fun getAccountStatuses(

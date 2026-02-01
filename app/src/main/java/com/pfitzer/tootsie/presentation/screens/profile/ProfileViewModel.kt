@@ -26,6 +26,10 @@ class ProfileViewModel @Inject constructor(
     private val getRelationshipUseCase: GetRelationshipUseCase,
     private val followAccountUseCase: FollowAccountUseCase,
     private val unfollowAccountUseCase: UnfollowAccountUseCase,
+    private val muteAccountUseCase: MuteAccountUseCase,
+    private val unmuteAccountUseCase: UnmuteAccountUseCase,
+    private val blockAccountUseCase: BlockAccountUseCase,
+    private val unblockAccountUseCase: UnblockAccountUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
@@ -133,6 +137,10 @@ class ProfileViewModel @Inject constructor(
         when (action) {
             is ProfileAction.FollowAccount -> followAccount()
             is ProfileAction.UnfollowAccount -> unfollowAccount()
+            is ProfileAction.MuteAccount -> muteAccount()
+            is ProfileAction.UnmuteAccount -> unmuteAccount()
+            is ProfileAction.BlockAccount -> blockAccount()
+            is ProfileAction.UnblockAccount -> unblockAccount()
             is ProfileAction.Refresh -> loadProfile()
             is ProfileAction.DismissError -> dismissError()
             is ProfileAction.FavoriteStatus -> favoriteStatus(action.status)
@@ -351,6 +359,130 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
+     * Mute the account.
+     */
+    private fun muteAccount() {
+        val currentAccountId = accountId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingMute = true) }
+
+            when (val result = muteAccountUseCase(currentAccountId)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            relationship = result.data,
+                            isProcessingMute = false
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessingMute = false,
+                            errorMessage = "Failed to mute account"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unmute the account.
+     */
+    private fun unmuteAccount() {
+        val currentAccountId = accountId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingMute = true) }
+
+            when (val result = unmuteAccountUseCase(currentAccountId)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            relationship = result.data,
+                            isProcessingMute = false
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessingMute = false,
+                            errorMessage = "Failed to unmute account"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Block the account.
+     */
+    private fun blockAccount() {
+        val currentAccountId = accountId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingBlock = true) }
+
+            when (val result = blockAccountUseCase(currentAccountId)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            relationship = result.data,
+                            isProcessingBlock = false
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessingBlock = false,
+                            errorMessage = "Failed to block account"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Unblock the account.
+     */
+    private fun unblockAccount() {
+        val currentAccountId = accountId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingBlock = true) }
+
+            when (val result = unblockAccountUseCase(currentAccountId)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            relationship = result.data,
+                            isProcessingBlock = false
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessingBlock = false,
+                            errorMessage = "Failed to unblock account"
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
      * Dismiss error message.
      */
     private fun dismissError() {
@@ -367,6 +499,8 @@ data class ProfileUiState(
     val isOwnProfile: Boolean = false,
     val isLoading: Boolean = false,
     val isProcessingFollow: Boolean = false,
+    val isProcessingMute: Boolean = false,
+    val isProcessingBlock: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -376,6 +510,10 @@ data class ProfileUiState(
 sealed class ProfileAction {
     data object FollowAccount : ProfileAction()
     data object UnfollowAccount : ProfileAction()
+    data object MuteAccount : ProfileAction()
+    data object UnmuteAccount : ProfileAction()
+    data object BlockAccount : ProfileAction()
+    data object UnblockAccount : ProfileAction()
     data object Refresh : ProfileAction()
     data object DismissError : ProfileAction()
     data class FavoriteStatus(val status: Status) : ProfileAction()

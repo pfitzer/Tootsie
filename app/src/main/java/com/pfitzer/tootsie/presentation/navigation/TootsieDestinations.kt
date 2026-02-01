@@ -234,4 +234,14 @@ sealed class TootsieDestinations(val route: String) {
      * Announcements screen - view server announcements.
      */
     data object Announcements : TootsieDestinations("announcements")
+
+    /**
+     * Muted Accounts screen - view and manage muted accounts.
+     */
+    data object MutedAccounts : TootsieDestinations("muted_accounts")
+
+    /**
+     * Blocked Accounts screen - view and manage blocked accounts.
+     */
+    data object BlockedAccounts : TootsieDestinations("blocked_accounts")
 }

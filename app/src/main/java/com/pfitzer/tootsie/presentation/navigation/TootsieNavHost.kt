@@ -443,6 +443,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToFollowRequests = {
                     navController.navigate(TootsieDestinations.FollowRequests.route)
+                },
+                onNavigateToMutedAccounts = {
+                    navController.navigate(TootsieDestinations.MutedAccounts.route)
+                },
+                onNavigateToBlockedAccounts = {
+                    navController.navigate(TootsieDestinations.BlockedAccounts.route)
                 }
             )
         }
@@ -770,6 +776,30 @@ fun TootsieNavHost(
                 },
                 onNavigateToHashtag = { hashtag ->
                     navController.navigate(TootsieDestinations.HashtagTimeline.createRoute(hashtag))
+                }
+            )
+        }
+
+        // Muted Accounts screen - view and manage muted accounts
+        composable(route = TootsieDestinations.MutedAccounts.route) {
+            com.pfitzer.tootsie.presentation.screens.mutedaccounts.MutedAccountsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                }
+            )
+        }
+
+        // Blocked Accounts screen - view and manage blocked accounts
+        composable(route = TootsieDestinations.BlockedAccounts.route) {
+            com.pfitzer.tootsie.presentation.screens.blockedaccounts.BlockedAccountsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 }
             )
         }

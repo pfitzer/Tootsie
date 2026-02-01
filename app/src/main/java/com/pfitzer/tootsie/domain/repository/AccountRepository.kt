@@ -67,6 +67,60 @@ interface AccountRepository {
     suspend fun unfollowAccount(accountId: String): Result<Relationship>
 
     /**
+     * Mute an account.
+     * Hides the account's posts from timelines and notifications.
+     *
+     * @param accountId Account ID to mute
+     * @param notifications Whether to mute notifications (default true)
+     * @param duration Duration of mute in seconds (0 = indefinite)
+     * @return Updated relationship status
+     */
+    suspend fun muteAccount(
+        accountId: String,
+        notifications: Boolean = true,
+        duration: Int = 0
+    ): Result<Relationship>
+
+    /**
+     * Unmute an account.
+     *
+     * @param accountId Account ID to unmute
+     * @return Updated relationship status
+     */
+    suspend fun unmuteAccount(accountId: String): Result<Relationship>
+
+    /**
+     * Block an account.
+     * Prevents the account from following you and viewing your content.
+     *
+     * @param accountId Account ID to block
+     * @return Updated relationship status
+     */
+    suspend fun blockAccount(accountId: String): Result<Relationship>
+
+    /**
+     * Unblock an account.
+     *
+     * @param accountId Account ID to unblock
+     * @return Updated relationship status
+     */
+    suspend fun unblockAccount(accountId: String): Result<Relationship>
+
+    /**
+     * Get muted accounts.
+     *
+     * @return Flow of paged muted accounts
+     */
+    fun getMutedAccounts(): Flow<PagingData<Account>>
+
+    /**
+     * Get blocked accounts.
+     *
+     * @return Flow of paged blocked accounts
+     */
+    fun getBlockedAccounts(): Flow<PagingData<Account>>
+
+    /**
      * Get statuses posted by an account (user timeline).
      * Returns a Flow of PagingData for infinite scrolling.
      *

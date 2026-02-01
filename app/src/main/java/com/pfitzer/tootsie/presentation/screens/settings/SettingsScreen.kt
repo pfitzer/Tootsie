@@ -45,6 +45,8 @@ fun SettingsScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToPushSettings: () -> Unit = {},
     onNavigateToFollowRequests: () -> Unit = {},
+    onNavigateToMutedAccounts: () -> Unit = {},
+    onNavigateToBlockedAccounts: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -89,7 +91,9 @@ fun SettingsScreen(
                         onAction = viewModel::onAction,
                         onNavigateToLogin = onNavigateToLogin,
                         onNavigateToPushSettings = onNavigateToPushSettings,
-                        onNavigateToFollowRequests = onNavigateToFollowRequests
+                        onNavigateToFollowRequests = onNavigateToFollowRequests,
+                        onNavigateToMutedAccounts = onNavigateToMutedAccounts,
+                        onNavigateToBlockedAccounts = onNavigateToBlockedAccounts
                     )
                 }
 
@@ -117,7 +121,9 @@ private fun SuccessContent(
     onAction: (SettingsAction) -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToPushSettings: () -> Unit,
-    onNavigateToFollowRequests: () -> Unit
+    onNavigateToFollowRequests: () -> Unit,
+    onNavigateToMutedAccounts: () -> Unit,
+    onNavigateToBlockedAccounts: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -160,6 +166,22 @@ private fun SuccessContent(
             item {
                 FollowRequestsButton(
                     onClick = onNavigateToFollowRequests,
+                    isEnabled = !state.isSwitching && !state.isRemoving
+                )
+            }
+
+            // Muted accounts button
+            item {
+                MutedAccountsButton(
+                    onClick = onNavigateToMutedAccounts,
+                    isEnabled = !state.isSwitching && !state.isRemoving
+                )
+            }
+
+            // Blocked accounts button
+            item {
+                BlockedAccountsButton(
+                    onClick = onNavigateToBlockedAccounts,
                     isEnabled = !state.isSwitching && !state.isRemoving
                 )
             }
@@ -646,6 +668,72 @@ private fun FollowRequestsButton(
         ) {
             Text(
                 text = stringResource(R.string.follow_requests_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Muted accounts button.
+ */
+@Composable
+private fun MutedAccountsButton(
+    onClick: () -> Unit,
+    isEnabled: Boolean
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled) { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.muted_accounts_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Blocked accounts button.
+ */
+@Composable
+private fun BlockedAccountsButton(
+    onClick: () -> Unit,
+    isEnabled: Boolean
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isEnabled) { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.blocked_accounts_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f)
             )
