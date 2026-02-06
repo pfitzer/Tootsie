@@ -154,12 +154,8 @@ class TimelinePagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<String, Status>): String? {
-        // Try to find the closest page to the anchorPosition and use its first item ID
-        // as the refresh key. This helps Paging 3 restore the scroll position.
-        return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey
-        }
+        // Return null to always load the newest statuses on refresh
+        return null
     }
 
     /**
