@@ -21,6 +21,7 @@ import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.status.PollComponent
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.StatusActions
 
@@ -114,6 +115,15 @@ fun NotificationCard(
                         onTextClick = null, // Don't handle text clicks separately
                         modifier = Modifier.padding(start = 48.dp)
                     )
+
+                    // Poll results (for ended poll notifications)
+                    notification.status.poll?.let { poll ->
+                        PollComponent(
+                            poll = poll,
+                            onVoteClick = { _, _ -> },
+                            modifier = Modifier.padding(start = 48.dp)
+                        )
+                    }
 
                     // Action buttons only for mentions (where user can interact with the status)
                     if (notification.type == NotificationType.MENTION) {
