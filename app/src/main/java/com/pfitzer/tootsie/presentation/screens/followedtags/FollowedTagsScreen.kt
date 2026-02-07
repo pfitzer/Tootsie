@@ -46,10 +46,11 @@ fun FollowedTagsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
-    // Scroll to top on refresh
-    LaunchedEffect(uiState.isLoading) {
-        if (!uiState.isLoading && uiState.followedTags.isNotEmpty()) {
+    // Scroll to top only on explicit refresh or follow
+    LaunchedEffect(uiState.scrollToTop) {
+        if (uiState.scrollToTop) {
             listState.scrollToItem(0)
+            viewModel.onAction(FollowedTagsAction.ScrollToTopConsumed)
         }
     }
 

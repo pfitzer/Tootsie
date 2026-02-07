@@ -30,7 +30,7 @@ class FollowedTagsViewModel @Inject constructor(
     val uiState: StateFlow<FollowedTagsUiState> = _uiState.asStateFlow()
 
     init {
-        loadFollowedTags()
+        loadFollowedTags(scrollToTopOnSuccess = false)
     }
 
     /**
@@ -49,7 +49,10 @@ class FollowedTagsViewModel @Inject constructor(
                 _uiState.update { it.copy(showUnfollowConfirmation = null) }
             }
             is FollowedTagsAction.DismissError -> dismissError()
-            is FollowedTagsAction.Refresh -> loadFollowedTags()
+            is FollowedTagsAction.Refresh -> loadFollowedTags(scrollToTopOnSuccess = true)
+            is FollowedTagsAction.ScrollToTopConsumed -> {
+                _uiState.update { it.copy(scrollToTop = false) }
+            }
             is FollowedTagsAction.ShowFollowDialog -> {
                 _uiState.update { it.copy(showFollowDialog = true) }
             }
@@ -75,7 +78,7 @@ class FollowedTagsViewModel @Inject constructor(
             when (val result = followTagUseCase(cleanTagName)) {
                 is Result.Success -> {
                     // Refresh the list to include the new tag
-                    loadFollowedTags()
+                    loadFollowedTags(scrollToTopOnSuccess = true)
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -93,7 +96,7 @@ class FollowedTagsViewModel @Inject constructor(
     /**
      * Load followed tags from the API.
      */
-    private fun loadFollowedTags() {
+    private fun loadFollowedTags(scrollToTopOnSuccess: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -102,7 +105,8 @@ class FollowedTagsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             followedTags = result.data,
-                            isLoading = false
+                            isLoading = false,
+                            scrollToTop = scrollToTopOnSuccess
                         )
                     }
                 }
@@ -163,7 +167,8 @@ data class FollowedTagsUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val showUnfollowConfirmation: FollowedTag? = null,
-    val showFollowDialog: Boolean = false
+    val showFollowDialog: Boolean = false,
+    val scrollToTop: Boolean = false
 )
 
 /**
@@ -178,4 +183,5 @@ sealed class FollowedTagsAction {
     data object ShowFollowDialog : FollowedTagsAction()
     data object DismissFollowDialog : FollowedTagsAction()
     data class FollowTag(val tagName: String) : FollowedTagsAction()
+    data object ScrollToTopConsumed : FollowedTagsAction()
 }
