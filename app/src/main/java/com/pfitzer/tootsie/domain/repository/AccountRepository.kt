@@ -128,13 +128,15 @@ interface AccountRepository {
      * @param excludeReplies Whether to exclude replies (default: false)
      * @param excludeReblogs Whether to exclude boosts (default: false)
      * @param onlyMedia Whether to only show posts with media (default: false)
+     * @param pinned Whether to only show pinned posts (default: false)
      * @return Flow of paged statuses
      */
     fun getAccountStatuses(
         accountId: String,
         excludeReplies: Boolean = false,
         excludeReblogs: Boolean = false,
-        onlyMedia: Boolean = false
+        onlyMedia: Boolean = false,
+        pinned: Boolean = false
     ): Flow<PagingData<Status>>
 
     /**

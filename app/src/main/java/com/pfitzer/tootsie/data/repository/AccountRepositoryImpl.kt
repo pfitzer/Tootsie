@@ -166,7 +166,8 @@ class AccountRepositoryImpl @Inject constructor(
         accountId: String,
         excludeReplies: Boolean,
         excludeReblogs: Boolean,
-        onlyMedia: Boolean
+        onlyMedia: Boolean,
+        pinned: Boolean
     ): Flow<PagingData<Status>> {
         return Pager(
             config = PagingConfig(
@@ -180,7 +181,8 @@ class AccountRepositoryImpl @Inject constructor(
                     accountId = accountId,
                     excludeReplies = excludeReplies,
                     excludeReblogs = excludeReblogs,
-                    onlyMedia = onlyMedia
+                    onlyMedia = onlyMedia,
+                    pinned = pinned
                 )
             }
         ).flow

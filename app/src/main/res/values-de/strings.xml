@@ -122,6 +122,14 @@
     <string name="profile_follows_you">Folgt dir</string>
     <string name="profile_blocked">Blockiert</string>
     <string name="profile_muted">Stummgeschaltet</string>
+    <string name="profile_tab_posts">Beiträge</string>
+    <string name="profile_tab_posts_replies">Antworten</string>
+    <string name="profile_tab_media">Medien</string>
+    <string name="profile_tab_featured">Angeheftet</string>
+    <string name="empty_profile_posts">Noch keine Beiträge</string>
+    <string name="empty_profile_posts_replies">Noch keine Beiträge oder Antworten</string>
+    <string name="empty_profile_media">Noch keine Medienbeiträge</string>
+    <string name="empty_profile_featured">Keine vorgestellten Beiträge</string>
 
     <!-- Mute/Block -->
     <string name="mute">Stummschalten</string>

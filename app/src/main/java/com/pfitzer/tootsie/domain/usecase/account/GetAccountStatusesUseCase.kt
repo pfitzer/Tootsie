@@ -19,19 +19,22 @@ class GetAccountStatusesUseCase @Inject constructor(
      * @param excludeReplies Whether to exclude replies
      * @param excludeReblogs Whether to exclude boosts
      * @param onlyMedia Whether to only show posts with media
+     * @param pinned Whether to only show pinned posts
      * @return Flow of paged statuses
      */
     operator fun invoke(
         accountId: String,
         excludeReplies: Boolean = false,
         excludeReblogs: Boolean = false,
-        onlyMedia: Boolean = false
+        onlyMedia: Boolean = false,
+        pinned: Boolean = false
     ): Flow<PagingData<Status>> {
         return accountRepository.getAccountStatuses(
             accountId = accountId,
             excludeReplies = excludeReplies,
             excludeReblogs = excludeReblogs,
-            onlyMedia = onlyMedia
+            onlyMedia = onlyMedia,
+            pinned = pinned
         )
     }
 }

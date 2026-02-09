@@ -1,10 +1,12 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
@@ -60,15 +62,42 @@ class ProfileViewModel @Inject constructor(
         )
 
     /**
-     * Paging data flow for account timeline.
+     * Resolved account ID - set after profile loads.
+     * For own profile, this is populated from the loaded account since SavedStateHandle accountId is null.
      */
-    val timelinePagingData: Flow<PagingData<Status>>? = accountId?.let { id ->
-        getAccountStatusesUseCase(
-            accountId = id,
-            excludeReplies = false,
-            excludeReblogs = false
-        ).cachedIn(viewModelScope)
-    }
+    private val _resolvedAccountId = MutableStateFlow(accountId)
+
+    /**
+     * Map of profile tab to its paging data flow.
+     * Derived from _resolvedAccountId so it works for both own profile and other profiles.
+     */
+    val tabPagingData: StateFlow<Map<ProfileTab, Flow<PagingData<Status>>>> =
+        _resolvedAccountId.filterNotNull().map { id ->
+            ProfileTab.entries.associateWith { tab ->
+                when (tab) {
+                    ProfileTab.POSTS -> getAccountStatusesUseCase(
+                        accountId = id,
+                        excludeReplies = true
+                    )
+                    ProfileTab.POSTS_AND_REPLIES -> getAccountStatusesUseCase(
+                        accountId = id,
+                        excludeReplies = false
+                    )
+                    ProfileTab.MEDIA -> getAccountStatusesUseCase(
+                        accountId = id,
+                        onlyMedia = true
+                    )
+                    ProfileTab.FEATURED -> getAccountStatusesUseCase(
+                        accountId = id,
+                        pinned = true
+                    )
+                }.cachedIn(viewModelScope)
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
     init {
         loadProfile()
@@ -93,6 +122,9 @@ class ProfileViewModel @Inject constructor(
                             isOwnProfile = accountId == null
                         )
                     }
+
+                    // Set resolved account ID (fixes own-profile having no timeline)
+                    _resolvedAccountId.value = accountId ?: accountResult.data.id
 
                     // Load relationship if viewing another user's profile
                     if (accountId != null) {
@@ -525,4 +557,17 @@ sealed class ProfileAction {
     data class PinStatus(val status: Status) : ProfileAction()
     data class UnpinStatus(val status: Status) : ProfileAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : ProfileAction()
+}
+
+/**
+ * Profile tabs for filtering account statuses.
+ */
+enum class ProfileTab(
+    @StringRes val titleResId: Int,
+    @StringRes val emptyResId: Int
+) {
+    POSTS(R.string.profile_tab_posts, R.string.empty_profile_posts),
+    POSTS_AND_REPLIES(R.string.profile_tab_posts_replies, R.string.empty_profile_posts_replies),
+    MEDIA(R.string.profile_tab_media, R.string.empty_profile_media),
+    FEATURED(R.string.profile_tab_featured, R.string.empty_profile_featured)
 }

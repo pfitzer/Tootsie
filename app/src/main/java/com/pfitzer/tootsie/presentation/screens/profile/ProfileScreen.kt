@@ -2,7 +2,11 @@ package com.pfitzer.tootsie.presentation.screens.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -30,6 +34,7 @@ import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.util.openInBrowser
+import kotlinx.coroutines.launch
 
 /**
  * Profile Screen - displays user profile information.
@@ -54,9 +59,13 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
-    val timelinePagingItems = viewModel.timelinePagingData?.collectAsLazyPagingItems()
+    val tabPagingDataMap by viewModel.tabPagingData.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    val tabs = ProfileTab.entries
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val coroutineScope = rememberCoroutineScope()
 
     showShareMenu?.let { status ->
         ShareBottomSheet(
@@ -86,9 +95,6 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
-                    // Active Account Avatar (only show if not viewing own profile or if we want it consistently everywhere)
-                    // If uiState.isOwnProfile is true, we might not need to show the small avatar as the big one is right there.
-                    // But for consistency across screens, let's show it if it's NOT the own profile being viewed.
                     if (!uiState.isOwnProfile) {
                         activeAccount?.let { account ->
                             IconButton(onClick = { onNavigateToProfile(account.id) }) {
@@ -120,12 +126,12 @@ fun ProfileScreen(
                     )
                 }
                 uiState.account != null -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        // Profile header
-                        item {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Profile header (scrollable)
+                        Column(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             ProfileHeader(
                                 account = uiState.account!!,
                                 relationship = uiState.relationship,
@@ -163,103 +169,63 @@ fun ProfileScreen(
                             )
                         }
 
-                        // Divider
-                        item {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        }
+                        HorizontalDivider()
 
-                        // Timeline
-                        if (timelinePagingItems != null) {
-                            items(timelinePagingItems.itemCount) { index ->
-                                timelinePagingItems[index]?.let { status ->
-                                    StatusCard(
-                                        status = status,
-                                        onStatusClick = {},
-                                        onAvatarClick = onNavigateToProfile,
-                                        onMentionClick = onNavigateToProfile,
-                                        onHashtagClick = onNavigateToHashtag,
-                                        onLinkClick = { url ->
-                                            context.openInBrowser(url)
-                                        },
-                                        onImageClick = onNavigateToImageViewer,
-                                        onVideoClick = onNavigateToVideoPlayer,
-                                        onFavoriteClick = { s ->
-                                            if (s.favourited) {
-                                                viewModel.onAction(ProfileAction.UnfavoriteStatus(s))
-                                            } else {
-                                                viewModel.onAction(ProfileAction.FavoriteStatus(s))
-                                            }
-                                        },
-                                        onBoostClick = { s ->
-                                            if (s.reblogged) {
-                                                viewModel.onAction(ProfileAction.UnboostStatus(s))
-                                            } else {
-                                                viewModel.onAction(ProfileAction.BoostStatus(s))
-                                            }
-                                        },
-                                        onReplyClick = {}, // TODO: Wire reply navigation
-                                        onBookmarkClick = { s ->
-                                            if (s.bookmarked) {
-                                                viewModel.onAction(ProfileAction.UnbookmarkStatus(s))
-                                            } else {
-                                                viewModel.onAction(ProfileAction.BookmarkStatus(s))
-                                            }
-                                        },
-                                        onPinClick = if (uiState.isOwnProfile) { { s ->
-                                            if (s.pinned) {
-                                                viewModel.onAction(ProfileAction.UnpinStatus(s))
-                                            } else {
-                                                viewModel.onAction(ProfileAction.PinStatus(s))
-                                            }
-                                        } } else null,
-                                        onVoteClick = { pollId, choices ->
-                                            viewModel.onAction(ProfileAction.VoteOnPoll(pollId, choices))
-                                        },
-                                        onShareClick = { showShareMenu = it },
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                }
-                            }
-
-                            // Loading states
-                            when (timelinePagingItems.loadState.refresh) {
-                                is LoadState.Loading -> {
-                                    item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            CircularProgressIndicator()
+                        // Tab row
+                        PrimaryTabRow(
+                            selectedTabIndex = pagerState.currentPage,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            divider = {}
+                        ) {
+                            tabs.forEachIndexed { index, tab ->
+                                Tab(
+                                    selected = pagerState.currentPage == index,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
                                         }
-                                    }
-                                }
-                                is LoadState.Error -> {
-                                    item {
-                                        ErrorMessage(
-                                            message = stringResource(R.string.error_load_posts),
-                                            modifier = Modifier.padding(16.dp)
+                                    },
+                                    text = {
+                                        Text(
+                                            text = stringResource(tab.titleResId),
+                                            style = MaterialTheme.typography.titleSmall
                                         )
                                     }
-                                }
-                                else -> {}
+                                )
                             }
+                        }
 
-                            when (timelinePagingItems.loadState.append) {
-                                is LoadState.Loading -> {
-                                    item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            CircularProgressIndicator()
-                                        }
-                                    }
+                        // Pager content
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            verticalAlignment = Alignment.Top
+                        ) { page ->
+                            val tab = tabs[page]
+                            val pagingFlow = tabPagingDataMap[tab]
+
+                            if (pagingFlow != null) {
+                                ProfileTabContent(
+                                    tab = tab,
+                                    pagingFlow = pagingFlow,
+                                    isOwnProfile = uiState.isOwnProfile,
+                                    viewModel = viewModel,
+                                    onNavigateToProfile = onNavigateToProfile,
+                                    onNavigateToHashtag = onNavigateToHashtag,
+                                    onNavigateToImageViewer = onNavigateToImageViewer,
+                                    onNavigateToVideoPlayer = onNavigateToVideoPlayer,
+                                    onShareClick = { showShareMenu = it }
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
                                 }
-                                else -> {}
                             }
                         }
                     }
@@ -271,6 +237,130 @@ fun ProfileScreen(
                             .align(Alignment.Center)
                             .padding(16.dp)
                     )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Content for a single profile tab - displays a paged list of statuses.
+ */
+@Composable
+private fun ProfileTabContent(
+    tab: ProfileTab,
+    pagingFlow: kotlinx.coroutines.flow.Flow<androidx.paging.PagingData<Status>>,
+    isOwnProfile: Boolean,
+    viewModel: ProfileViewModel,
+    onNavigateToProfile: (String) -> Unit,
+    onNavigateToHashtag: (String) -> Unit,
+    onNavigateToImageViewer: (String, String?) -> Unit,
+    onNavigateToVideoPlayer: (String, String?) -> Unit,
+    onShareClick: (Status) -> Unit
+) {
+    val pagingItems = pagingFlow.collectAsLazyPagingItems()
+    val context = LocalContext.current
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (pagingItems.loadState.refresh) {
+            is LoadState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            is LoadState.Error -> {
+                ErrorMessage(
+                    message = stringResource(R.string.error_load_posts),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp)
+                )
+            }
+            is LoadState.NotLoading -> {
+                if (pagingItems.itemCount == 0) {
+                    Text(
+                        text = stringResource(tab.emptyResId),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                }
+            }
+        }
+
+        if (pagingItems.itemCount > 0) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                items(pagingItems.itemCount) { index ->
+                    pagingItems[index]?.let { status ->
+                        StatusCard(
+                            status = status,
+                            onStatusClick = {},
+                            onAvatarClick = onNavigateToProfile,
+                            onMentionClick = onNavigateToProfile,
+                            onHashtagClick = onNavigateToHashtag,
+                            onLinkClick = { url ->
+                                context.openInBrowser(url)
+                            },
+                            onImageClick = onNavigateToImageViewer,
+                            onVideoClick = onNavigateToVideoPlayer,
+                            onFavoriteClick = { s ->
+                                if (s.favourited) {
+                                    viewModel.onAction(ProfileAction.UnfavoriteStatus(s))
+                                } else {
+                                    viewModel.onAction(ProfileAction.FavoriteStatus(s))
+                                }
+                            },
+                            onBoostClick = { s ->
+                                if (s.reblogged) {
+                                    viewModel.onAction(ProfileAction.UnboostStatus(s))
+                                } else {
+                                    viewModel.onAction(ProfileAction.BoostStatus(s))
+                                }
+                            },
+                            onReplyClick = {},
+                            onBookmarkClick = { s ->
+                                if (s.bookmarked) {
+                                    viewModel.onAction(ProfileAction.UnbookmarkStatus(s))
+                                } else {
+                                    viewModel.onAction(ProfileAction.BookmarkStatus(s))
+                                }
+                            },
+                            onPinClick = if (isOwnProfile) { { s ->
+                                if (s.pinned) {
+                                    viewModel.onAction(ProfileAction.UnpinStatus(s))
+                                } else {
+                                    viewModel.onAction(ProfileAction.PinStatus(s))
+                                }
+                            } } else null,
+                            onVoteClick = { pollId, choices ->
+                                viewModel.onAction(ProfileAction.VoteOnPoll(pollId, choices))
+                            },
+                            onShareClick = onShareClick,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                // Append loading indicator
+                when (pagingItems.loadState.append) {
+                    is LoadState.Loading -> {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
