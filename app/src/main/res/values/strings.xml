@@ -121,6 +121,14 @@
     <string name="profile_follows_you">Follows you</string>
     <string name="profile_blocked">Blocked</string>
     <string name="profile_muted">Muted</string>
+    <string name="profile_tab_posts">Posts</string>
+    <string name="profile_tab_posts_replies">With replies</string>
+    <string name="profile_tab_media">Media</string>
+    <string name="profile_tab_featured">Pinned</string>
+    <string name="empty_profile_posts">No posts yet</string>
+    <string name="empty_profile_posts_replies">No posts or replies yet</string>
+    <string name="empty_profile_media">No media posts yet</string>
+    <string name="empty_profile_featured">No featured posts</string>
 
     <!-- Mute/Block -->
     <string name="mute">Mute</string>

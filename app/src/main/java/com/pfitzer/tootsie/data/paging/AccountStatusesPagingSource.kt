@@ -20,7 +20,8 @@ class AccountStatusesPagingSource(
     private val accountId: String,
     private val excludeReplies: Boolean = false,
     private val excludeReblogs: Boolean = false,
-    private val onlyMedia: Boolean = false
+    private val onlyMedia: Boolean = false,
+    private val pinned: Boolean = false
 ) : PagingSource<String, Status>() {
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
@@ -35,7 +36,8 @@ class AccountStatusesPagingSource(
                 limit = params.loadSize,
                 excludeReplies = excludeReplies,
                 excludeReblogs = excludeReblogs,
-                onlyMedia = onlyMedia
+                onlyMedia = onlyMedia,
+                pinned = pinned
             )
 
             Log.d(TAG, "API returned ${statusDtos.size} statuses")
