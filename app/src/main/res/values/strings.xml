@@ -122,7 +122,7 @@
     <string name="profile_blocked">Blocked</string>
     <string name="profile_muted">Muted</string>
     <string name="profile_tab_posts">Posts</string>
-    <string name="profile_tab_posts_replies">With replies</string>
+    <string name="profile_tab_posts_replies">Replies</string>
     <string name="profile_tab_media">Media</string>
     <string name="profile_tab_featured">Pinned</string>
     <string name="empty_profile_posts">No posts yet</string>

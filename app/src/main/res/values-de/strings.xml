@@ -123,7 +123,7 @@
     <string name="profile_blocked">Blockiert</string>
     <string name="profile_muted">Stummgeschaltet</string>
     <string name="profile_tab_posts">Beiträge</string>
-    <string name="profile_tab_posts_replies">Mit Antworten</string>
+    <string name="profile_tab_posts_replies">Antworten</string>
     <string name="profile_tab_media">Medien</string>
     <string name="profile_tab_featured">Angeheftet</string>
     <string name="empty_profile_posts">Noch keine Beiträge</string>
