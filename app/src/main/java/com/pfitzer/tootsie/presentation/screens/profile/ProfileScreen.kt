@@ -130,6 +130,7 @@ fun ProfileScreen(
                         // Profile header (scrollable)
                         Column(
                             modifier = Modifier
+                                .weight(1f, fill = false)
                                 .verticalScroll(rememberScrollState())
                         ) {
                             ProfileHeader(
