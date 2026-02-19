@@ -14,11 +14,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -126,12 +134,100 @@ fun ProfileScreen(
                     )
                 }
                 uiState.account != null -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Profile header (scrollable)
+                    var headerHeightPx by remember { mutableFloatStateOf(0f) }
+                    var headerOffsetPx by remember { mutableFloatStateOf(0f) }
+                    val nestedScrollConnection = remember {
+                        object : NestedScrollConnection {
+                            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                                val delta = available.y
+                                val newOffset = (headerOffsetPx + delta).coerceIn(-headerHeightPx, 0f)
+                                val consumed = newOffset - headerOffsetPx
+                                headerOffsetPx = newOffset
+                                return Offset(0f, consumed)
+                            }
+                        }
+                    }
+                    val density = LocalDensity.current
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(nestedScrollConnection)
+                    ) {
+                        // Scrolling content: spacer + divider + tabs + pager
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            val spacerHeight = with(density) {
+                                (headerHeightPx + headerOffsetPx).coerceAtLeast(0f).toDp()
+                            }
+                            Spacer(modifier = Modifier.height(spacerHeight))
+
+                            HorizontalDivider()
+
+                            // Tab row
+                            PrimaryTabRow(
+                                selectedTabIndex = pagerState.currentPage,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                divider = {}
+                            ) {
+                                tabs.forEachIndexed { index, tab ->
+                                    Tab(
+                                        selected = pagerState.currentPage == index,
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                pagerState.animateScrollToPage(index)
+                                            }
+                                        },
+                                        text = {
+                                            Text(
+                                                text = stringResource(tab.titleResId),
+                                                style = MaterialTheme.typography.titleSmall
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+
+                            // Pager content
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                verticalAlignment = Alignment.Top
+                            ) { page ->
+                                val tab = tabs[page]
+                                val pagingFlow = tabPagingDataMap[tab]
+
+                                if (pagingFlow != null) {
+                                    ProfileTabContent(
+                                        tab = tab,
+                                        pagingFlow = pagingFlow,
+                                        isOwnProfile = uiState.isOwnProfile,
+                                        viewModel = viewModel,
+                                        onNavigateToProfile = onNavigateToProfile,
+                                        onNavigateToHashtag = onNavigateToHashtag,
+                                        onNavigateToImageViewer = onNavigateToImageViewer,
+                                        onNavigateToVideoPlayer = onNavigateToVideoPlayer,
+                                        onShareClick = { showShareMenu = it }
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+                        }
+
+                        // Header: overlaid, slides up as user scrolls down
                         Column(
                             modifier = Modifier
-                                .weight(1f, fill = false)
-                                .verticalScroll(rememberScrollState())
+                                .fillMaxWidth()
+                                .onSizeChanged { headerHeightPx = it.height.toFloat() }
+                                .offset { IntOffset(0, headerOffsetPx.roundToInt()) }
                         ) {
                             ProfileHeader(
                                 account = uiState.account!!,
@@ -168,66 +264,6 @@ fun ProfileScreen(
                                 },
                                 onEditProfileClick = onNavigateToEditProfile
                             )
-                        }
-
-                        HorizontalDivider()
-
-                        // Tab row
-                        PrimaryTabRow(
-                            selectedTabIndex = pagerState.currentPage,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            divider = {}
-                        ) {
-                            tabs.forEachIndexed { index, tab ->
-                                Tab(
-                                    selected = pagerState.currentPage == index,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    },
-                                    text = {
-                                        Text(
-                                            text = stringResource(tab.titleResId),
-                                            style = MaterialTheme.typography.titleSmall
-                                        )
-                                    }
-                                )
-                            }
-                        }
-
-                        // Pager content
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            verticalAlignment = Alignment.Top
-                        ) { page ->
-                            val tab = tabs[page]
-                            val pagingFlow = tabPagingDataMap[tab]
-
-                            if (pagingFlow != null) {
-                                ProfileTabContent(
-                                    tab = tab,
-                                    pagingFlow = pagingFlow,
-                                    isOwnProfile = uiState.isOwnProfile,
-                                    viewModel = viewModel,
-                                    onNavigateToProfile = onNavigateToProfile,
-                                    onNavigateToHashtag = onNavigateToHashtag,
-                                    onNavigateToImageViewer = onNavigateToImageViewer,
-                                    onNavigateToVideoPlayer = onNavigateToVideoPlayer,
-                                    onShareClick = { showShareMenu = it }
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
                         }
                     }
                 }
