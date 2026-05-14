@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.data.remote.api
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.data.remote.dto.AnnouncementDto
 import com.pfitzer.tootsie.data.remote.dto.FilterDto
+import com.pfitzer.tootsie.data.remote.dto.ReportDto
 import com.pfitzer.tootsie.data.remote.dto.FilterKeywordDto
 import com.pfitzer.tootsie.data.remote.dto.FollowedTagDto
 import com.pfitzer.tootsie.data.remote.dto.InstanceDto
@@ -983,4 +984,25 @@ interface MastodonApiService {
     suspend fun dismissAnnouncement(
         @Path("id") id: String
     )
+
+    // ========== Reports Endpoint ==========
+
+    /**
+     * Report an account (and optionally specific statuses) to instance moderators.
+     *
+     * @param accountId ID of the account to report
+     * @param statusIds Optional list of status IDs to include in the report
+     * @param comment Optional additional comment
+     * @param forward Whether to forward to the remote instance
+     * @param category Category: "spam", "violation", or "other"
+     */
+    @FormUrlEncoded
+    @POST("api/v1/reports")
+    suspend fun report(
+        @Field("account_id") accountId: String,
+        @Field("status_ids[]") statusIds: List<String>?,
+        @Field("comment") comment: String?,
+        @Field("forward") forward: Boolean,
+        @Field("category") category: String
+    ): ReportDto
 }

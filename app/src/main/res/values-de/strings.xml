@@ -131,6 +131,22 @@
     <string name="empty_profile_media">Noch keine Medienbeiträge</string>
     <string name="empty_profile_featured">Keine vorgestellten Beiträge</string>
 
+    <!-- Report -->
+    <string name="report">Melden</string>
+    <string name="report_post">Beitrag melden</string>
+    <string name="report_user">Nutzer melden</string>
+    <string name="report_dialog_title">Melden</string>
+    <string name="report_category_spam">Spam</string>
+    <string name="report_category_violation">Verstößt gegen Serverregeln</string>
+    <string name="report_category_other">Sonstiges</string>
+    <string name="report_comment_hint">Zusätzliche Kommentare (optional)</string>
+    <string name="report_forward">An externe Instanz weiterleiten</string>
+    <string name="report_submit">Meldung absenden</string>
+    <string name="report_success">Meldung eingereicht</string>
+    <string name="report_error">Meldung konnte nicht eingereicht werden</string>
+    <string name="cd_report">Melden</string>
+    <string name="cd_more_options">Weitere Optionen</string>
+
     <!-- Mute/Block -->
     <string name="mute">Stummschalten</string>
     <string name="unmute">Stummschaltung aufheben</string>

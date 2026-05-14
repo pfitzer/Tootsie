@@ -2,6 +2,8 @@ package com.pfitzer.tootsie.di
 
 import com.pfitzer.tootsie.data.repository.*
 import com.pfitzer.tootsie.domain.repository.*
+import com.pfitzer.tootsie.data.repository.ReportRepositoryImpl
+import com.pfitzer.tootsie.domain.repository.ReportRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -210,4 +212,13 @@ abstract class RepositoryModule {
     abstract fun bindAnnouncementRepository(
         announcementRepositoryImpl: AnnouncementRepositoryImpl
     ): AnnouncementRepository
+
+    /**
+     * Binds ReportRepositoryImpl to ReportRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindReportRepository(
+        reportRepositoryImpl: ReportRepositoryImpl
+    ): ReportRepository
 }
