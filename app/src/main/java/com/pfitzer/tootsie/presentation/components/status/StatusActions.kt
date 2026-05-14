@@ -8,6 +8,10 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,6 +29,7 @@ import com.pfitzer.tootsie.domain.model.Status
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
  * @param onPinClick Optional callback when pin button is clicked (only shown if provided)
+ * @param onReportClick Optional callback when report is selected (only shown if provided, for non-own posts)
  * @param modifier Optional modifier
  */
 @Composable
@@ -36,6 +41,7 @@ fun StatusActions(
     onBookmarkClick: () -> Unit,
     onShareClick: () -> Unit,
     onPinClick: (() -> Unit)? = null,
+    onReportClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -92,8 +98,46 @@ fun StatusActions(
                 contentDescription = if (status.pinned) stringResource(R.string.cd_unpin) else stringResource(R.string.cd_pin),
                 activeColor = MaterialTheme.colorScheme.tertiary
             )
+        } else if (onReportClick != null) {
+            // More options menu (Share + Report) for non-own posts
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.cd_more_options),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.cd_share)) },
+                        leadingIcon = {
+                            Icon(Icons.Default.Share, contentDescription = null)
+                        },
+                        onClick = {
+                            expanded = false
+                            onShareClick()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.report_post)) },
+                        leadingIcon = {
+                            Icon(Icons.Default.Flag, contentDescription = null)
+                        },
+                        onClick = {
+                            expanded = false
+                            onReportClick()
+                        }
+                    )
+                }
+            }
         } else {
-            // Share (when not showing pin)
+            // Share only (no report option)
             ActionButton(
                 icon = Icons.Default.Share,
                 count = null,

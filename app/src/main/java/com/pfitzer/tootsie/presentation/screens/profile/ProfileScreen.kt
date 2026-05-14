@@ -38,6 +38,7 @@ import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.report.ReportDialog
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
@@ -74,6 +75,9 @@ fun ProfileScreen(
     val tabs = ProfileTab.entries
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
+    var showReportAccountDialog by remember { mutableStateOf(false) }
+    var showReportStatusDialog by remember { mutableStateOf<Status?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     showShareMenu?.let { status ->
         ShareBottomSheet(
@@ -82,7 +86,37 @@ fun ProfileScreen(
         )
     }
 
+    if (showReportAccountDialog) {
+        uiState.account?.let { account ->
+            ReportDialog(
+                showForwardOption = account.acct.contains("@"),
+                onConfirm = { category, comment, forward ->
+                    viewModel.onAction(ProfileAction.ReportAccount(category, comment, forward))
+                },
+                onDismiss = { showReportAccountDialog = false }
+            )
+        }
+    }
+
+    showReportStatusDialog?.let { status ->
+        ReportDialog(
+            showForwardOption = status.account.acct.contains("@"),
+            onConfirm = { category, comment, forward ->
+                viewModel.onAction(ProfileAction.ReportStatus(status, category, comment, forward))
+            },
+            onDismiss = { showReportStatusDialog = null }
+        )
+    }
+
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.onAction(ProfileAction.DismissSuccess)
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -209,7 +243,8 @@ fun ProfileScreen(
                                         onNavigateToHashtag = onNavigateToHashtag,
                                         onNavigateToImageViewer = onNavigateToImageViewer,
                                         onNavigateToVideoPlayer = onNavigateToVideoPlayer,
-                                        onShareClick = { showShareMenu = it }
+                                        onShareClick = { showShareMenu = it },
+                                        onReportClick = { showReportStatusDialog = it }
                                     )
                                 } else {
                                     Box(
@@ -257,6 +292,7 @@ fun ProfileScreen(
                                         viewModel.onAction(ProfileAction.BlockAccount)
                                     }
                                 },
+                                onReportClick = { showReportAccountDialog = true },
                                 onMentionClick = onNavigateToProfile,
                                 onHashtagClick = onNavigateToHashtag,
                                 onLinkClick = { url ->
@@ -293,7 +329,8 @@ private fun ProfileTabContent(
     onNavigateToHashtag: (String) -> Unit,
     onNavigateToImageViewer: (String, String?) -> Unit,
     onNavigateToVideoPlayer: (String, String?) -> Unit,
-    onShareClick: (Status) -> Unit
+    onShareClick: (Status) -> Unit,
+    onReportClick: (Status) -> Unit
 ) {
     val pagingItems = pagingFlow.collectAsLazyPagingItems()
     val context = LocalContext.current
@@ -374,6 +411,7 @@ private fun ProfileTabContent(
                                     viewModel.onAction(ProfileAction.PinStatus(s))
                                 }
                             } } else null,
+                            onReportClick = if (!isOwnProfile) onReportClick else null,
                             onVoteClick = { pollId, choices ->
                                 viewModel.onAction(ProfileAction.VoteOnPoll(pollId, choices))
                             },
@@ -418,6 +456,7 @@ private fun ProfileHeader(
     onFollowClick: () -> Unit,
     onMuteClick: () -> Unit,
     onBlockClick: () -> Unit,
+    onReportClick: () -> Unit,
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
@@ -525,6 +564,17 @@ private fun ProfileHeader(
                             relationship?.blocking == true -> stringResource(R.string.unblock)
                             else -> stringResource(R.string.block)
                         },
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                // Report button
+                OutlinedButton(
+                    onClick = onReportClick,
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.report),
                         style = MaterialTheme.typography.labelMedium
                     )
                 }

@@ -13,6 +13,7 @@ import com.pfitzer.tootsie.domain.model.TimelineFilter
 import com.pfitzer.tootsie.domain.model.TimelineType
 import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.filter.GetFiltersForContextUseCase
+import com.pfitzer.tootsie.domain.usecase.report.ReportUseCase
 import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.domain.usecase.timeline.GetTimelineUseCase
 import com.pfitzer.tootsie.domain.usecase.timeline.RefreshTimelineUseCase
@@ -43,7 +44,8 @@ class HomeViewModel @Inject constructor(
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
-    private val voteOnPollUseCase: VoteOnPollUseCase
+    private val voteOnPollUseCase: VoteOnPollUseCase,
+    private val reportUseCase: ReportUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -123,9 +125,11 @@ class HomeViewModel @Inject constructor(
             is HomeAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
             is HomeAction.RefreshTimeline -> refreshTimeline()
             is HomeAction.DismissError -> dismissError()
+            is HomeAction.DismissSuccess -> dismissSuccess()
             is HomeAction.UpdateFilter -> updateFilter(action.filter)
             is HomeAction.ChangeTimelineType -> changeTimelineType(action.timelineType)
             is HomeAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+            is HomeAction.ReportStatus -> reportStatus(action.status, action.category, action.comment, action.forward)
         }
     }
 
@@ -286,10 +290,40 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Report a status.
+     */
+    private fun reportStatus(status: Status, category: String, comment: String?, forward: Boolean) {
+        viewModelScope.launch {
+            when (reportUseCase(
+                accountId = status.account.id,
+                statusIds = listOf(status.id),
+                comment = comment,
+                forward = forward,
+                category = category
+            )) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
      * Dismiss error message.
      */
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    /**
+     * Dismiss success message.
+     */
+    private fun dismissSuccess() {
+        _uiState.update { it.copy(successMessage = null) }
     }
 
     /**
@@ -307,7 +341,8 @@ class HomeViewModel @Inject constructor(
  */
 data class HomeUiState(
     val isRefreshing: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val successMessage: String? = null
 )
 
 /**
@@ -322,7 +357,14 @@ sealed class HomeAction {
     data class UnbookmarkStatus(val status: Status) : HomeAction()
     data object RefreshTimeline : HomeAction()
     data object DismissError : HomeAction()
+    data object DismissSuccess : HomeAction()
     data class UpdateFilter(val filter: TimelineFilter) : HomeAction()
     data class ChangeTimelineType(val timelineType: TimelineType) : HomeAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : HomeAction()
+    data class ReportStatus(
+        val status: Status,
+        val category: String,
+        val comment: String?,
+        val forward: Boolean
+    ) : HomeAction()
 }

@@ -11,6 +11,7 @@ import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.usecase.account.*
+import com.pfitzer.tootsie.domain.usecase.report.ReportUseCase
 import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +44,7 @@ class ProfileViewModel @Inject constructor(
     private val pinStatusUseCase: PinStatusUseCase,
     private val unpinStatusUseCase: UnpinStatusUseCase,
     private val voteOnPollUseCase: VoteOnPollUseCase,
+    private val reportUseCase: ReportUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -184,6 +186,9 @@ class ProfileViewModel @Inject constructor(
             is ProfileAction.PinStatus -> pinStatus(action.status)
             is ProfileAction.UnpinStatus -> unpinStatus(action.status)
             is ProfileAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
+            is ProfileAction.ReportAccount -> reportAccount(action.category, action.comment, action.forward)
+            is ProfileAction.ReportStatus -> reportStatus(action.status, action.category, action.comment, action.forward)
+            is ProfileAction.DismissSuccess -> dismissSuccess()
         }
     }
 
@@ -515,10 +520,52 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
+     * Report the account.
+     */
+    private fun reportAccount(category: String, comment: String?, forward: Boolean) {
+        val currentAccountId = _resolvedAccountId.value ?: return
+        viewModelScope.launch {
+            when (reportUseCase(currentAccountId, null, comment, forward, category)) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Report a status from this profile's timeline.
+     */
+    private fun reportStatus(status: Status, category: String, comment: String?, forward: Boolean) {
+        viewModelScope.launch {
+            when (reportUseCase(status.account.id, listOf(status.id), comment, forward, category)) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
      * Dismiss error message.
      */
     private fun dismissError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    /**
+     * Dismiss success message.
+     */
+    private fun dismissSuccess() {
+        _uiState.update { it.copy(successMessage = null) }
     }
 }
 
@@ -533,7 +580,8 @@ data class ProfileUiState(
     val isProcessingFollow: Boolean = false,
     val isProcessingMute: Boolean = false,
     val isProcessingBlock: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val successMessage: String? = null
 )
 
 /**
@@ -557,6 +605,9 @@ sealed class ProfileAction {
     data class PinStatus(val status: Status) : ProfileAction()
     data class UnpinStatus(val status: Status) : ProfileAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : ProfileAction()
+    data class ReportAccount(val category: String, val comment: String?, val forward: Boolean) : ProfileAction()
+    data class ReportStatus(val status: Status, val category: String, val comment: String?, val forward: Boolean) : ProfileAction()
+    data object DismissSuccess : ProfileAction()
 }
 
 /**

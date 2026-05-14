@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.components.report.ReportDialog
 import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.util.ShareUtils
 import kotlinx.coroutines.launch
@@ -98,12 +99,31 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showShareMenu by remember { mutableStateOf<Status?>(null) }
+    var showReportDialog by remember { mutableStateOf<Status?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     showShareMenu?.let { status ->
         ShareBottomSheet(
             status = status,
             onDismissRequest = { showShareMenu = null }
         )
+    }
+
+    showReportDialog?.let { status ->
+        ReportDialog(
+            showForwardOption = status.account.acct.contains("@"),
+            onConfirm = { category, comment, forward ->
+                viewModel.onAction(HomeAction.ReportStatus(status, category, comment, forward))
+            },
+            onDismiss = { showReportDialog = null }
+        )
+    }
+
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.onAction(HomeAction.DismissSuccess)
+        }
     }
 
     val pagerState = rememberPagerState(
@@ -353,7 +373,8 @@ fun HomeScreen(
                     contentDescription = stringResource(R.string.cd_compose_post)
                 )
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         var isEdgeSwipe by remember { mutableStateOf(false) }
 
@@ -417,6 +438,9 @@ fun HomeScreen(
                     onShareClick = { status ->
                         showShareMenu = status
                     },
+                    onReportClick = { status ->
+                        showReportDialog = status
+                    },
                     onReplyClick = { status ->
                         onNavigateToReply(status.id)
                     },
@@ -461,6 +485,7 @@ private fun TimelineList(
     onBoostClick: (Status) -> Unit,
     onBookmarkClick: (Status) -> Unit,
     onShareClick: (Status) -> Unit,
+    onReportClick: (Status) -> Unit,
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
@@ -522,6 +547,7 @@ private fun TimelineList(
                     onReplyClick = onReplyClick,
                     onBookmarkClick = onBookmarkClick,
                     onShareClick = onShareClick,
+                    onReportClick = onReportClick,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }

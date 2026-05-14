@@ -130,6 +130,22 @@
     <string name="empty_profile_media">No media posts yet</string>
     <string name="empty_profile_featured">No featured posts</string>
 
+    <!-- Report -->
+    <string name="report">Report</string>
+    <string name="report_post">Report post</string>
+    <string name="report_user">Report user</string>
+    <string name="report_dialog_title">Report</string>
+    <string name="report_category_spam">Spam</string>
+    <string name="report_category_violation">Violates server rules</string>
+    <string name="report_category_other">Other</string>
+    <string name="report_comment_hint">Additional comments (optional)</string>
+    <string name="report_forward">Forward to remote instance</string>
+    <string name="report_submit">Submit report</string>
+    <string name="report_success">Report submitted</string>
+    <string name="report_error">Failed to submit report</string>
+    <string name="cd_report">Report</string>
+    <string name="cd_more_options">More options</string>
+
     <!-- Mute/Block -->
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>

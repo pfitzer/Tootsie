@@ -35,6 +35,7 @@ import com.pfitzer.tootsie.presentation.util.htmlToPlainText
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
  * @param onPinClick Optional callback when pin button is clicked (only shown if provided, for own posts)
+ * @param onReportClick Optional callback when report is selected (only shown if provided, for non-own posts)
  * @param onMentionClick Callback when a mention is clicked (receives accountId)
  * @param onHashtagClick Callback when a hashtag is clicked (receives tag name)
  * @param onLinkClick Callback when a link is clicked (receives URL)
@@ -53,6 +54,7 @@ fun StatusCard(
     onBookmarkClick: (Status) -> Unit,
     onShareClick: (Status) -> Unit = {},
     onPinClick: ((Status) -> Unit)? = null,
+    onReportClick: ((Status) -> Unit)? = null,
     onMentionClick: (String) -> Unit = {},
     onHashtagClick: (String) -> Unit = {},
     onLinkClick: (String) -> Unit = {},
@@ -160,7 +162,8 @@ fun StatusCard(
                     onReplyClick = { onReplyClick(displayStatus) },
                     onBookmarkClick = { onBookmarkClick(displayStatus) },
                     onShareClick = { onShareClick(displayStatus) },
-                    onPinClick = onPinClick?.let { { it(displayStatus) } }
+                    onPinClick = onPinClick?.let { { it(displayStatus) } },
+                    onReportClick = onReportClick?.let { { it(displayStatus) } }
                 )
             }
         }
