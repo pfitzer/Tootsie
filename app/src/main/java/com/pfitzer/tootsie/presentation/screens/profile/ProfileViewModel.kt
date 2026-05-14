@@ -118,10 +118,12 @@ class ProfileViewModel @Inject constructor(
 
             when (accountResult) {
                 is Result.Success -> {
+                    val ownAccountId = activeAccount.value?.id
                     _uiState.update {
                         it.copy(
                             account = accountResult.data,
-                            isOwnProfile = accountId == null
+                            isOwnProfile = accountId == null ||
+                                (ownAccountId != null && accountResult.data.id == ownAccountId)
                         )
                     }
 

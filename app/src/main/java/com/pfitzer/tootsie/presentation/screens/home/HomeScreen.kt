@@ -441,6 +441,7 @@ fun HomeScreen(
                     onReportClick = { status ->
                         showReportDialog = status
                     },
+                    activeAccountId = activeAccount?.id,
                     onReplyClick = { status ->
                         onNavigateToReply(status.id)
                     },
@@ -486,6 +487,7 @@ private fun TimelineList(
     onBookmarkClick: (Status) -> Unit,
     onShareClick: (Status) -> Unit,
     onReportClick: (Status) -> Unit,
+    activeAccountId: String?,
     onReplyClick: (Status) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
@@ -547,7 +549,7 @@ private fun TimelineList(
                     onReplyClick = onReplyClick,
                     onBookmarkClick = onBookmarkClick,
                     onShareClick = onShareClick,
-                    onReportClick = onReportClick,
+                    onReportClick = if (activeAccountId != null && (status.reblog?.account?.id ?: status.account.id) != activeAccountId) onReportClick else null,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
