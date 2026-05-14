@@ -29,7 +29,7 @@ accompanist = "0.36.0"
 unifiedpush = "2.4.0"
 bouncycastle = "1.83"
 hilt-work = "1.2.0"
-compose-googlefonts = "1.10.6"
+compose-googlefonts = "1.11.1"
 
 [libraries]
 # Existing AndroidX
