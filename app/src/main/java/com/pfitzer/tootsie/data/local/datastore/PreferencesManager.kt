@@ -1,19 +1,26 @@
 package com.pfitzer.tootsie.data.local.datastore
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.pfitzer.tootsie.domain.model.AccountPushConfig
 import com.pfitzer.tootsie.domain.model.PushAlerts
 import com.pfitzer.tootsie.domain.model.PushStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +29,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 /**
  * Manager for app preferences using Jetpack DataStore.
- * Stores user settings, active account info, and other persistent data.
+ * Sensitive credentials (OAuth token, instance URL) are stored in EncryptedSharedPreferences.
+ * Non-sensitive settings (theme, filters, etc.) remain in plaintext DataStore.
  */
 @Singleton
 class PreferencesManager @Inject constructor(
@@ -31,29 +39,40 @@ class PreferencesManager @Inject constructor(
     private val dataStore = context.dataStore
 
     companion object {
-        // Authentication
-        private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
+        // Legacy DataStore keys — used only for one-time migration to encrypted storage
+        private val KEY_ACCESS_TOKEN_LEGACY = stringPreferencesKey("access_token")
+        private val KEY_INSTANCE_URL_LEGACY = stringPreferencesKey("instance_url")
+
+        // Non-sensitive DataStore keys
         private val KEY_ACTIVE_ACCOUNT_ID = stringPreferencesKey("active_account_id")
-        private val KEY_INSTANCE_URL = stringPreferencesKey("instance_url")
-
-        // App Settings
-        private val KEY_THEME = stringPreferencesKey("theme") // "light", "dark", "system"
-        private val KEY_LANGUAGE = stringPreferencesKey("language") // "en", "de", "system"
+        private val KEY_THEME = stringPreferencesKey("theme")
+        private val KEY_LANGUAGE = stringPreferencesKey("language")
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
-
-        // Display Settings
-        private val KEY_TEXT_SIZE = stringPreferencesKey("text_size") // "SMALL", "MEDIUM", "LARGE", "EXTRA_LARGE"
-
-        // Feature Flags
+        private val KEY_TEXT_SIZE = stringPreferencesKey("text_size")
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-
-        // Timeline Filters
         private val KEY_TIMELINE_HIDE_BOOSTS = booleanPreferencesKey("timeline_hide_boosts")
         private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
         private val KEY_TIMELINE_SHOW_ONLY_MEDIA = booleanPreferencesKey("timeline_show_only_media")
-
-        // Database Cleanup
         private val KEY_DATABASE_RETENTION_HOURS = stringPreferencesKey("database_retention_hours")
+
+        // Keys inside EncryptedSharedPreferences
+        private const val SECURE_PREFS_FILE = "tootsie_secure_prefs"
+        private const val SECURE_KEY_ACCESS_TOKEN = "access_token"
+        private const val SECURE_KEY_INSTANCE_URL = "instance_url"
+    }
+
+    // Initialized lazily on first IO-thread access; MasterKey.Builder uses Android Keystore
+    private val encryptedPrefs: SharedPreferences by lazy {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        EncryptedSharedPreferences.create(
+            context,
+            SECURE_PREFS_FILE,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     // Push Config Keys (account-scoped)
@@ -75,38 +94,53 @@ class PreferencesManager @Inject constructor(
     private fun pushAlertFollowRequestKey(accountId: String) = booleanPreferencesKey("push_alert_follow_request_$accountId")
     private fun lastNotificationIdKey(accountId: String) = stringPreferencesKey("last_notification_id_$accountId")
 
-    // ========== Authentication ==========
+    // ========== Authentication (EncryptedSharedPreferences) ==========
 
     /**
-     * Save access token for the active account.
+     * Save access token encrypted. Also removes any legacy plaintext entry.
      */
     suspend fun saveAccessToken(token: String) {
-        dataStore.edit { preferences ->
-            preferences[KEY_ACCESS_TOKEN] = token
-        }
+        encryptedPrefs.edit().putString(SECURE_KEY_ACCESS_TOKEN, token).apply()
+        dataStore.edit { it.remove(KEY_ACCESS_TOKEN_LEGACY) }
     }
 
     /**
-     * Get access token as Flow.
+     * Observe access token as Flow (backed by EncryptedSharedPreferences).
+     * flowOn(IO) ensures the Keystore-backed lazy init runs off the main thread.
      */
-    val accessToken: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[KEY_ACCESS_TOKEN]
-    }
+    val accessToken: Flow<String?> = callbackFlow {
+        trySend(encryptedPrefs.getString(SECURE_KEY_ACCESS_TOKEN, null))
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == SECURE_KEY_ACCESS_TOKEN) {
+                trySend(encryptedPrefs.getString(SECURE_KEY_ACCESS_TOKEN, null))
+            }
+        }
+        encryptedPrefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { encryptedPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.flowOn(Dispatchers.IO)
 
     /**
-     * Get access token (suspend function for one-time read).
+     * Get access token (one-time read). Migrates from legacy plaintext DataStore on first call.
      */
     suspend fun getAccessToken(): String? {
-        return dataStore.data.map { it[KEY_ACCESS_TOKEN] }.first()
+        val secureToken = encryptedPrefs.getString(SECURE_KEY_ACCESS_TOKEN, null)
+        if (secureToken != null) return secureToken
+
+        // One-time migration: read plaintext token, move to encrypted storage, erase original
+        val legacyToken = dataStore.data.map { it[KEY_ACCESS_TOKEN_LEGACY] }.first()
+        if (legacyToken != null) {
+            encryptedPrefs.edit().putString(SECURE_KEY_ACCESS_TOKEN, legacyToken).apply()
+            dataStore.edit { it.remove(KEY_ACCESS_TOKEN_LEGACY) }
+        }
+        return legacyToken
     }
 
     /**
      * Clear access token (logout).
      */
     suspend fun clearAccessToken() {
-        dataStore.edit { preferences ->
-            preferences.remove(KEY_ACCESS_TOKEN)
-        }
+        encryptedPrefs.edit().remove(SECURE_KEY_ACCESS_TOKEN).apply()
+        dataStore.edit { it.remove(KEY_ACCESS_TOKEN_LEGACY) }
     }
 
     /**
@@ -135,35 +169,49 @@ class PreferencesManager @Inject constructor(
     }
 
     /**
-     * Save instance URL for the active account.
+     * Save instance URL encrypted. Also removes any legacy plaintext entry.
      */
     suspend fun saveInstanceUrl(instanceUrl: String) {
-        dataStore.edit { preferences ->
-            preferences[KEY_INSTANCE_URL] = instanceUrl
-        }
+        encryptedPrefs.edit().putString(SECURE_KEY_INSTANCE_URL, instanceUrl).apply()
+        dataStore.edit { it.remove(KEY_INSTANCE_URL_LEGACY) }
     }
 
     /**
-     * Get instance URL as Flow.
+     * Observe instance URL as Flow (backed by EncryptedSharedPreferences).
      */
-    val instanceUrl: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[KEY_INSTANCE_URL]
-    }
+    val instanceUrl: Flow<String?> = callbackFlow {
+        trySend(encryptedPrefs.getString(SECURE_KEY_INSTANCE_URL, null))
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == SECURE_KEY_INSTANCE_URL) {
+                trySend(encryptedPrefs.getString(SECURE_KEY_INSTANCE_URL, null))
+            }
+        }
+        encryptedPrefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { encryptedPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.flowOn(Dispatchers.IO)
 
     /**
-     * Get instance URL (suspend function for one-time read).
+     * Get instance URL (one-time read). Migrates from legacy plaintext DataStore on first call.
      */
     suspend fun getInstanceUrl(): String? {
-        return dataStore.data.map { it[KEY_INSTANCE_URL] }.first()
+        val secureUrl = encryptedPrefs.getString(SECURE_KEY_INSTANCE_URL, null)
+        if (secureUrl != null) return secureUrl
+
+        // One-time migration: read plaintext URL, move to encrypted storage, erase original
+        val legacyUrl = dataStore.data.map { it[KEY_INSTANCE_URL_LEGACY] }.first()
+        if (legacyUrl != null) {
+            encryptedPrefs.edit().putString(SECURE_KEY_INSTANCE_URL, legacyUrl).apply()
+            dataStore.edit { it.remove(KEY_INSTANCE_URL_LEGACY) }
+        }
+        return legacyUrl
     }
 
     /**
      * Clear instance URL.
      */
     suspend fun clearInstanceUrl() {
-        dataStore.edit { preferences ->
-            preferences.remove(KEY_INSTANCE_URL)
-        }
+        encryptedPrefs.edit().remove(SECURE_KEY_INSTANCE_URL).apply()
+        dataStore.edit { it.remove(KEY_INSTANCE_URL_LEGACY) }
     }
 
     // ========== App Settings ==========
@@ -317,7 +365,6 @@ class PreferencesManager @Inject constructor(
 
     /**
      * Save push configuration for a specific account.
-     * IMPORTANT: Use .first() not .collect() when reading from DataStore.
      */
     suspend fun savePushConfig(config: AccountPushConfig) {
         dataStore.edit { preferences ->
@@ -367,12 +414,11 @@ class PreferencesManager @Inject constructor(
                     followRequest = preferences[pushAlertFollowRequestKey(accountId)] ?: false
                 )
             )
-        }.first()  // IMPORTANT: Use .first() not .collect()
+        }.first()
     }
 
     /**
      * Delete push configuration for a specific account.
-     * Removes all push-related preferences for the account.
      */
     suspend fun deletePushConfig(accountId: String) {
         dataStore.edit { preferences ->
@@ -403,9 +449,10 @@ class PreferencesManager @Inject constructor(
     // ========== Utility ==========
 
     /**
-     * Clear all preferences (full app reset).
+     * Clear all preferences and encrypted credentials (full app reset).
      */
     suspend fun clearAll() {
+        encryptedPrefs.edit().clear().apply()
         dataStore.edit { preferences ->
             preferences.clear()
         }
@@ -415,10 +462,14 @@ class PreferencesManager @Inject constructor(
      * Clear all authentication data (logout).
      */
     suspend fun clearAuthData() {
+        encryptedPrefs.edit()
+            .remove(SECURE_KEY_ACCESS_TOKEN)
+            .remove(SECURE_KEY_INSTANCE_URL)
+            .apply()
         dataStore.edit { preferences ->
-            preferences.remove(KEY_ACCESS_TOKEN)
+            preferences.remove(KEY_ACCESS_TOKEN_LEGACY)
             preferences.remove(KEY_ACTIVE_ACCOUNT_ID)
-            preferences.remove(KEY_INSTANCE_URL)
+            preferences.remove(KEY_INSTANCE_URL_LEGACY)
         }
     }
 

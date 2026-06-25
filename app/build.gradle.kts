@@ -133,6 +133,9 @@ dependencies {
     // BouncyCastle (VAPID key generation)
     implementation(libs.bouncycastle.bcprov)
 
+    // Encrypted storage for sensitive credentials
+    implementation(libs.androidx.security.crypto)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
