@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
+<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
+        <!--
+            Exclude encrypted prefs: Android Keystore keys are device-bound and cannot be
+            restored from cloud, so restoring the file would produce unreadable data.
         -->
+        <exclude domain="sharedpref" path="tootsie_secure_prefs.xml" />
+
+        <!--
+            Exclude DataStore: contains VAPID private keys for push notifications.
+            After restore the user must re-authenticate anyway.
+        -->
+        <exclude domain="file" path="datastore/" />
     </cloud-backup>
-    <!--
+
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!-- Same exclusions apply for device-to-device transfer -->
+        <exclude domain="sharedpref" path="tootsie_secure_prefs.xml" />
+        <exclude domain="file" path="datastore/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

@@ -30,6 +30,7 @@ unifiedpush = "2.4.0"
 bouncycastle = "1.84"
 hilt-work = "1.2.0"
 compose-googlefonts = "1.11.1"
+security-crypto = "1.1.0-alpha06"
 
 [libraries]
 # Existing AndroidX
@@ -107,6 +108,9 @@ unifiedpush-connector = { group = "com.github.UnifiedPush", name = "android-conn
 
 # BouncyCastle (for VAPID key generation)
 bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
+
+# Security
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 
 # Hilt WorkManager
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
