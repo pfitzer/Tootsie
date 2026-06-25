@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.pfitzer.tootsie"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.pfitzer.tootsie"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "1.2.3-alpha"
 
