@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.pfitzer.tootsie.BuildConfig
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.remote.api.AuthApiService
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
@@ -64,12 +65,20 @@ object NetworkModule {
 
     /**
      * Provides HTTP logging interceptor for debugging.
+     *
+     * Full body logging is enabled only in debug builds. In release builds the
+     * level is NONE to avoid leaking bearer tokens (Authorization header) and
+     * sensitive response bodies (posts, DMs, profile data) into logcat.
      */
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY // Log full request/response
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY // Log full request/response
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
     }
 
