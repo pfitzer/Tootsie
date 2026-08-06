@@ -82,6 +82,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    // Required by Dagger/Hilt 2.60+ generated code (CanIgnoreReturnValue)
+    compileOnly(libs.errorprone.annotations)
 
     // Room
     implementation(libs.room.runtime)
