@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.data.remote.interceptors
 
 import android.util.Log
+import com.pfitzer.tootsie.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -24,13 +25,13 @@ class AuthInterceptor @Inject constructor(
             url.contains("/oauth/token") ||
             url.contains("/api/v1/instance")
         ) {
-            Log.d(TAG, "intercept() - Skipping auth for: $url")
+            if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Skipping auth for: $url")
             return chain.proceed(originalRequest)
         }
 
         // Get access token synchronously (no blocking)
         val token = tokenProvider.getTokenSync()
-        Log.d(TAG, "intercept() - Token present: ${token != null}")
+        if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Token present: ${token != null}")
 
         // Add Authorization header if token is available
         val request = if (token != null) {

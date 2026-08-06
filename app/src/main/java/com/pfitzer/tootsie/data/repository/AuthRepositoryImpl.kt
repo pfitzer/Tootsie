@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.data.repository
 
 import android.util.Log
+import com.pfitzer.tootsie.BuildConfig
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.mapper.toDomain
@@ -43,18 +44,20 @@ class AuthRepositoryImpl @Inject constructor(
      * This is separated from init block to avoid blocking during dependency injection.
      */
     suspend fun initializeProviders() {
-        Log.d(TAG, "initializeProviders() - Loading stored values from DataStore...")
+        if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Loading stored values from DataStore...")
 
         val storedToken = preferencesManager.getAccessToken()
         val storedInstance = preferencesManager.getInstanceUrl()
 
-        Log.d(TAG, "initializeProviders() - Stored token present: ${storedToken != null}")
-        Log.d(TAG, "initializeProviders() - Stored instance: $storedInstance")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "initializeProviders() - Stored token present: ${storedToken != null}")
+            Log.d(TAG, "initializeProviders() - Stored instance: $storedInstance")
+        }
 
         // Set token in provider if it exists
         if (storedToken != null) {
             tokenProvider.setToken(storedToken)
-            Log.d(TAG, "initializeProviders() - Token loaded into provider")
+            if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Token loaded into provider")
         } else {
             Log.w(TAG, "initializeProviders() - No token found in DataStore")
         }
@@ -62,30 +65,30 @@ class AuthRepositoryImpl @Inject constructor(
         // Set instance URL in provider if it exists
         if (storedInstance != null) {
             instanceUrlProvider.setInstanceUrl(storedInstance)
-            Log.d(TAG, "initializeProviders() - Instance URL loaded into provider: $storedInstance")
+            if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Instance URL loaded into provider: $storedInstance")
         } else {
             Log.w(TAG, "initializeProviders() - No instance URL found, using default: mastodon.social")
         }
 
-        Log.d(TAG, "initializeProviders() - Providers initialization complete")
+        if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Providers initialization complete")
     }
 
     override suspend fun registerApp(instanceUrl: String): Result<AppCredentials> {
-        Log.d(TAG, "registerApp() called with instanceUrl: $instanceUrl")
+        if (BuildConfig.DEBUG) Log.d(TAG, "registerApp() called with instanceUrl: $instanceUrl")
         return try {
             // Save instance URL for future API calls
-            Log.d(TAG, "Saving instance URL to preferences")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Saving instance URL to preferences")
             preferencesManager.saveInstanceUrl(instanceUrl)
 
             // CRITICAL: Set instance URL in provider for OkHttp interceptor
             // This must be synchronous to avoid deadlocks in the interceptor
             instanceUrlProvider.setInstanceUrl(instanceUrl)
-            Log.d(TAG, "Instance URL set in provider: $instanceUrl")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Instance URL set in provider: $instanceUrl")
 
             // Register app with the instance
             // Use deep link redirect URI for OAuth callback
             val redirectUri = "tootsie://oauth"
-            Log.d(TAG, "Making API call to register app with redirect URI: $redirectUri")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Making API call to register app with redirect URI: $redirectUri")
 
             val response = authApiService.registerApp(
                 clientName = "Tootsie",
@@ -94,7 +97,7 @@ class AuthRepositoryImpl @Inject constructor(
                 website = null
             )
 
-            Log.d(TAG, "API call successful, received client_id: ${response.clientId}")
+            if (BuildConfig.DEBUG) Log.d(TAG, "API call successful, received client_id: ${response.clientId}")
             Result.Success(response.toDomain())
         } catch (e: Exception) {
             Log.e(TAG, "registerApp() failed with exception", e)
@@ -136,7 +139,7 @@ class AuthRepositoryImpl @Inject constructor(
             // CRITICAL: Set token in provider for OkHttp interceptor
             // This must be synchronous to avoid deadlocks in the interceptor
             tokenProvider.setToken(accessToken.accessToken)
-            Log.d(TAG, "Access token set in provider")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Access token set in provider")
 
             Result.Success(accessToken)
         } catch (e: Exception) {
@@ -188,7 +191,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             // Clear token from provider
             tokenProvider.clearToken()
-            Log.d(TAG, "Token cleared from provider")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Token cleared from provider")
 
             // Delete account from database if exists
             activeAccount?.let {

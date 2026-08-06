@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.data.remote.interceptors
 
 import android.util.Log
+import com.pfitzer.tootsie.BuildConfig
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -19,11 +20,11 @@ class InstanceInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
-        Log.d(TAG, "intercept() - Original URL: ${originalRequest.url}")
+        if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Original URL: ${originalRequest.url}")
 
         // Get current instance URL synchronously
         val instance = instanceUrlProvider.getInstanceUrlSync() ?: "mastodon.social"
-        Log.d(TAG, "intercept() - Instance from provider: $instance")
+        if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Instance from provider: $instance")
 
         // Build new URL with the correct instance
         val newUrl = HttpUrl.Builder()
@@ -41,12 +42,14 @@ class InstanceInterceptor @Inject constructor(
             .url(finalUrl)
             .build()
 
-        Log.d(TAG, "intercept() - Final URL: ${request.url}")
-        Log.d(TAG, "intercept() - Making network request...")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "intercept() - Final URL: ${request.url}")
+            Log.d(TAG, "intercept() - Making network request...")
+        }
 
         try {
             val response = chain.proceed(request)
-            Log.d(TAG, "intercept() - Response received: ${response.code}")
+            if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Response received: ${response.code}")
             return response
         } catch (e: Exception) {
             Log.e(TAG, "intercept() - Network request failed", e)
