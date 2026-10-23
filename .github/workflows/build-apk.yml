@@ -1,0 +1,43 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # Release build has no signing config; it is built to verify R8/ProGuard rules
+      - name: Build debug and release APKs
+        run: ./gradlew assembleDebug assembleRelease --console=plain
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: tootsie-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
