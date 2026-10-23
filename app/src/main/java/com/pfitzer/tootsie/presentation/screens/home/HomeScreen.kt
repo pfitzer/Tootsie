@@ -34,7 +34,7 @@ import com.pfitzer.tootsie.presentation.components.report.ReportDialog
 import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.util.ShareUtils
 import kotlinx.coroutines.launch
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems

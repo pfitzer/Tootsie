@@ -1,12 +1,14 @@
 package com.pfitzer.tootsie.presentation.components.status
 
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import com.pfitzer.tootsie.domain.model.Mention
 import com.pfitzer.tootsie.domain.model.Tag
 import com.pfitzer.tootsie.presentation.util.SpanType
@@ -56,17 +58,19 @@ fun RichTextContent(
         parsedContent.clickableSpans.forEach { span ->
             // Ensure indices are within bounds
             if (span.start >= 0 && span.end <= parsedContent.plainText.length && span.start < span.end) {
-                // Add visual styling (blue color)
-                addStyle(
-                    style = SpanStyle(color = linkColor),
-                    start = span.start,
-                    end = span.end
-                )
-
-                // Add annotation with type and value for click handling
-                addStringAnnotation(
-                    tag = span.type.name,  // "LINK", "MENTION", or "HASHTAG"
-                    annotation = span.value,
+                // Link annotation handles both styling and click handling
+                addLink(
+                    clickable = LinkAnnotation.Clickable(
+                        tag = span.type.name,  // "LINK", "MENTION", or "HASHTAG"
+                        styles = TextLinkStyles(style = SpanStyle(color = linkColor)),
+                        linkInteractionListener = {
+                            when (span.type) {
+                                SpanType.MENTION -> onMentionClick(span.value)
+                                SpanType.HASHTAG -> onHashtagClick(span.value)
+                                SpanType.LINK -> onLinkClick(span.value)
+                            }
+                        }
+                    ),
                     start = span.start,
                     end = span.end
                 )
@@ -74,29 +78,15 @@ fun RichTextContent(
         }
     }
 
-    // Render clickable text
-    ClickableText(
+    // Render text; clicks on links are consumed by their LinkAnnotation,
+    // clicks elsewhere fall through to the text click handler
+    Text(
         text = annotatedString,
         style = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
-        modifier = modifier,
-        onClick = { offset ->
-            // Find which annotation was clicked
-            var clickHandled = false
-            parsedContent.clickableSpans.forEach { span ->
-                if (offset in span.start until span.end) {
-                    clickHandled = true
-                    when (span.type) {
-                        SpanType.MENTION -> onMentionClick(span.value)
-                        SpanType.HASHTAG -> onHashtagClick(span.value)
-                        SpanType.LINK -> onLinkClick(span.value)
-                    }
-                }
-            }
-
-            // If click was not on a link/mention/hashtag, call the text click handler
-            if (!clickHandled && onTextClick != null) {
-                onTextClick()
-            }
+        modifier = if (onTextClick != null) {
+            modifier.clickable(interactionSource = null, indication = null, onClick = onTextClick)
+        } else {
+            modifier
         }
     )
 }

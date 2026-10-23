@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -21,7 +22,7 @@ import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
-import com.pfitzer.tootsie.presentation.util.formatRelativeTime
+import com.pfitzer.tootsie.presentation.util.LocaleAwareDateFormatter
 import com.pfitzer.tootsie.presentation.util.htmlToPlainText
 
 /**
@@ -76,7 +77,7 @@ fun StatusCard(
     if (isFiltered) {
         // Show placeholder for filtered content
         FilteredContentPlaceholder(
-            filterTitle = status.filteredByKeyword!!,
+            filterTitle = status.filteredByKeyword,
             onShowContent = { showFilteredContent = true },
             modifier = modifier
         )
@@ -252,7 +253,7 @@ private fun StatusHeader(
         }
 
         Text(
-            text = formatRelativeTime(timestamp),
+            text = LocaleAwareDateFormatter.formatRelativeTime(LocalContext.current, timestamp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

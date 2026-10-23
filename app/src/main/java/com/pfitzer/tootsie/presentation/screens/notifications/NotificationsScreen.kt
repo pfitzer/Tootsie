@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -227,20 +227,16 @@ fun SwipeToDismissNotification(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
-                onDismiss()
-                true
-            } else {
-                false
-            }
-        }
-    )
+    val dismissState = rememberSwipeToDismissBoxState()
 
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
+        onDismiss = { direction ->
+            if (direction == SwipeToDismissBoxValue.EndToStart) {
+                onDismiss()
+            }
+        },
         backgroundContent = {
             val color = when (dismissState.dismissDirection) {
                 SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
