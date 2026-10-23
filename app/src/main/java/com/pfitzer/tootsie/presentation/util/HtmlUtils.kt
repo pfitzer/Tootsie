@@ -115,12 +115,7 @@ fun annotatedStringToHtml(annotatedString: androidx.compose.ui.text.AnnotatedStr
     // We sort spans by start position to process them in order
     val allSpans = (annotatedString.spanStyles.map { it to "style" } + 
                    annotatedString.getStringAnnotations(0, text.length).map { it to "annotation" })
-        .sortedBy { (span, _) -> 
-            when (span) {
-                is androidx.compose.ui.text.AnnotatedString.Range<*> -> span.start
-                else -> 0
-            }
-        }
+        .sortedBy { (span, _) -> span.start }
 
     // Since we can't easily convert back to HTML with nested tags this way, 
     // we'll use a simpler approach: process character by character or use a more advanced logic.

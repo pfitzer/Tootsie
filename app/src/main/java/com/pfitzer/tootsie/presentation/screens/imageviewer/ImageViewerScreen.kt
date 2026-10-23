@@ -53,7 +53,7 @@ fun ImageViewerScreen(
     val screenHeight = configuration.screenHeightDp.dp
     val dismissThreshold = 150.dp
 
-    val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
+    val transformState = rememberTransformableState { _, zoomChange, offsetChange, _ ->
         scale = (scale * zoomChange).coerceIn(1f, 5f)
 
         if (scale > 1f) {

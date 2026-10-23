@@ -190,7 +190,6 @@ private fun MediaPreviewItem(
                             MediaType.VIDEO -> "VIDEO"
                             MediaType.AUDIO -> "AUDIO"
                             MediaType.GIFV -> "GIF"
-                            else -> ""
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondary,

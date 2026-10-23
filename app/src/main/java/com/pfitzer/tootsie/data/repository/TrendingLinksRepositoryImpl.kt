@@ -24,7 +24,7 @@ class TrendingLinksRepositoryImpl @Inject constructor(
     ): Result<List<TrendingLink>> {
         return try {
             val trendingLinksDto: List<TrendingLinkDto> = mastodonApi.getTrendingLinks(limit, offset)
-            val trendingLinks: List<TrendingLink> = trendingLinksDto.map { (it as TrendingLinkDto).toDomain() }
+            val trendingLinks: List<TrendingLink> = trendingLinksDto.map { it.toDomain() }
             Result.Success(trendingLinks)
         } catch (e: Exception) {
             Result.Error(e.message)

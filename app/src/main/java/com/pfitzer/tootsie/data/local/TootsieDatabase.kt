@@ -68,20 +68,20 @@ abstract class TootsieDatabase : RoomDatabase() {
          * 3. Recreating timeline_remote_keys with composite primary key
          */
         val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // 1. Add ownerAccountId column to statuses table (nullable)
-                database.execSQL("ALTER TABLE statuses ADD COLUMN ownerAccountId TEXT")
+                db.execSQL("ALTER TABLE statuses ADD COLUMN ownerAccountId TEXT")
 
                 // 2. Handle drafts table - need to add non-nullable accountId
                 // First, get the active account ID (or first account if no active account)
-                val cursor = database.query(
+                val cursor = db.query(
                     "SELECT id FROM accounts WHERE isActive = 1 LIMIT 1"
                 )
                 val activeAccountId = if (cursor.moveToFirst()) {
                     cursor.getString(0)
                 } else {
                     // No active account, get first account
-                    val fallbackCursor = database.query("SELECT id FROM accounts LIMIT 1")
+                    val fallbackCursor = db.query("SELECT id FROM accounts LIMIT 1")
                     if (fallbackCursor.moveToFirst()) {
                         fallbackCursor.getString(0)
                     } else {
@@ -91,7 +91,7 @@ abstract class TootsieDatabase : RoomDatabase() {
 
                 if (activeAccountId != null) {
                     // Create new drafts table with accountId
-                    database.execSQL("""
+                    db.execSQL("""
                         CREATE TABLE drafts_new (
                             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             accountId TEXT NOT NULL,
@@ -107,19 +107,19 @@ abstract class TootsieDatabase : RoomDatabase() {
                     """.trimIndent())
 
                     // Copy existing drafts with active account ID
-                    database.execSQL("""
+                    db.execSQL("""
                         INSERT INTO drafts_new (id, accountId, content, mediaIds, visibility, sensitive, spoilerText, inReplyToId, createdAt, updatedAt)
                         SELECT id, '$activeAccountId', content, mediaIds, visibility, sensitive, spoilerText, inReplyToId, createdAt, updatedAt
                         FROM drafts
                     """.trimIndent())
 
                     // Drop old table and rename new one
-                    database.execSQL("DROP TABLE drafts")
-                    database.execSQL("ALTER TABLE drafts_new RENAME TO drafts")
+                    db.execSQL("DROP TABLE drafts")
+                    db.execSQL("ALTER TABLE drafts_new RENAME TO drafts")
                 } else {
                     // No accounts exist, just recreate empty drafts table
-                    database.execSQL("DROP TABLE drafts")
-                    database.execSQL("""
+                    db.execSQL("DROP TABLE drafts")
+                    db.execSQL("""
                         CREATE TABLE drafts (
                             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             accountId TEXT NOT NULL,
@@ -136,8 +136,8 @@ abstract class TootsieDatabase : RoomDatabase() {
                 }
 
                 // 3. Recreate timeline_remote_keys with composite primary key
-                database.execSQL("DROP TABLE timeline_remote_keys")
-                database.execSQL("""
+                db.execSQL("DROP TABLE timeline_remote_keys")
+                db.execSQL("""
                     CREATE TABLE timeline_remote_keys (
                         statusId TEXT NOT NULL,
                         timelineType TEXT NOT NULL,
@@ -157,10 +157,10 @@ abstract class TootsieDatabase : RoomDatabase() {
          * Solution: Clear all old cached statuses (they will be re-fetched from API).
          */
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Delete all cached statuses with NULL ownerAccountId
                 // These are orphaned from the v2->v3 migration
-                database.execSQL("DELETE FROM statuses WHERE ownerAccountId IS NULL")
+                db.execSQL("DELETE FROM statuses WHERE ownerAccountId IS NULL")
             }
         }
 
@@ -169,9 +169,9 @@ abstract class TootsieDatabase : RoomDatabase() {
          * Adds the filters table for keyword and context filtering.
          */
         val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Create filters table
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE IF NOT EXISTS filters (
                         id TEXT NOT NULL PRIMARY KEY,
                         title TEXT NOT NULL,

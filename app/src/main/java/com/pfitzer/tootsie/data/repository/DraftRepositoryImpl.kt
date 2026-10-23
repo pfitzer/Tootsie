@@ -5,6 +5,7 @@ import com.pfitzer.tootsie.data.local.dao.DraftDao
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.util.Result
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -16,6 +17,7 @@ import javax.inject.Singleton
  * Manages draft posts stored locally in the database.
  * All operations are scoped to the active account.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class DraftRepositoryImpl @Inject constructor(
     private val draftDao: DraftDao,

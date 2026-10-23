@@ -117,7 +117,7 @@ fun ComposePollComponent(
                 }
             }
 
-            Divider()
+            HorizontalDivider()
 
             // Multiple choice toggle
             Row(
