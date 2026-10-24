@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.notification
 
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -92,8 +93,9 @@ fun NotificationCard(
                     )
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
+                        EmojiText(
                             text = notification.account.displayName.ifBlank { notification.account.username },
+                            emojis = notification.account.emojis,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -119,6 +121,7 @@ fun NotificationCard(
                     if (hasContentWarning) {
                         ContentWarning(
                             text = notification.status.spoilerText,
+                            emojis = notification.status.emojis,
                             expanded = showContentBehindWarning,
                             onToggle = { showContentBehindWarning = !showContentBehindWarning },
                             modifier = Modifier.padding(start = 48.dp, bottom = 8.dp)
@@ -134,7 +137,8 @@ fun NotificationCard(
                             onHashtagClick = onHashtagClick,
                             onLinkClick = onLinkClick,
                             onTextClick = null, // Don't handle text clicks separately
-                            modifier = Modifier.padding(start = 48.dp)
+                            modifier = Modifier.padding(start = 48.dp),
+                            emojis = notification.status.emojis
                         )
                     }
 
@@ -142,6 +146,7 @@ fun NotificationCard(
                     notification.status.poll?.takeIf { showBody }?.let { poll ->
                         PollComponent(
                             poll = poll,
+                            emojis = notification.status.emojis,
                             onVoteClick = { _, _ -> },
                             modifier = Modifier.padding(start = 48.dp)
                         )

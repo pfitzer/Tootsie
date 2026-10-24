@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -584,8 +585,9 @@ private fun ProfileHeader(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Display name
-        Text(
+        EmojiText(
             text = account.displayName.ifBlank { account.username },
+            emojis = account.emojis,
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -606,7 +608,8 @@ private fun ProfileHeader(
                 tags = emptyList(),     // Account bios don't have structured tag data
                 onMentionClick = onMentionClick,
                 onHashtagClick = onHashtagClick,
-                onLinkClick = onLinkClick
+                onLinkClick = onLinkClick,
+                emojis = account.emojis
             )
         }
 

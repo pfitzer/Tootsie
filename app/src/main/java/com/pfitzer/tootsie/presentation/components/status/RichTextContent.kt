@@ -9,7 +9,9 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import com.pfitzer.tootsie.domain.model.CustomEmoji
 import com.pfitzer.tootsie.domain.model.Mention
+import com.pfitzer.tootsie.presentation.components.common.withCustomEmojis
 import com.pfitzer.tootsie.domain.model.Tag
 import com.pfitzer.tootsie.presentation.util.SpanType
 import com.pfitzer.tootsie.presentation.util.parseHtmlContent
@@ -26,6 +28,7 @@ import com.pfitzer.tootsie.presentation.util.parseHtmlContent
  * @param onLinkClick Callback when an external link is clicked (receives URL)
  * @param onTextClick Optional callback when non-linked text is clicked (e.g., to view status detail)
  * @param modifier Modifier for the text component
+ * @param emojis Custom emojis of the post or account, shown as images instead of `:shortcode:`
  */
 @Composable
 fun RichTextContent(
@@ -36,7 +39,8 @@ fun RichTextContent(
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
     onTextClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emojis: List<CustomEmoji> = emptyList()
 ) {
     // Parse HTML to extract plain text and clickable spans
     val parsedContent = parseHtmlContent(content, mentions, tags)
@@ -78,10 +82,13 @@ fun RichTextContent(
         }
     }
 
+    val (text, inlineContent) = annotatedString.withCustomEmojis(emojis)
+
     // Render text; clicks on links are consumed by their LinkAnnotation,
     // clicks elsewhere fall through to the text click handler
     Text(
-        text = annotatedString,
+        text = text,
+        inlineContent = inlineContent,
         style = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
         modifier = if (onTextClick != null) {
             modifier.clickable(interactionSource = null, indication = null, onClick = onTextClick)
