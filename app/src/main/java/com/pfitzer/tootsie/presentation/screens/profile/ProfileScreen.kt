@@ -110,7 +110,7 @@ fun ProfileScreen(
 
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(message.asString(context))
             viewModel.onAction(ProfileAction.DismissSuccess)
         }
     }

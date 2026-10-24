@@ -73,7 +73,7 @@ fun FilterDetailScreen(
                 }
                 uiState.errorMessage != null && uiState.filter == null -> {
                     Text(
-                        text = uiState.errorMessage!!,
+                        text = uiState.errorMessage!!.asString(),
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp),
@@ -101,7 +101,7 @@ fun FilterDetailScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

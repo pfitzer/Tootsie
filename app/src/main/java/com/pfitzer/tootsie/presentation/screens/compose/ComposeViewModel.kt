@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.compose
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -168,7 +170,7 @@ class ComposeViewModel @Inject constructor(
     private fun uploadMedia(file: File) {
         // Don't allow more than 4 attachments
         if (_uiState.value.mediaAttachments.size >= 4) {
-            _uiState.update { it.copy(errorMessage = "Maximum 4 media attachments allowed") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_max_media)) }
             return
         }
 
@@ -191,7 +193,7 @@ class ComposeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isUploadingMedia = false,
-                            errorMessage = "Failed to upload media: ${result.message}"
+                            errorMessage = UiText.of(R.string.error_upload_media, result.message.orEmpty())
                         )
                     }
                 }
@@ -240,7 +242,7 @@ class ComposeViewModel @Inject constructor(
 
         // Allow posting if there's content OR media (can post media-only)
         if (content.isBlank() && !hasMedia) {
-            _uiState.update { it.copy(errorMessage = "Post cannot be empty") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_post_empty)) }
             return
         }
 
@@ -273,7 +275,7 @@ class ComposeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isPosting = false,
-                            errorMessage = "Failed to post: ${result.message}"
+                            errorMessage = UiText.of(R.string.error_post_failed, result.message.orEmpty())
                         )
                     }
                 }
@@ -403,7 +405,7 @@ class ComposeViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to load draft") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_load_draft)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -435,7 +437,7 @@ class ComposeViewModel @Inject constructor(
      */
     private fun addPoll() {
         if (_uiState.value.mediaAttachments.isNotEmpty()) {
-            _uiState.update { it.copy(errorMessage = "Cannot add poll to a post with media") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_poll_with_media)) }
             return
         }
         _uiState.update {
@@ -554,7 +556,7 @@ data class ComposeUiState(
     val isUploadingMedia: Boolean = false,
     val isPosting: Boolean = false,
     val isPosted: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val replyToId: String? = null,
     val replyToAccount: String? = null,
     val currentDraftId: Long? = null,

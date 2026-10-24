@@ -133,7 +133,7 @@ fun ListsScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

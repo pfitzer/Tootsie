@@ -52,3 +52,14 @@ fun ErrorMessage(
         }
     }
 }
+
+/**
+ * Displays an error message produced by a ViewModel.
+ */
+@Composable
+fun ErrorMessage(
+    message: com.pfitzer.tootsie.presentation.util.UiText,
+    modifier: Modifier = Modifier
+) {
+    ErrorMessage(message = message.asString(), modifier = modifier)
+}

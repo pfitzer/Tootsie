@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.settings.push
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
@@ -22,7 +24,7 @@ data class PushSettingsUiState(
     val status: PushStatus = PushStatus.DISABLED,
     val distributorName: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**
@@ -77,7 +79,7 @@ class PushSettingsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = result.message,
+                            errorMessage = UiText.of(R.string.error_load_push_settings),
                             isLoading = false
                         )
                     }
@@ -132,7 +134,7 @@ class PushSettingsViewModel @Inject constructor(
                     is Result.Error -> {
                         _uiState.update {
                             it.copy(
-                                errorMessage = result.message,
+                                errorMessage = UiText.of(R.string.error_enable_push),
                                 isLoading = false
                             )
                         }
@@ -154,7 +156,7 @@ class PushSettingsViewModel @Inject constructor(
                     is Result.Error -> {
                         _uiState.update {
                             it.copy(
-                                errorMessage = result.message,
+                                errorMessage = UiText.of(R.string.error_disable_push),
                                 isLoading = false
                             )
                         }
@@ -178,7 +180,7 @@ class PushSettingsViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = result.message)
+                        it.copy(errorMessage = UiText.of(R.string.error_update_push_alerts))
                     }
                 }
                 else -> {}

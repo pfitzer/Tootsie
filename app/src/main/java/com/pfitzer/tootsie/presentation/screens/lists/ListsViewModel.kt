@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.lists
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.MastodonList
@@ -69,7 +71,7 @@ class ListsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_load_lists)
                         )
                     }
                 }
@@ -83,7 +85,7 @@ class ListsViewModel @Inject constructor(
      */
     private fun createList(title: String, repliesPolicy: RepliesPolicy) {
         if (title.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "List title cannot be empty") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_list_title_empty)) }
             return
         }
 
@@ -100,7 +102,7 @@ class ListsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isCreating = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_create_list)
                         )
                     }
                 }
@@ -122,7 +124,7 @@ class ListsViewModel @Inject constructor(
                     loadLists()
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_update_list)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -144,7 +146,7 @@ class ListsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_delete_list)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -166,7 +168,7 @@ data class ListsUiState(
     val lists: List<MastodonList> = emptyList(),
     val isLoading: Boolean = false,
     val isCreating: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

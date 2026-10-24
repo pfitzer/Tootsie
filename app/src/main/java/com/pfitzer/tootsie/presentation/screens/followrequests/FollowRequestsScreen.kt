@@ -68,7 +68,7 @@ fun FollowRequestsScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

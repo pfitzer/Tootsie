@@ -344,6 +344,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 - **Formatted Strings**: Proper placeholders (%1$s, %1$d) for dynamic content
 - **Accessibility**: All content descriptions localized for TalkBack support
 - **Zero Hardcoded Strings**: All user-facing text externalized (verified with build)
+- **ViewModel Messages**: ViewModels never build user-facing strings. Error/success messages in UI state are `UiText?` (`presentation/util/UiText.kt`, e.g. `UiText.of(R.string.error_favorite)`), resolved in the UI with `asString()` (or `asString(context)` inside `LaunchedEffect`). `UiTextResourcesTest` checks that every `error_*`/`success_*` string resolves in EN and DE
 
 ### Multi-Account Architecture
 - **Single Database with Account Scoping**: All data uses accountId/ownerAccountId fields for isolation

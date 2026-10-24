@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.auth
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -59,7 +61,7 @@ class LoginViewModel @Inject constructor(
         if (_uiState.value.instanceUrl.isBlank()) {
             Log.w(TAG, "Instance URL is blank")
             _uiState.update {
-                it.copy(errorMessage = "Please enter a Mastodon instance URL")
+                it.copy(errorMessage = UiText.of(R.string.error_enter_instance))
             }
             return
         }
@@ -97,7 +99,7 @@ class LoginViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Failed to connect to instance: ${result.message}",
+                            errorMessage = UiText.of(R.string.error_connect_instance, result.message.orEmpty()),
                             loginStep = LoginStep.INITIAL
                         )
                     }
@@ -119,7 +121,7 @@ class LoginViewModel @Inject constructor(
         if (appCredentials == null) {
             Log.e(TAG, "App credentials not found when handling authorization code")
             _uiState.update {
-                it.copy(errorMessage = "App credentials not found. Please try logging in again.")
+                it.copy(errorMessage = UiText.of(R.string.error_app_credentials_missing))
             }
             return
         }
@@ -158,7 +160,7 @@ class LoginViewModel @Inject constructor(
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    errorMessage = "Failed to verify credentials: ${credentialsResult.message}",
+                                    errorMessage = UiText.of(R.string.error_verify_credentials, credentialsResult.message.orEmpty()),
                                     loginStep = LoginStep.INITIAL
                                 )
                             }
@@ -173,7 +175,7 @@ class LoginViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Failed to exchange authorization code: ${tokenResult.message}",
+                            errorMessage = UiText.of(R.string.error_exchange_code, tokenResult.message.orEmpty()),
                             loginStep = LoginStep.INITIAL
                         )
                     }
@@ -198,7 +200,7 @@ class LoginViewModel @Inject constructor(
 data class LoginUiState(
     val instanceUrl: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val appCredentials: AppCredentials? = null,
     val authorizationUrl: String? = null,
     val loginStep: LoginStep = LoginStep.INITIAL,

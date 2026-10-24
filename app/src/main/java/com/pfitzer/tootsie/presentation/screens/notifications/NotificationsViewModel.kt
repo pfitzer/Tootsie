@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.notifications
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -113,7 +115,7 @@ class NotificationsViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to dismiss notification")
+                        it.copy(errorMessage = UiText.of(R.string.error_dismiss_notification))
                     }
                 }
                 is Result.Loading -> Unit
@@ -138,7 +140,7 @@ class NotificationsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isClearingAll = false,
-                            errorMessage = "Failed to clear notifications"
+                            errorMessage = UiText.of(R.string.error_clear_notifications)
                         )
                     }
                 }
@@ -161,7 +163,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = favoriteStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to favorite") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_favorite)) }
                 is Result.Loading -> Unit
             }
         }
@@ -174,7 +176,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = unfavoriteStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to unfavorite") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unfavorite)) }
                 is Result.Loading -> Unit
             }
         }
@@ -187,7 +189,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = reblogStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to boost") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_boost)) }
                 is Result.Loading -> Unit
             }
         }
@@ -200,7 +202,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = unreblogStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to unboost") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unboost)) }
                 is Result.Loading -> Unit
             }
         }
@@ -213,7 +215,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = bookmarkStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to bookmark") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_bookmark)) }
                 is Result.Loading -> Unit
             }
         }
@@ -226,7 +228,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = unbookmarkStatusUseCase(status.id)) {
                 is Result.Success -> loadNotifications()
-                is Result.Error -> _uiState.update { it.copy(errorMessage = "Failed to remove bookmark") }
+                is Result.Error -> _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unbookmark)) }
                 is Result.Loading -> Unit
             }
         }
@@ -238,7 +240,7 @@ class NotificationsViewModel @Inject constructor(
  */
 data class NotificationsUiState(
     val isClearingAll: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

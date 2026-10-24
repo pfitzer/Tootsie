@@ -121,7 +121,7 @@ fun HomeScreen(
 
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(message.asString(context))
             viewModel.onAction(HomeAction.DismissSuccess)
         }
     }

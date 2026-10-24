@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.followedtags
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.FollowedTag
@@ -83,7 +85,7 @@ class FollowedTagsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to follow #$cleanTagName",
+                            errorMessage = UiText.of(R.string.error_follow_hashtag, cleanTagName),
                             isLoading = false
                         )
                     }
@@ -113,7 +115,7 @@ class FollowedTagsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to load followed tags",
+                            errorMessage = UiText.of(R.string.error_load_followed_tags),
                             isLoading = false
                         )
                     }
@@ -141,7 +143,7 @@ class FollowedTagsViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unfollow #${tag.name}")
+                        it.copy(errorMessage = UiText.of(R.string.error_unfollow_hashtag, tag.name))
                     }
                 }
                 is Result.Loading -> {
@@ -165,7 +167,7 @@ class FollowedTagsViewModel @Inject constructor(
 data class FollowedTagsUiState(
     val followedTags: List<FollowedTag> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val showUnfollowConfirmation: FollowedTag? = null,
     val showFollowDialog: Boolean = false,
     val scrollToTop: Boolean = false

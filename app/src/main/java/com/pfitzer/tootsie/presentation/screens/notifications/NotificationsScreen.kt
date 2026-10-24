@@ -214,7 +214,7 @@ fun NotificationsScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

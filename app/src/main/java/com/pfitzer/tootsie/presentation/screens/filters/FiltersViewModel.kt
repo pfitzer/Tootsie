@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.filters
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Filter
@@ -73,7 +75,7 @@ class FiltersViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_load_filters)
                         )
                     }
                 }
@@ -93,15 +95,15 @@ class FiltersViewModel @Inject constructor(
         keywords: List<Pair<String, Boolean>>
     ) {
         if (title.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Filter title cannot be empty") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_filter_title_empty)) }
             return
         }
         if (contexts.isEmpty()) {
-            _uiState.update { it.copy(errorMessage = "Select at least one context") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_filter_context_required)) }
             return
         }
         if (keywords.isEmpty()) {
-            _uiState.update { it.copy(errorMessage = "Add at least one keyword") }
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_filter_keyword_required)) }
             return
         }
 
@@ -124,7 +126,7 @@ class FiltersViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isCreating = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_create_filter)
                         )
                     }
                 }
@@ -148,7 +150,7 @@ class FiltersViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_delete_filter)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -170,7 +172,7 @@ data class FiltersUiState(
     val filters: List<Filter> = emptyList(),
     val isLoading: Boolean = false,
     val isCreating: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

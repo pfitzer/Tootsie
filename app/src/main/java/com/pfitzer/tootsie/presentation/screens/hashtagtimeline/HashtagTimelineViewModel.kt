@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.hashtagtimeline
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -116,7 +118,7 @@ class HashtagTimelineViewModel @Inject constructor(
                     // Paging is reactive
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_vote)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -136,7 +138,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to follow #$hashtag",
+                            errorMessage = UiText.of(R.string.error_follow_hashtag, hashtag),
                             isProcessingFollow = false
                         )
                     }
@@ -159,7 +161,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to unfollow #$hashtag",
+                            errorMessage = UiText.of(R.string.error_unfollow_hashtag, hashtag),
                             isProcessingFollow = false
                         )
                     }
@@ -180,7 +182,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to favorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_favorite))
                     }
                 }
                 is Result.Loading -> {
@@ -201,7 +203,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unfavorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unfavorite))
                     }
                 }
                 is Result.Loading -> {
@@ -222,7 +224,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to boost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_boost))
                     }
                 }
                 is Result.Loading -> {
@@ -243,7 +245,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unboost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unboost))
                     }
                 }
                 is Result.Loading -> {
@@ -264,7 +266,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to bookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_bookmark))
                     }
                 }
                 is Result.Loading -> {
@@ -285,7 +287,7 @@ class HashtagTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unbookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unbookmark))
                     }
                 }
                 is Result.Loading -> {
@@ -309,7 +311,7 @@ class HashtagTimelineViewModel @Inject constructor(
 data class HashtagTimelineUiState(
     val isFollowing: Boolean = false,
     val isProcessingFollow: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

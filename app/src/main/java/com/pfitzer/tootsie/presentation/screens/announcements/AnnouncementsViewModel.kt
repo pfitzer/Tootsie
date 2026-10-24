@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.announcements
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Announcement
@@ -61,7 +63,7 @@ class AnnouncementsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = result.message ?: "Failed to load announcements",
+                            errorMessage = UiText.of(R.string.error_load_announcements),
                             isLoading = false
                         )
                     }
@@ -91,7 +93,7 @@ class AnnouncementsViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to dismiss announcement")
+                        it.copy(errorMessage = UiText.of(R.string.error_dismiss_announcement))
                     }
                 }
                 is Result.Loading -> Unit
@@ -113,7 +115,7 @@ class AnnouncementsViewModel @Inject constructor(
 data class AnnouncementsUiState(
     val announcements: List<Announcement> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**
