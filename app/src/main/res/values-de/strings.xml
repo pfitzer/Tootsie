@@ -77,7 +77,7 @@
     <string name="compose_placeholder_content">Was hast du im Sinn?</string>
     <string name="compose_placeholder_warning">Warnungstext</string>
     <string name="compose_replying_to">Antwort an @%1$s</string>
-    <string name="compose_character_count">%1$d / 500</string>
+    <string name="compose_character_count">%1$d / %2$d</string>
     <string name="compose_button_post">Posten</string>
     <string name="compose_button_posting">Wird gepostet…</string>
 

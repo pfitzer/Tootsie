@@ -53,7 +53,8 @@ data class InstanceConfigurationDto(
 @Serializable
 data class StatusesConfigDto(
     @SerialName("max_characters") val maxCharacters: Int = 500,
-    @SerialName("max_media_attachments") val maxMediaAttachments: Int = 4
+    @SerialName("max_media_attachments") val maxMediaAttachments: Int = 4,
+    @SerialName("characters_reserved_per_url") val charactersReservedPerUrl: Int = 23
 )
 
 @Serializable
