@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.followedtags
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,7 +8,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import com.pfitzer.tootsie.presentation.icons.CustomIcons
 import com.pfitzer.tootsie.presentation.icons.Tags
@@ -20,13 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.FollowedTag
+import com.pfitzer.tootsie.domain.model.FollowedTagSort
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 
 /**
@@ -67,6 +71,10 @@ fun FollowedTagsScreen(
                     }
                 },
                 actions = {
+                    SortMenu(
+                        selected = uiState.sort,
+                        onSelect = { viewModel.onAction(FollowedTagsAction.SelectSort(it)) }
+                    )
                     IconButton(onClick = { viewModel.onAction(FollowedTagsAction.ShowFollowDialog) }) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -98,11 +106,8 @@ fun FollowedTagsScreen(
                         )
                     }
                     uiState.followedTags.isEmpty() && !uiState.isLoading -> {
-                        Text(
-                            text = stringResource(R.string.empty_followed_tags),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.Center)
+                        EmptyFollowedTags(
+                            onFollow = { viewModel.onAction(FollowedTagsAction.ShowFollowDialog) }
                         )
                     }
                     else -> {
@@ -112,7 +117,7 @@ fun FollowedTagsScreen(
                             contentPadding = PaddingValues(vertical = 8.dp)
                         ) {
                             items(
-                                items = uiState.followedTags,
+                                items = uiState.sortedTags,
                                 key = { it.name }
                             ) { tag ->
                                 FollowedTagItem(
@@ -120,10 +125,7 @@ fun FollowedTagsScreen(
                                     onTagClick = { onNavigateToHashtag(tag.name) },
                                     onUnfollowClick = {
                                         viewModel.onAction(FollowedTagsAction.RequestUnfollowTag(tag))
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    }
                                 )
                             }
                         }
@@ -211,60 +213,110 @@ fun FollowedTagsScreen(
 }
 
 /**
- * Item displaying a followed tag with unfollow button.
+ * Followed tag with its posts of the last 7 days and an unfollow button.
  */
 @Composable
 private fun FollowedTagItem(
     tag: FollowedTag,
     onTagClick: () -> Unit,
-    onUnfollowClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onUnfollowClick: () -> Unit
 ) {
-    Card(
-        onClick = onTagClick,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = CustomIcons.Tags,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column {
-                    Text(
-                        text = "#${tag.name}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    if (tag.history.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.followed_tag_stats, tag.totalUses, tag.totalAccounts),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
+    ListItem(
+        headlineContent = { Text("#${tag.name}") },
+        supportingContent = {
+            Text(pluralStringResource(R.plurals.search_hashtag_posts_week, tag.totalUses, tag.totalUses.toString()))
+        },
+        leadingContent = {
+            Icon(
+                imageVector = CustomIcons.Tags,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingContent = {
             TextButton(onClick = onUnfollowClick) {
                 Text(stringResource(R.string.unfollow))
             }
+        },
+        modifier = Modifier.clickable(onClick = onTagClick)
+    )
+}
+
+/**
+ * Sort menu: alphabetical (default) or by activity.
+ */
+@Composable
+private fun SortMenu(
+    selected: FollowedTagSort,
+    onSelect: (FollowedTagSort) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Sort,
+                contentDescription = stringResource(R.string.followed_tags_sort)
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            FollowedTagSort.entries.forEach { sort ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                when (sort) {
+                                    FollowedTagSort.ALPHABETICAL -> R.string.followed_tags_sort_alphabetical
+                                    FollowedTagSort.ACTIVITY -> R.string.followed_tags_sort_activity
+                                }
+                            )
+                        )
+                    },
+                    trailingIcon = {
+                        if (sort == selected) Icon(Icons.Default.Check, contentDescription = null)
+                    },
+                    onClick = {
+                        expanded = false
+                        onSelect(sort)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyFollowedTags(onFollow: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = CustomIcons.Tags,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.empty_followed_tags),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.followed_tags_empty_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = onFollow) {
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.follow_tag))
         }
     }
 }

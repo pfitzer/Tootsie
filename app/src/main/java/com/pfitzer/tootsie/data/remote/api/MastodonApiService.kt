@@ -776,7 +776,7 @@ interface MastodonApiService {
         @Query("max_id") maxId: String? = null,
         @Query("since_id") sinceId: String? = null,
         @Query("min_id") minId: String? = null
-    ): List<FollowedTagDto>
+    ): retrofit2.Response<List<FollowedTagDto>>
 
     /**
      * Follow a hashtag.
