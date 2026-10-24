@@ -7,6 +7,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +25,7 @@ import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.status.ContentWarning
 import com.pfitzer.tootsie.presentation.components.status.PollComponent
 import com.pfitzer.tootsie.presentation.components.status.RichTextContent
 import com.pfitzer.tootsie.presentation.components.status.StatusActions
@@ -105,19 +110,36 @@ fun NotificationCard(
 
                 // Status content (if applicable)
                 if (notification.status != null) {
-                    RichTextContent(
-                        content = notification.status.content,
-                        mentions = notification.status.mentions,
-                        tags = notification.status.tags,
-                        onMentionClick = onMentionClick,
-                        onHashtagClick = onHashtagClick,
-                        onLinkClick = onLinkClick,
-                        onTextClick = null, // Don't handle text clicks separately
-                        modifier = Modifier.padding(start = 48.dp)
-                    )
+                    val hasContentWarning = notification.status.spoilerText.isNotBlank()
+                    var showContentBehindWarning by rememberSaveable(notification.id) {
+                        mutableStateOf(false)
+                    }
+                    val showBody = !hasContentWarning || showContentBehindWarning
+
+                    if (hasContentWarning) {
+                        ContentWarning(
+                            text = notification.status.spoilerText,
+                            expanded = showContentBehindWarning,
+                            onToggle = { showContentBehindWarning = !showContentBehindWarning },
+                            modifier = Modifier.padding(start = 48.dp, bottom = 8.dp)
+                        )
+                    }
+
+                    if (showBody) {
+                        RichTextContent(
+                            content = notification.status.content,
+                            mentions = notification.status.mentions,
+                            tags = notification.status.tags,
+                            onMentionClick = onMentionClick,
+                            onHashtagClick = onHashtagClick,
+                            onLinkClick = onLinkClick,
+                            onTextClick = null, // Don't handle text clicks separately
+                            modifier = Modifier.padding(start = 48.dp)
+                        )
+                    }
 
                     // Poll results (for ended poll notifications)
-                    notification.status.poll?.let { poll ->
+                    notification.status.poll?.takeIf { showBody }?.let { poll ->
                         PollComponent(
                             poll = poll,
                             onVoteClick = { _, _ -> },
