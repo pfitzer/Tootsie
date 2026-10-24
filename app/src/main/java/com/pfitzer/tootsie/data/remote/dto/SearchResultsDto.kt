@@ -21,7 +21,8 @@ data class SearchResultsDto(
 data class HashtagDto(
     @SerialName("name") val name: String,
     @SerialName("url") val url: String,
-    @SerialName("history") val history: List<HashtagHistoryDto>? = null
+    @SerialName("history") val history: List<HashtagHistoryDto>? = null,
+    @SerialName("following") val following: Boolean? = null
 )
 
 /**

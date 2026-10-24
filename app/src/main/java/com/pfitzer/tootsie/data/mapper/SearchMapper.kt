@@ -25,7 +25,8 @@ fun HashtagDto.toDomain(): Hashtag {
     return Hashtag(
         name = name,
         url = url,
-        history = history?.map { it.toDomain() }
+        history = history?.map { it.toDomain() },
+        following = following
     )
 }
 

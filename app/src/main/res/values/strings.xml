@@ -227,11 +227,6 @@
     <string name="search">Search</string>
     <string name="search_hint">Search for users, hashtags, or posts</string>
     <string name="search_placeholder">Search…</string>
-    <string name="search_section_accounts">Accounts (%1$d)</string>
-    <string name="search_section_posts">Posts (%1$d)</string>
-    <string name="search_section_hashtags">Hashtags (%1$d)</string>
-    <string name="search_followers_count">%1$d followers</string>
-    <string name="search_hashtag_uses">%1$d posts</string>
     <string name="search_no_results">No results found for \"%1$s\"</string>
     <string name="search_no_results_hint">Try different keywords or check your spelling</string>
     <string name="search_empty_title">Search for accounts, posts, and hashtags</string>
@@ -602,4 +597,23 @@
     <string name="cd_post_language">Post language: %1$s</string>
     <string name="compose_post_language">Post language</string>
     <string name="compose_language_search">Search language</string>
+
+    <!-- Search (#226) -->
+    <string name="search_filter_all">All</string>
+    <string name="search_filter_accounts">Accounts</string>
+    <string name="search_filter_posts">Posts</string>
+    <string name="search_filter_hashtags">Hashtags</string>
+    <string name="search_show_all">Show all</string>
+    <string name="search_recent">Recent searches</string>
+    <string name="search_recent_clear">Clear</string>
+    <string name="search_recent_remove">Remove \"%1$s\" from recent searches</string>
+    <string name="search_trending_hashtags">Trending hashtags</string>
+    <plurals name="search_followers">
+        <item quantity="one">%1$s follower</item>
+        <item quantity="other">%1$s followers</item>
+    </plurals>
+    <plurals name="search_hashtag_posts_week">
+        <item quantity="one">%1$s post in the last 7 days</item>
+        <item quantity="other">%1$s posts in the last 7 days</item>
+    </plurals>
 </resources>

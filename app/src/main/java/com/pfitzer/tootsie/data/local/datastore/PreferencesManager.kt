@@ -54,6 +54,9 @@ class PreferencesManager @Inject constructor(
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
         private val KEY_TEXT_SIZE = stringPreferencesKey("text_size")
         private val KEY_POST_LANGUAGE = stringPreferencesKey("post_language")
+
+        // Queries are single-line, so a line break can separate them
+        private const val RECENT_SEARCHES_SEPARATOR = "\n"
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_TIMELINE_HIDE_BOOSTS = booleanPreferencesKey("timeline_hide_boosts")
         private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
@@ -270,6 +273,34 @@ class PreferencesManager @Inject constructor(
      */
     suspend fun getPostLanguage(): String? =
         dataStore.data.map { preferences -> preferences[KEY_POST_LANGUAGE] }.first()
+
+    // ========== Search ==========
+
+    /**
+     * Recent search queries of an account, newest first.
+     */
+    suspend fun getRecentSearches(accountId: String): List<String> =
+        dataStore.data.map { preferences ->
+            preferences[recentSearchesKey(accountId)]
+                ?.split(RECENT_SEARCHES_SEPARATOR)
+                ?.filter { it.isNotBlank() }
+                .orEmpty()
+        }.first()
+
+    /**
+     * Replace the recent search queries of an account.
+     */
+    suspend fun saveRecentSearches(accountId: String, queries: List<String>) {
+        dataStore.edit { preferences ->
+            if (queries.isEmpty()) {
+                preferences.remove(recentSearchesKey(accountId))
+            } else {
+                preferences[recentSearchesKey(accountId)] = queries.joinToString(RECENT_SEARCHES_SEPARATOR)
+            }
+        }
+    }
+
+    private fun recentSearchesKey(accountId: String) = stringPreferencesKey("recent_searches_$accountId")
 
     // ========== Display Settings ==========
 

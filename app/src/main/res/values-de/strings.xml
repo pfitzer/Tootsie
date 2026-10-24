@@ -228,11 +228,6 @@
     <string name="search">Suchen</string>
     <string name="search_hint">Suche nach Benutzern, Hashtags oder Beiträgen</string>
     <string name="search_placeholder">Suche…</string>
-    <string name="search_section_accounts">Konten (%1$d)</string>
-    <string name="search_section_posts">Beiträge (%1$d)</string>
-    <string name="search_section_hashtags">Hashtags (%1$d)</string>
-    <string name="search_followers_count">%1$d Follower</string>
-    <string name="search_hashtag_uses">%1$d Beiträge</string>
     <string name="search_no_results">Keine Ergebnisse für \"%1$s\" gefunden</string>
     <string name="search_no_results_hint">Versuchen Sie andere Suchbegriffe oder überprüfen Sie die Rechtschreibung</string>
     <string name="search_empty_title">Suche nach Konten, Beiträgen und Hashtags</string>
@@ -603,4 +598,23 @@
     <string name="cd_post_language">Sprache des Beitrags: %1$s</string>
     <string name="compose_post_language">Sprache des Beitrags</string>
     <string name="compose_language_search">Sprache suchen</string>
+
+    <!-- Search (#226) -->
+    <string name="search_filter_all">Alle</string>
+    <string name="search_filter_accounts">Konten</string>
+    <string name="search_filter_posts">Beiträge</string>
+    <string name="search_filter_hashtags">Hashtags</string>
+    <string name="search_show_all">Alle anzeigen</string>
+    <string name="search_recent">Letzte Suchen</string>
+    <string name="search_recent_clear">Löschen</string>
+    <string name="search_recent_remove">\"%1$s\" aus den letzten Suchen entfernen</string>
+    <string name="search_trending_hashtags">Angesagte Hashtags</string>
+    <plurals name="search_followers">
+        <item quantity="one">%1$s Follower</item>
+        <item quantity="other">%1$s Follower</item>
+    </plurals>
+    <plurals name="search_hashtag_posts_week">
+        <item quantity="one">%1$s Beitrag in den letzten 7 Tagen</item>
+        <item quantity="other">%1$s Beiträge in den letzten 7 Tagen</item>
+    </plurals>
 </resources>

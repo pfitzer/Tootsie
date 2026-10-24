@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -243,8 +244,9 @@ private fun StatusHeader(
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            EmojiText(
                 text = account.displayName,
+                emojis = account.emojis,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
