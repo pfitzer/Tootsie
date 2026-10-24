@@ -4,6 +4,7 @@ import android.util.Log
 import com.pfitzer.tootsie.data.local.TootsieDatabase
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -73,9 +74,24 @@ class CredentialMigration @Inject constructor(
         }
     }
 
-    private fun compactDatabase() {
+    private suspend fun compactDatabase() {
         val db = database.openHelper.writableDatabase
         db.execSQL("VACUUM")
-        db.query("PRAGMA wal_checkpoint(TRUNCATE)").close()
+
+        // TRUNCATE resets the WAL (which still holds the old plaintext frames) only if no
+        // other connection is reading; retry briefly if it was blocked.
+        repeat(CHECKPOINT_ATTEMPTS) { attempt ->
+            val busy = db.query("PRAGMA wal_checkpoint(TRUNCATE)").use { cursor ->
+                cursor.moveToFirst() && cursor.getInt(0) != 0
+            }
+            if (!busy) return
+            if (attempt < CHECKPOINT_ATTEMPTS - 1) delay(CHECKPOINT_RETRY_DELAY_MS)
+        }
+        Log.w(TAG, "WAL checkpoint was blocked, old frames may remain until the next checkpoint")
+    }
+
+    private companion object {
+        const val CHECKPOINT_ATTEMPTS = 5
+        const val CHECKPOINT_RETRY_DELAY_MS = 200L
     }
 }
