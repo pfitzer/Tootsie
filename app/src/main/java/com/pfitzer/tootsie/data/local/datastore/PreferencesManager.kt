@@ -67,6 +67,7 @@ class PreferencesManager @Inject constructor(
     private fun pushVapidPrivateKey(accountId: String) = stringPreferencesKey("push_vapid_private_$accountId")
     private fun pushAuthSecretKey(accountId: String) = stringPreferencesKey("push_auth_secret_$accountId")
     private fun pushStatusKey(accountId: String) = stringPreferencesKey("push_status_$accountId")
+    private fun pushStandardKey(accountId: String) = booleanPreferencesKey("push_standard_$accountId")
 
     // Alert preference keys (account-scoped)
     private fun pushAlertMentionKey(accountId: String) = booleanPreferencesKey("push_alert_mention_$accountId")
@@ -403,10 +404,24 @@ class PreferencesManager @Inject constructor(
     }
 
     /**
+     * Whether the server subscription uses standard (aes128gcm) Web Push encryption.
+     */
+    suspend fun isPushStandard(accountId: String): Boolean =
+        dataStore.data.first()[pushStandardKey(accountId)] ?: false
+
+    /**
+     * Record whether the server subscription uses standard Web Push encryption.
+     */
+    suspend fun setPushStandard(accountId: String, standard: Boolean) {
+        dataStore.edit { it[pushStandardKey(accountId)] = standard }
+    }
+
+    /**
      * Delete push configuration for a specific account.
      */
     suspend fun deletePushConfig(accountId: String) {
         dataStore.edit { preferences ->
+            preferences.remove(pushStandardKey(accountId))
             preferences.remove(pushEnabledKey(accountId))
             preferences.remove(pushEndpointKey(accountId))
             preferences.remove(pushVapidPublicKey(accountId))

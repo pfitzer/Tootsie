@@ -43,7 +43,8 @@ class PushRepositoryImpl @Inject constructor(
                     keys = KeysDto(
                         p256dh = vapidPublicKey,
                         auth = authSecret
-                    )
+                    ),
+                    standard = true
                 ),
                 data = alerts.toDto()
             )
@@ -55,6 +56,7 @@ class PushRepositoryImpl @Inject constructor(
                 authorization = credentials.authorization,
                 instance = credentials.instance
             )
+            preferencesManager.setPushStandard(accountId, true)
             Result.Success(response.toDomain())
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to subscribe to push")
@@ -74,7 +76,8 @@ class PushRepositoryImpl @Inject constructor(
                     keys = KeysDto(
                         p256dh = config.vapidPublicKey ?: return@withContext Result.Error("No key"),
                         auth = config.authSecret ?: return@withContext Result.Error("No auth")
-                    )
+                    ),
+                    standard = true
                 ),
                 data = alerts.toDto()
             )
@@ -141,6 +144,9 @@ class PushRepositoryImpl @Inject constructor(
                 Result.Error(e.message ?: "Failed to get push config")
             }
         }
+
+    override suspend fun isStandardSubscription(accountId: String): Boolean =
+        withContext(Dispatchers.IO) { preferencesManager.isPushStandard(accountId) }
 
     override suspend fun deletePushConfig(accountId: String): Result<Unit> =
         withContext(Dispatchers.IO) {

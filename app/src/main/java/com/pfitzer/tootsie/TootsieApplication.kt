@@ -1,9 +1,11 @@
 package com.pfitzer.tootsie
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
+import com.pfitzer.tootsie.domain.model.AccountPushConfig
 import com.pfitzer.tootsie.domain.model.PushStatus
 import com.pfitzer.tootsie.domain.repository.PushRepository
 import com.pfitzer.tootsie.push.NotificationHelper
@@ -17,6 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "TootsieApplication"
 
 /**
  * Application class implementing UnifiedPush callbacks.
@@ -92,18 +96,37 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
             if (configResult is Result.Success) {
                 val config = configResult.data
 
-                // Decrypt message
+                // Decrypt message (RFC 8291 aes128gcm)
                 val payload = pushDecryptor.decrypt(
                     message,
+                    config.vapidPublicKey,
                     config.vapidPrivateKey,
                     config.authSecret
                 )
 
-                payload?.let {
-                    notificationHelper.showPushNotification(it, accountId)
+                if (payload != null) {
+                    notificationHelper.showPushNotification(payload, accountId)
+                } else if (!pushRepository.isStandardSubscription(accountId)) {
+                    // Subscriptions created before standard encryption was requested use the
+                    // legacy scheme, which can't be decrypted via UnifiedPush. Subscribe again
+                    // once with the existing endpoint and keys to switch to aes128gcm.
+                    resubscribeWithStandardEncryption(config)
                 }
             }
         }
+    }
+
+    private suspend fun resubscribeWithStandardEncryption(config: AccountPushConfig) {
+        val endpoint = config.endpoint ?: return
+        Log.i(TAG, "Re-subscribing account ${config.accountId} with standard Web Push encryption")
+        authRepository.ensureInitialized()
+        pushRepository.subscribeToPush(
+            accountId = config.accountId,
+            endpoint = endpoint,
+            vapidPublicKey = config.vapidPublicKey ?: return,
+            authSecret = config.authSecret ?: return,
+            alerts = config.alerts
+        )
     }
 
     /**

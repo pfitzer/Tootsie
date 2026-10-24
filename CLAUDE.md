@@ -265,7 +265,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 1. Mastodon server sends encrypted payload to UnifiedPush distributor
 2. Distributor forwards to UnifiedPushService
 3. UnifiedPushService calls `handleMessage()`
-4. Decrypt payload using VAPID private key + auth secret
+4. Decrypt payload (RFC 8291 aes128gcm: ECDH with the subscription key pair + auth secret, HKDF, AES-128-GCM)
 5. Display notification via NotificationHelper
 
 **Fallback to Polling:**
@@ -298,7 +298,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 - **WorkManager**: Periodic background tasks for fallback polling
 
 ### Known Limitations
-1. **Encryption**: Currently accepts plaintext/base64 JSON (RFC 8291 encryption planned)
+1. **Encryption**: Only standard RFC 8291 `aes128gcm` is supported (subscriptions are created with `standard: true`, Mastodon >= 4.4). UnifiedPush forwards no HTTP headers, so the legacy `aesgcm` scheme can not be decrypted; legacy subscriptions are re-created automatically on the first undecryptable message
 2. **Distributor Detection**: Uses `getSavedDistributor()` (requires user to select distributor)
 3. **Polling Deduplication**: No tracking of shown notifications (may show duplicates)
 4. **Notification Persistence**: Notifications cleared on tap (no inbox storage)
