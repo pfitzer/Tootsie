@@ -2,10 +2,10 @@ package com.pfitzer.tootsie.data.remote.interceptors
 
 import android.util.Log
 import com.pfitzer.tootsie.BuildConfig
-import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response
+import java.io.IOException
 import javax.inject.Inject
 
 private const val TAG = "InstanceInterceptor"
@@ -28,10 +28,12 @@ class InstanceInterceptor @Inject constructor(
         val originalRequest = chain.request()
         if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Original URL: ${originalRequest.url}")
 
-        // Use the explicitly requested instance, or the active one (synchronously)
+        // Use the explicitly requested instance, or the active one (synchronously).
+        // Without an instance the request must fail: falling back to a fixed server
+        // would send the bearer token of one instance to another.
         val instance = originalRequest.header(HEADER_INSTANCE)
             ?: instanceUrlProvider.getInstanceUrlSync()
-            ?: "mastodon.social"
+            ?: throw IOException("No instance URL configured")
         if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Instance from provider: $instance")
 
         // Build new URL with the correct instance
