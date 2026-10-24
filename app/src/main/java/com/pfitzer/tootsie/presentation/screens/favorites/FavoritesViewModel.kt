@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.presentation.util.applyInteractions
 
 /**
  * ViewModel for Favorites Screen.
@@ -23,6 +25,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val getFavoritesUseCase: GetFavoritesUseCase,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
     private val unfavoriteStatusUseCase: UnfavoriteStatusUseCase,
@@ -41,6 +44,7 @@ class FavoritesViewModel @Inject constructor(
      */
     val favoritesPagingData: Flow<PagingData<Status>> = getFavoritesUseCase()
         .cachedIn(viewModelScope)
+        .applyInteractions(statusInteractionStore)
 
     /**
      * Handle user actions.
@@ -82,7 +86,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (favoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -101,7 +105,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (unfavoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -120,7 +124,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (reblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -139,7 +143,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (unreblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -158,7 +162,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (bookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -177,7 +181,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             when (unbookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - status state updated
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {

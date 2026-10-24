@@ -18,6 +18,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.presentation.util.applyInteractions
 
 /**
  * ViewModel for Profile Screen.
@@ -25,6 +27,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val getAccountUseCase: GetAccountUseCase,
     private val getRelationshipUseCase: GetRelationshipUseCase,
     private val followAccountUseCase: FollowAccountUseCase,
@@ -94,6 +97,7 @@ class ProfileViewModel @Inject constructor(
                         pinned = true
                     )
                 }.cachedIn(viewModelScope)
+                    .applyInteractions(statusInteractionStore)
             }
         }.stateIn(
             scope = viewModelScope,
