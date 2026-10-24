@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.presentation.screens.compose
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +11,16 @@ import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.CustomEmoji
+import com.pfitzer.tootsie.domain.usecase.account.GetAllAccountsUseCase
+import com.pfitzer.tootsie.domain.usecase.account.ObserveActiveAccountUseCase
+import com.pfitzer.tootsie.domain.usecase.account.SwitchAccountUseCase
 import com.pfitzer.tootsie.domain.usecase.instance.GetInstanceLimitsUseCase
+import com.pfitzer.tootsie.domain.usecase.search.SearchUseCase
+import com.pfitzer.tootsie.domain.util.AutocompleteToken
+import java.util.Locale
 import com.pfitzer.tootsie.domain.util.StatusLengthCounter
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +29,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -38,6 +50,11 @@ class ComposeViewModel @Inject constructor(
     private val draftRepository: DraftRepository,
     private val getCustomEmojisUseCase: com.pfitzer.tootsie.domain.usecase.emoji.GetCustomEmojisUseCase,
     private val getInstanceLimitsUseCase: GetInstanceLimitsUseCase,
+    private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
+    private val getAllAccountsUseCase: GetAllAccountsUseCase,
+    private val switchAccountUseCase: SwitchAccountUseCase,
+    private val searchUseCase: SearchUseCase,
+    private val preferencesManager: PreferencesManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -51,10 +68,15 @@ class ComposeViewModel @Inject constructor(
     // Auto-save job for draft saving
     private var autoSaveJob: Job? = null
 
+    // Pending autocomplete lookup, replaced on every keystroke
+    private var autocompleteJob: Job? = null
+
     init {
-        // Load custom emojis and posting limits from the instance
-        loadCustomEmojis()
-        loadInstanceLimits()
+        // The posting account; emojis and limits belong to its instance and are
+        // (re)loaded whenever it changes
+        observeActiveAccount()
+        loadAccounts()
+        loadLanguage()
 
         // Load draft if resuming from drafts
         if (draftId != null) {
@@ -81,6 +103,94 @@ class ComposeViewModel @Inject constructor(
                 _uiState.update { it.copy(quotedStatus = result.data) }
             }
             // Without the preview the quote can still be posted
+        }
+    }
+
+    /**
+     * Observe the active (posting) account and load its instance's emojis and limits.
+     */
+    private fun observeActiveAccount() {
+        viewModelScope.launch {
+            observeActiveAccountUseCase()
+                .filterNotNull()
+                .distinctUntilChanged { old, new -> old.id == new.id }
+                .collect { account ->
+                    _uiState.update { it.copy(account = account) }
+                    loadCustomEmojis()
+                    loadInstanceLimits()
+                }
+        }
+    }
+
+    /**
+     * Load the logged-in accounts, for switching the posting account.
+     */
+    private fun loadAccounts() {
+        viewModelScope.launch {
+            val accounts = runCatching { getAllAccountsUseCase() }.getOrDefault(emptyList())
+            _uiState.update { it.copy(accounts = accounts) }
+        }
+    }
+
+    /**
+     * Default post language: the last one used, otherwise the device language.
+     */
+    private fun loadLanguage() {
+        viewModelScope.launch {
+            val language = preferencesManager.getPostLanguage() ?: Locale.getDefault().language
+            _uiState.update { it.copy(language = language) }
+        }
+    }
+
+    /**
+     * Post as another logged-in account. Only offered for new posts: replies and quotes
+     * refer to status IDs of the current account's instance.
+     */
+    private fun switchAccount(accountId: String) {
+        if (!_uiState.value.canSwitchAccount || accountId == _uiState.value.account?.id) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(suggestions = emptyList()) }
+            switchAccountUseCase(accountId)
+            // The new account arrives via observeActiveAccount
+        }
+    }
+
+    private fun selectLanguage(language: String) {
+        _uiState.update { it.copy(language = language) }
+    }
+
+    /**
+     * Look up suggestions for the word being typed (mention, hashtag or custom emoji).
+     */
+    private fun updateAutocomplete(token: AutocompleteToken?) {
+        autocompleteJob?.cancel()
+        if (token == null) {
+            _uiState.update { it.copy(suggestions = emptyList()) }
+            return
+        }
+        if (token.type == AutocompleteToken.Type.EMOJI) {
+            val query = token.query.lowercase()
+            val emojis = _uiState.value.customEmojis
+                .filter { it.visibleInPicker && it.shortcode.lowercase().contains(query) }
+                .sortedBy { !it.shortcode.lowercase().startsWith(query) }
+                .take(MAX_SUGGESTIONS)
+                .map { ComposeSuggestion.Emoji(it) }
+            _uiState.update { it.copy(suggestions = emojis) }
+            return
+        }
+        autocompleteJob = viewModelScope.launch {
+            // Wait until typing pauses
+            delay(AUTOCOMPLETE_DELAY_MS)
+            val type = if (token.type == AutocompleteToken.Type.MENTION) "accounts" else "hashtags"
+            val result = searchUseCase(query = token.query, type = type, limit = MAX_SUGGESTIONS)
+            val suggestions = (result as? Result.Success)?.data?.let { results ->
+                if (token.type == AutocompleteToken.Type.MENTION) {
+                    results.accounts.map { ComposeSuggestion.Mention(it) }
+                } else {
+                    results.hashtags.map { ComposeSuggestion.Hashtag(it.name) }
+                }
+            }.orEmpty()
+            _uiState.update { it.copy(suggestions = suggestions) }
         }
     }
 
@@ -151,6 +261,9 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.LoadDraft -> loadDraft(action.draftId)
             is ComposeAction.SaveDraftNow -> saveDraftNow()
             is ComposeAction.Exit -> exit()
+            is ComposeAction.SwitchAccount -> switchAccount(action.accountId)
+            is ComposeAction.SelectLanguage -> selectLanguage(action.language)
+            is ComposeAction.UpdateAutocomplete -> updateAutocomplete(action.token)
             is ComposeAction.DeleteDraft -> deleteDraft()
             ComposeAction.AddPoll -> addPoll()
             ComposeAction.RemovePoll -> removePoll()
@@ -293,11 +406,14 @@ class ComposeViewModel @Inject constructor(
                 mediaIds = mediaIds.takeIf { it.isNotEmpty() },
                 spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() },
                 pollConfig = _uiState.value.pollConfig,
-                quotedStatusId = quoteId
+                quotedStatusId = quoteId,
+                language = _uiState.value.language
             )
 
             when (result) {
                 is Result.Success -> {
+                    // Default for the next post
+                    _uiState.value.language?.let { preferencesManager.savePostLanguage(it) }
                     _uiState.update {
                         it.copy(
                             isPosting = false,
@@ -621,7 +737,13 @@ data class ComposeUiState(
     val isLoadingEmojis: Boolean = true,
     val pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null,
     val limits: InstanceLimits = InstanceLimits(),
-    val isExited: Boolean = false
+    val isExited: Boolean = false,
+    /** The account that posts (the active account). */
+    val account: Account? = null,
+    val accounts: List<Account> = emptyList(),
+    /** ISO 639-1 language of the post. */
+    val language: String? = null,
+    val suggestions: List<ComposeSuggestion> = emptyList()
 ) {
     /** Length as Mastodon counts it (URLs, mentions, content warning). */
     val characterCount: Int by lazy {
@@ -637,6 +759,7 @@ data class ComposeUiState(
         return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && !isOverCharacterLimit
     }
     val isReply: Boolean get() = replyToId != null
+    val canSwitchAccount: Boolean get() = accounts.size > 1 && !isReply && quoteId == null
     val isQuote: Boolean get() = quoteId != null
     val canAddMedia: Boolean get() = mediaAttachments.size < limits.maxMediaAttachments && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
@@ -660,6 +783,10 @@ sealed class ComposeAction {
     data object SaveDraftNow : ComposeAction()
     /** Leave the screen; the draft is saved before isExited is set. */
     data object Exit : ComposeAction()
+    data class SwitchAccount(val accountId: String) : ComposeAction()
+    data class SelectLanguage(val language: String) : ComposeAction()
+    /** The word at the cursor changed; null if there is nothing to complete. */
+    data class UpdateAutocomplete(val token: AutocompleteToken?) : ComposeAction()
     data object DeleteDraft : ComposeAction()
 
     // Poll actions
@@ -674,11 +801,34 @@ sealed class ComposeAction {
 }
 
 /**
+ * Autocomplete suggestion while typing.
+ */
+sealed class ComposeSuggestion {
+    /** Text that replaces the typed word. */
+    abstract val replacement: String
+
+    data class Mention(val account: Account) : ComposeSuggestion() {
+        override val replacement: String get() = "@${account.acct} "
+    }
+
+    data class Hashtag(val name: String) : ComposeSuggestion() {
+        override val replacement: String get() = "#$name "
+    }
+
+    data class Emoji(val emoji: CustomEmoji) : ComposeSuggestion() {
+        override val replacement: String get() = ":${emoji.shortcode}: "
+    }
+}
+
+/**
  * Status visibility levels.
  */
-enum class StatusVisibility(val value: String, val displayName: String) {
-    PUBLIC("public", "Public"),
-    UNLISTED("unlisted", "Unlisted"),
-    PRIVATE("private", "Followers only"),
-    DIRECT("direct", "Direct")
+enum class StatusVisibility(val value: String, @StringRes val labelRes: Int) {
+    PUBLIC("public", R.string.visibility_public),
+    UNLISTED("unlisted", R.string.visibility_unlisted),
+    PRIVATE("private", R.string.visibility_private),
+    DIRECT("direct", R.string.visibility_direct)
 }
+
+private const val MAX_SUGGESTIONS = 5
+private const val AUTOCOMPLETE_DELAY_MS = 250L
