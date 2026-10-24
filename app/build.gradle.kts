@@ -134,6 +134,8 @@ dependencies {
     // WorkManager
     implementation(libs.work.runtime)
     implementation(libs.hilt.work)
+    // Generates the factories HiltWorkerFactory needs for @HiltWorker classes
+    ksp(libs.androidx.hilt.compiler)
 
     // UnifiedPush
     implementation(libs.unifiedpush.connector)
@@ -150,4 +152,5 @@ dependencies {
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test)
     androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.work.testing)
 }
