@@ -37,8 +37,9 @@ class ComposeViewModel @Inject constructor(
 
     private val replyToId: String? = savedStateHandle["replyToId"]
     private val draftId: String? = savedStateHandle["draftId"]
+    private val quoteId: String? = savedStateHandle["quoteId"]
 
-    private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId))
+    private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId, quoteId = quoteId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
 
     // Auto-save job for draft saving
@@ -55,6 +56,24 @@ class ComposeViewModel @Inject constructor(
         // Load reply context if replying to a status
         else if (replyToId != null) {
             loadReplyContext(replyToId)
+        }
+
+        // Load the quoted status for the preview
+        if (quoteId != null) {
+            loadQuotedStatus(quoteId)
+        }
+    }
+
+    /**
+     * Load the status being quoted, for the preview card.
+     */
+    private fun loadQuotedStatus(statusId: String) {
+        viewModelScope.launch {
+            val result = statusRepository.getStatus(statusId)
+            if (result is Result.Success) {
+                _uiState.update { it.copy(quotedStatus = result.data) }
+            }
+            // Without the preview the quote can still be posted
         }
     }
 
@@ -255,7 +274,8 @@ class ComposeViewModel @Inject constructor(
                 inReplyToId = replyToId,
                 mediaIds = mediaIds.takeIf { it.isNotEmpty() },
                 spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() },
-                pollConfig = _uiState.value.pollConfig
+                pollConfig = _uiState.value.pollConfig,
+                quotedStatusId = quoteId
             )
 
             when (result) {
@@ -557,6 +577,8 @@ data class ComposeUiState(
     val errorMessage: String? = null,
     val replyToId: String? = null,
     val replyToAccount: String? = null,
+    val quoteId: String? = null,
+    val quotedStatus: com.pfitzer.tootsie.domain.model.Status? = null,
     val currentDraftId: Long? = null,
     val isSavingDraft: Boolean = false,
     val lastDraftSavedAt: Long? = null,
@@ -573,6 +595,7 @@ data class ComposeUiState(
         return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && characterCount <= 500
     }
     val isReply: Boolean get() = replyToId != null
+    val isQuote: Boolean get() = quoteId != null
     val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
     val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank() || hasPoll

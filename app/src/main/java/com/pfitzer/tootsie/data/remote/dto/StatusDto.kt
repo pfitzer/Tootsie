@@ -34,7 +34,9 @@ data class StatusDto(
     @SerialName("bookmarked") val bookmarked: Boolean = false,
     @SerialName("pinned") val pinned: Boolean = false,
     @SerialName("card") val card: CardDto? = null,
-    @SerialName("language") val language: String? = null
+    @SerialName("language") val language: String? = null,
+    @SerialName("quote") val quote: QuoteDto? = null,
+    @SerialName("quote_approval") val quoteApproval: QuoteApprovalDto? = null
 )
 
 @Serializable
@@ -109,4 +111,24 @@ data class CardDto(
     @SerialName("height") val height: Int? = null,
     @SerialName("image") val image: String? = null,
     @SerialName("embed_url") val embedUrl: String? = null
+)
+
+/**
+ * Quote (with the quoted status) or ShallowQuote (only its ID, for nested quotes).
+ */
+@Serializable
+data class QuoteDto(
+    @SerialName("state") val state: String,
+    @SerialName("quoted_status") val quotedStatus: StatusDto? = null,
+    @SerialName("quoted_status_id") val quotedStatusId: String? = null
+)
+
+/**
+ * Quote policy of a status and how it applies to the requesting user (Mastodon >= 4.5).
+ */
+@Serializable
+data class QuoteApprovalDto(
+    @SerialName("automatic") val automatic: List<String> = emptyList(),
+    @SerialName("manual") val manual: List<String> = emptyList(),
+    @SerialName("current_user") val currentUser: String? = null
 )

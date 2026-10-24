@@ -293,6 +293,18 @@
     <string name="media_preview_unavailable">Vorschau nicht verfügbar – zum Öffnen tippen</string>
 
     <!-- Status Labels -->
+    <string name="status_boost">Boosten</string>
+    <string name="status_unboost">Boost zurücknehmen</string>
+    <string name="status_quote">Zitieren</string>
+    <string name="status_quote_needs_approval">Der Autor muss das Zitat freigeben</string>
+    <string name="status_quote_not_allowed">Der Autor erlaubt keine Zitate dieses Beitrags</string>
+    <string name="status_quote_pending">Zitierter Beitrag wartet auf Freigabe durch den Autor</string>
+    <string name="status_quote_unavailable">Zitierter Beitrag ist nicht verfügbar</string>
+    <string name="compose_title_quote">Beitrag zitieren</string>
+    <plurals name="status_quote_media_count">
+        <item quantity="one">%1$d Anhang</item>
+        <item quantity="other">%1$d Anhänge</item>
+    </plurals>
     <string name="status_boosted">%1$s hat geteilt</string>
     <string name="status_show_more">Mehr anzeigen</string>
     <string name="status_show_less">Weniger anzeigen</string>

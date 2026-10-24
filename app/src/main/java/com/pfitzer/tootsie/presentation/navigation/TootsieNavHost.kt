@@ -33,6 +33,9 @@ import com.pfitzer.tootsie.presentation.screens.filters.detail.FilterDetailScree
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.CompositionLocalProvider
+import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.status.LocalOnQuoteStatus
 
 /**
  * Main navigation host for the Tootsie app.
@@ -116,6 +119,12 @@ fun TootsieNavHost(
         },
         modifier = modifier
     ) { paddingValues ->
+        // Lets every status card offer "Quote" without passing a callback through each screen
+        CompositionLocalProvider(
+            LocalOnQuoteStatus provides { status: Status ->
+                navController.navigate(TootsieDestinations.Compose.createRoute(quoteId = status.id))
+            }
+        ) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -238,6 +247,11 @@ fun TootsieNavHost(
                     defaultValue = null
                 },
                 navArgument(TootsieDestinations.Compose.ARG_DRAFT_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(TootsieDestinations.Compose.ARG_QUOTE_ID) {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -802,6 +816,7 @@ fun TootsieNavHost(
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 }
             )
+        }
         }
         }
     }

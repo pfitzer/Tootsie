@@ -64,7 +64,8 @@ class StatusRepositoryImpl @Inject constructor(
         mediaIds: List<String>?,
         sensitive: Boolean,
         spoilerText: String?,
-        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig?
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig?,
+        quotedStatusId: String?
     ): Result<Status> {
         return try {
             val statusDto = mastodonApi.postStatus(
@@ -77,7 +78,8 @@ class StatusRepositoryImpl @Inject constructor(
                 pollOptions = pollConfig?.options,
                 pollExpiresIn = pollConfig?.expiresIn,
                 pollMultiple = pollConfig?.multiple,
-                pollHideTotals = pollConfig?.hideTotals
+                pollHideTotals = pollConfig?.hideTotals,
+                quotedStatusId = quotedStatusId
             )
             // Not cached here; it is cached with its timeline scope when the timeline loads
             Result.Success(statusDto.toDomain())

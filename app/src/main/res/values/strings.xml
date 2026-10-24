@@ -293,6 +293,18 @@
 
     <!-- Status Labels -->
     <string name="status_boosted">%1$s boosted</string>
+    <string name="status_boost">Boost</string>
+    <string name="status_unboost">Undo boost</string>
+    <string name="status_quote">Quote</string>
+    <string name="status_quote_needs_approval">The author has to approve the quote</string>
+    <string name="status_quote_not_allowed">The author doesn\'t allow quotes of this post</string>
+    <string name="status_quote_pending">Quoted post is waiting for approval by its author</string>
+    <string name="status_quote_unavailable">Quoted post is not available</string>
+    <string name="compose_title_quote">Quote post</string>
+    <plurals name="status_quote_media_count">
+        <item quantity="one">%1$d attachment</item>
+        <item quantity="other">%1$d attachments</item>
+    </plurals>
     <string name="status_content_warning">CW: %1$s</string>
     <string name="status_show_more">Show more</string>
     <string name="status_show_less">Show less</string>
