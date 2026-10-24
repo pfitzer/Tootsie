@@ -180,7 +180,7 @@ Targeting Mastodon API v1 and v2 (compatible with Mastodon 3.0+)
 - **OAuth 2.0**: Standard web-based authorization flow
 - **App Registration**: Dynamic app registration per instance
 - **Multi-Instance**: Support any Mastodon-compatible instance
-- **Token Storage**: Secure storage using EncryptedSharedPreferences
+- **Token Storage**: AES-256-GCM encryption with a non-exportable Android Keystore key (`CredentialCipher`), stored in DataStore (active account) and Room (all accounts)
 
 ### Key API Endpoints
 ```
@@ -330,7 +330,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 
 ### Security
 - HTTPS-only communication with API
-- Secure token storage (EncryptedSharedPreferences)
+- Secure token storage (`CredentialCipher`: Android Keystore AES-GCM; Room DB and DataStore excluded from backup)
 - Input validation and sanitization
 - XSS prevention in HTML content rendering
 - ProGuard/R8 obfuscation for release builds

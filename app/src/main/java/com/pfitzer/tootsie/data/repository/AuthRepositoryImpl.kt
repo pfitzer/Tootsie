@@ -2,6 +2,8 @@ package com.pfitzer.tootsie.data.repository
 
 import android.util.Log
 import com.pfitzer.tootsie.BuildConfig
+import com.pfitzer.tootsie.data.local.crypto.CredentialCipher
+import com.pfitzer.tootsie.data.local.crypto.CredentialMigration
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.mapper.toDomain
@@ -19,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,7 +38,9 @@ class AuthRepositoryImpl @Inject constructor(
     private val accountDao: AccountDao,
     private val preferencesManager: PreferencesManager,
     private val instanceUrlProvider: InstanceUrlProvider,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val credentialCipher: CredentialCipher,
+    private val credentialMigration: CredentialMigration
 ) : AuthRepository {
 
     /**
@@ -44,6 +49,8 @@ class AuthRepositoryImpl @Inject constructor(
      * This is separated from init block to avoid blocking during dependency injection.
      */
     suspend fun initializeProviders() {
+        credentialMigration.migrate()
+
         if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Loading stored values from DataStore...")
 
         val storedToken = preferencesManager.getAccessToken()
@@ -160,9 +167,12 @@ class AuthRepositoryImpl @Inject constructor(
             val instanceUrl = preferencesManager.getInstanceUrl()
             val accessToken = preferencesManager.getAccessToken()
 
-            // Save account to database
+            // Save account to database (token encrypted at rest)
+            val encryptedToken = accessToken?.let {
+                withContext(Dispatchers.IO) { credentialCipher.encrypt(it) }
+            }
             val accountEntity = accountDto.toEntity(
-                accessToken = accessToken,
+                accessToken = encryptedToken,
                 instanceUrl = instanceUrl,
                 isActive = true
             )

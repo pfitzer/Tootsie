@@ -26,7 +26,7 @@ data class AccountEntity(
     val bot: Boolean,
 
     // Authentication data (only for logged-in accounts)
-    val accessToken: String? = null,
+    val accessToken: String? = null, // Encrypted with CredentialCipher, never plaintext
     val instanceUrl: String? = null,
     val isActive: Boolean = false, // Whether this is the currently active account
 
