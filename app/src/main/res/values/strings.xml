@@ -470,6 +470,10 @@
     <string name="follow_requests">Follow Requests</string>
     <string name="push_info_title">UnifiedPush Required</string>
     <string name="push_info_message">Push notifications require a UnifiedPush distributor app (like ntfy, NextPush, or Conversations). Install one from F-Droid or your app store to enable push notifications.</string>
+    <string name="push_permission_denied">Push notifications need the notification permission</string>
+    <string name="push_notifications_blocked_title">Notifications are blocked</string>
+    <string name="push_notifications_blocked_message">Tootsie is not allowed to show notifications. Allow them in the Android settings to receive push notifications.</string>
+    <string name="push_open_notification_settings">Open settings</string>
     <string name="push_fallback_info">When no distributor is available, Tootsie will check for new notifications every 15 minutes.</string>
     <string name="get_distributor_app">Get a distributor app</string>
 

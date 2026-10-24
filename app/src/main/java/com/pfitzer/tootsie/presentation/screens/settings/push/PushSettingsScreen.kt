@@ -1,5 +1,13 @@
 package com.pfitzer.tootsie.presentation.screens.settings.push
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,9 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
+import kotlinx.coroutines.launch
 
 /**
  * Push notification settings screen.
@@ -26,6 +38,32 @@ fun PushSettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // Android 13+: notifications need a runtime permission; re-checked when returning to the app
+    var notificationsAllowed by remember { mutableStateOf(areNotificationsAllowed(context)) }
+    LifecycleResumeEffect(Unit) {
+        notificationsAllowed = areNotificationsAllowed(context)
+        onPauseOrDispose { }
+    }
+    val permissionDeniedMessage = stringResource(R.string.push_permission_denied)
+    val openSettingsLabel = stringResource(R.string.push_open_notification_settings)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        notificationsAllowed = areNotificationsAllowed(context)
+        if (granted) {
+            viewModel.onAction(PushSettingsAction.TogglePush(true))
+        } else {
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = permissionDeniedMessage,
+                    actionLabel = openSettingsLabel
+                )
+                if (result == SnackbarResult.ActionPerformed) openNotificationSettings(context)
+            }
+        }
+    }
 
     // Show error message in snackbar
     LaunchedEffect(uiState.errorMessage) {
@@ -89,6 +127,35 @@ fun PushSettingsScreen(
                 }
             }
 
+            // Push is on, but Android won't show the notifications
+            if (uiState.enabled && !notificationsAllowed) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.push_notifications_blocked_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Text(
+                            text = stringResource(R.string.push_notifications_blocked_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        TextButton(onClick = { openNotificationSettings(context) }) {
+                            Text(openSettingsLabel)
+                        }
+                    }
+                }
+            }
+
             // Enable/Disable Push Card
             Card(
                 modifier = Modifier.fillMaxWidth()
@@ -118,7 +185,11 @@ fun PushSettingsScreen(
                         Switch(
                             checked = uiState.enabled,
                             onCheckedChange = { enabled ->
-                                viewModel.onAction(PushSettingsAction.TogglePush(enabled))
+                                if (enabled && needsNotificationPermission(context)) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.onAction(PushSettingsAction.TogglePush(enabled))
+                                }
                             },
                             enabled = !uiState.isLoading
                         )
@@ -291,4 +362,26 @@ private fun AlertSwitch(
             onCheckedChange = onCheckedChange
         )
     }
+}
+
+/**
+ * Android 13+ requires the POST_NOTIFICATIONS runtime permission.
+ */
+private fun needsNotificationPermission(context: Context): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+        PackageManager.PERMISSION_GRANTED
+
+/**
+ * Covers both the runtime permission and notifications disabled in the system settings.
+ */
+private fun areNotificationsAllowed(context: Context): Boolean =
+    NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+private fun openNotificationSettings(context: Context) {
+    context.startActivity(
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
 }

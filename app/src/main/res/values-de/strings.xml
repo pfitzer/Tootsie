@@ -471,6 +471,10 @@
     <string name="follow_requests">Folgeanfragen</string>
     <string name="push_info_title">UnifiedPush erforderlich</string>
     <string name="push_info_message">Push-Benachrichtigungen erfordern eine UnifiedPush-Distributor-App (wie ntfy, NextPush oder Conversations). Installieren Sie eine aus F-Droid oder Ihrem App-Store, um Push-Benachrichtigungen zu aktivieren.</string>
+    <string name="push_permission_denied">Push-Benachrichtigungen brauchen die Berechtigung für Benachrichtigungen</string>
+    <string name="push_notifications_blocked_title">Benachrichtigungen sind blockiert</string>
+    <string name="push_notifications_blocked_message">Tootsie darf keine Benachrichtigungen anzeigen. Erlaube sie in den Android-Einstellungen, um Push-Benachrichtigungen zu erhalten.</string>
+    <string name="push_open_notification_settings">Einstellungen öffnen</string>
     <string name="push_fallback_info">Wenn kein Distributor verfügbar ist, prüft Tootsie alle 15 Minuten auf neue Benachrichtigungen.</string>
     <string name="get_distributor_app">Distributor-App installieren</string>
 

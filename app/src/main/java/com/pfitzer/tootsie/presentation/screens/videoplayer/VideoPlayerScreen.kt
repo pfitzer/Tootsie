@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.pfitzer.tootsie.R
@@ -28,6 +29,7 @@ import com.pfitzer.tootsie.R
  * @param onNavigateBack Callback when back button is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@androidx.annotation.OptIn(UnstableApi::class) // PlayerView.controllerShowTimeoutMs
 @Composable
 fun VideoPlayerScreen(
     videoUrl: String,
