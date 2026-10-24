@@ -289,6 +289,9 @@
     <!-- Status Labels -->
     <string name="status_boosted">%1$s boosted</string>
     <string name="status_content_warning">CW: %1$s</string>
+    <string name="status_show_more">Show more</string>
+    <string name="status_show_less">Show less</string>
+    <string name="media_sensitive_tap_to_show">Sensitive content – tap to show</string>
     <string name="status_more_media">+%1$d</string>
 
     <!-- Trending Labels -->
