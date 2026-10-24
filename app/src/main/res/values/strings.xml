@@ -488,7 +488,6 @@
     <string name="empty_conversations">No direct messages yet.</string>
     <string name="cd_delete_conversation">Delete conversation</string>
     <string name="refresh">Refresh</string>
-    <string name="filter_detail_title">Filter Details</string>
     <string name="add">Add</string>
 
     <!-- Announcements -->
@@ -616,4 +615,13 @@
         <item quantity="one">%1$s post in the last 7 days</item>
         <item quantity="other">%1$s posts in the last 7 days</item>
     </plurals>
+
+    <!-- Filters (#222) -->
+    <string name="filter_expiration_keep">Keep (%1$s)</string>
+    <string name="filter_expires_at">Expires %1$s</string>
+    <string name="filter_delete_message">Posts will no longer be hidden or marked by this filter.</string>
+    <string name="filter_options">Filter options</string>
+    <string name="filter_keyword_remove">Remove keyword %1$s</string>
+    <string name="filter_action_warn_description">Matching posts are collapsed with a warning that names the filter.</string>
+    <string name="filter_action_hide_description">Matching posts are not shown at all.</string>
 </resources>

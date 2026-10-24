@@ -146,11 +146,11 @@ sealed class TootsieDestinations(val route: String) {
     data object FollowRequests : TootsieDestinations("follow_requests")
 
     /**
-     * Filter Detail screen - view and edit a single filter.
-     * Requires filterId parameter.
+     * Filter editor - create a filter (without filterId) or edit one.
      */
-    data object FilterDetail : TootsieDestinations("filters/{filterId}") {
-        fun createRoute(filterId: String): String = "filters/$filterId"
+    data object FilterEdit : TootsieDestinations("filters/edit?filterId={filterId}") {
+        fun createRoute(filterId: String?): String =
+            if (filterId == null) "filters/edit" else "filters/edit?filterId=$filterId"
         const val ARG_FILTER_ID = "filterId"
     }
 

@@ -489,7 +489,6 @@
     <string name="empty_conversations">Noch keine Direktnachrichten.</string>
     <string name="cd_delete_conversation">Unterhaltung löschen</string>
     <string name="refresh">Aktualisieren</string>
-    <string name="filter_detail_title">Filterdetails</string>
     <string name="add">Hinzufügen</string>
 
     <!-- Announcements -->
@@ -617,4 +616,13 @@
         <item quantity="one">%1$s Beitrag in den letzten 7 Tagen</item>
         <item quantity="other">%1$s Beiträge in den letzten 7 Tagen</item>
     </plurals>
+
+    <!-- Filters (#222) -->
+    <string name="filter_expiration_keep">Beibehalten (%1$s)</string>
+    <string name="filter_expires_at">Läuft ab %1$s</string>
+    <string name="filter_delete_message">Beiträge werden von diesem Filter nicht mehr ausgeblendet oder markiert.</string>
+    <string name="filter_options">Filteroptionen</string>
+    <string name="filter_keyword_remove">Schlüsselwort %1$s entfernen</string>
+    <string name="filter_action_warn_description">Passende Beiträge werden eingeklappt und mit einem Hinweis auf den Filter angezeigt.</string>
+    <string name="filter_action_hide_description">Passende Beiträge werden gar nicht angezeigt.</string>
 </resources>
