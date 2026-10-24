@@ -1,0 +1,432 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "f80aa7a27eb1b2b85d7a06ce759dbc26",
+    "entities": [
+      {
+        "tableName": "accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `username` TEXT NOT NULL, `acct` TEXT NOT NULL, `displayName` TEXT NOT NULL, `note` TEXT NOT NULL, `url` TEXT NOT NULL, `avatar` TEXT NOT NULL, `header` TEXT NOT NULL, `locked` INTEGER NOT NULL, `followersCount` INTEGER NOT NULL, `followingCount` INTEGER NOT NULL, `statusesCount` INTEGER NOT NULL, `createdAt` TEXT NOT NULL, `bot` INTEGER NOT NULL, `accessToken` TEXT, `instanceUrl` TEXT, `isActive` INTEGER NOT NULL, `lastSyncedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acct",
+            "columnName": "acct",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatar",
+            "columnName": "avatar",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "header",
+            "columnName": "header",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "locked",
+            "columnName": "locked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "followersCount",
+            "columnName": "followersCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "followingCount",
+            "columnName": "followingCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusesCount",
+            "columnName": "statusesCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bot",
+            "columnName": "bot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accessToken",
+            "columnName": "accessToken",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "instanceUrl",
+            "columnName": "instanceUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncedAt",
+            "columnName": "lastSyncedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "statuses",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `accountId` TEXT NOT NULL, `uri` TEXT NOT NULL, `url` TEXT, `content` TEXT NOT NULL, `createdAt` TEXT NOT NULL, `editedAt` TEXT, `visibility` TEXT NOT NULL, `sensitive` INTEGER NOT NULL, `spoilerText` TEXT NOT NULL, `reblogsCount` INTEGER NOT NULL, `favouritesCount` INTEGER NOT NULL, `repliesCount` INTEGER NOT NULL, `inReplyToId` TEXT, `inReplyToAccountId` TEXT, `reblogged` INTEGER NOT NULL, `favourited` INTEGER NOT NULL, `bookmarked` INTEGER NOT NULL, `pinned` INTEGER NOT NULL, `language` TEXT, `accountJson` TEXT NOT NULL, `mediaAttachmentsJson` TEXT, `mentionsJson` TEXT, `tagsJson` TEXT, `emojisJson` TEXT, `pollJson` TEXT, `reblogJson` TEXT, `cardJson` TEXT, `timelineType` TEXT, `ownerAccountId` TEXT, `lastSyncedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uri",
+            "columnName": "uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "editedAt",
+            "columnName": "editedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visibility",
+            "columnName": "visibility",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sensitive",
+            "columnName": "sensitive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spoilerText",
+            "columnName": "spoilerText",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reblogsCount",
+            "columnName": "reblogsCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favouritesCount",
+            "columnName": "favouritesCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repliesCount",
+            "columnName": "repliesCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inReplyToId",
+            "columnName": "inReplyToId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "inReplyToAccountId",
+            "columnName": "inReplyToAccountId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reblogged",
+            "columnName": "reblogged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favourited",
+            "columnName": "favourited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookmarked",
+            "columnName": "bookmarked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pinned",
+            "columnName": "pinned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "accountJson",
+            "columnName": "accountJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaAttachmentsJson",
+            "columnName": "mediaAttachmentsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mentionsJson",
+            "columnName": "mentionsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tagsJson",
+            "columnName": "tagsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emojisJson",
+            "columnName": "emojisJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pollJson",
+            "columnName": "pollJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reblogJson",
+            "columnName": "reblogJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cardJson",
+            "columnName": "cardJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timelineType",
+            "columnName": "timelineType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ownerAccountId",
+            "columnName": "ownerAccountId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSyncedAt",
+            "columnName": "lastSyncedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "timeline_remote_keys",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statusId` TEXT NOT NULL, `timelineType` TEXT NOT NULL, `ownerAccountId` TEXT NOT NULL, `prevKey` TEXT, `nextKey` TEXT, `lastRefreshed` INTEGER NOT NULL, PRIMARY KEY(`statusId`, `timelineType`, `ownerAccountId`))",
+        "fields": [
+          {
+            "fieldPath": "statusId",
+            "columnName": "statusId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timelineType",
+            "columnName": "timelineType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerAccountId",
+            "columnName": "ownerAccountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prevKey",
+            "columnName": "prevKey",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nextKey",
+            "columnName": "nextKey",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastRefreshed",
+            "columnName": "lastRefreshed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "statusId",
+            "timelineType",
+            "ownerAccountId"
+          ]
+        }
+      },
+      {
+        "tableName": "drafts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `accountId` TEXT NOT NULL, `content` TEXT NOT NULL, `mediaIds` TEXT, `visibility` TEXT NOT NULL, `sensitive` INTEGER NOT NULL, `spoilerText` TEXT, `inReplyToId` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaIds",
+            "columnName": "mediaIds",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visibility",
+            "columnName": "visibility",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sensitive",
+            "columnName": "sensitive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spoilerText",
+            "columnName": "spoilerText",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "inReplyToId",
+            "columnName": "inReplyToId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f80aa7a27eb1b2b85d7a06ce759dbc26')"
+    ]
+  }
+}

@@ -184,5 +184,11 @@ abstract class TootsieDatabase : RoomDatabase() {
                 """.trimIndent())
             }
         }
+
+        /**
+         * All manual migrations, in order. Schema version 1 was never released and is
+         * handled by a destructive fallback instead (see DatabaseModule).
+         */
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
     }
 }
