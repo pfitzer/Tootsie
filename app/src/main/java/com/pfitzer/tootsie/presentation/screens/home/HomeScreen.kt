@@ -449,11 +449,7 @@ fun HomeScreen(
                     onVideoClick = onNavigateToVideoPlayer,
                     onVoteClick = { pollId, choices ->
                         viewModel.onAction(HomeAction.VoteOnPoll(pollId, choices))
-                    },
-                    onRefresh = {
-                        viewModel.onAction(HomeAction.RefreshTimeline)
-                    },
-                    isRefreshing = uiState.isRefreshing
+                    }
                 )
 
                 // Error message
@@ -492,8 +488,6 @@ private fun TimelineList(
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
     onVoteClick: (String, List<Int>) -> Unit,
-    onRefresh: () -> Unit,
-    isRefreshing: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -509,10 +503,8 @@ private fun TimelineList(
 
     PullToRefreshBox(
         isRefreshing = isActuallyRefreshing,
-        onRefresh = {
-            onRefresh()
-            timelinePagingItems.refresh()
-        },
+        // Reloads the newest posts via the RemoteMediator
+        onRefresh = { timelinePagingItems.refresh() },
         modifier = modifier.fillMaxSize()
     ) {
         LazyColumn(

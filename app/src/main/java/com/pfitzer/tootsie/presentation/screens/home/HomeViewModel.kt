@@ -18,7 +18,6 @@ import com.pfitzer.tootsie.domain.usecase.filter.GetFiltersForContextUseCase
 import com.pfitzer.tootsie.domain.usecase.report.ReportUseCase
 import com.pfitzer.tootsie.domain.usecase.status.*
 import com.pfitzer.tootsie.domain.usecase.timeline.GetTimelineUseCase
-import com.pfitzer.tootsie.domain.usecase.timeline.RefreshTimelineUseCase
 import com.pfitzer.tootsie.domain.usecase.timeline.UpdateTimelineFilterUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +37,6 @@ import com.pfitzer.tootsie.presentation.util.applyInteractions
 class HomeViewModel @Inject constructor(
     private val statusInteractionStore: StatusInteractionStore,
     private val getTimelineUseCase: GetTimelineUseCase,
-    private val refreshTimelineUseCase: RefreshTimelineUseCase,
     private val updateTimelineFilterUseCase: UpdateTimelineFilterUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val getFiltersForContextUseCase: GetFiltersForContextUseCase,
@@ -129,7 +127,6 @@ class HomeViewModel @Inject constructor(
             is HomeAction.UnboostStatus -> unboostStatus(action.status)
             is HomeAction.BookmarkStatus -> bookmarkStatus(action.status)
             is HomeAction.UnbookmarkStatus -> unbookmarkStatus(action.status)
-            is HomeAction.RefreshTimeline -> refreshTimeline()
             is HomeAction.DismissError -> dismissError()
             is HomeAction.DismissSuccess -> dismissSuccess()
             is HomeAction.UpdateFilter -> updateFilter(action.filter)
@@ -275,20 +272,6 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Refresh the timeline.
-     */
-    private fun refreshTimeline() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isRefreshing = true) }
-            try {
-                refreshTimelineUseCase(_activeTimelineType.value)
-            } finally {
-                _uiState.update { it.copy(isRefreshing = false) }
-            }
-        }
-    }
-
-    /**
      * Change active timeline type.
      */
     private fun changeTimelineType(timelineType: TimelineType) {
@@ -346,7 +329,6 @@ class HomeViewModel @Inject constructor(
  * UI state for Home Screen.
  */
 data class HomeUiState(
-    val isRefreshing: Boolean = false,
     val errorMessage: UiText? = null,
     val successMessage: UiText? = null
 )
@@ -361,7 +343,6 @@ sealed class HomeAction {
     data class UnboostStatus(val status: Status) : HomeAction()
     data class BookmarkStatus(val status: Status) : HomeAction()
     data class UnbookmarkStatus(val status: Status) : HomeAction()
-    data object RefreshTimeline : HomeAction()
     data object DismissError : HomeAction()
     data object DismissSuccess : HomeAction()
     data class UpdateFilter(val filter: TimelineFilter) : HomeAction()

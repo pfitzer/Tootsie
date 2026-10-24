@@ -8,7 +8,7 @@ Tootsie is a modern, high-performance, and privacy-respecting Mastodon client fo
 
 - **Multi-Account Support**: Seamlessly switch between multiple Mastodon accounts without app reloads.
 - **Modern UI**: Fully built with Jetpack Compose and Material Design 3, with adjustable text size.
-- **Offline Cache**: Timelines are cached in a Room database and shown when the network is unavailable.
+- **Offline-First Timelines**: Home, local and federated timelines are loaded into a Room database (Paging `RemoteMediator`) and stay fully scrollable without a network connection.
 - **Privacy First**:
     - **UnifiedPush** notifications, no Firebase/FCM required. Payloads are decrypted on the device (RFC 8291 Web Push encryption); a WorkManager polling fallback covers all accounts when no distributor is available.
     - Access tokens are encrypted at rest with a non-exportable Android Keystore key (AES-GCM), in DataStore and in the Room database.
@@ -127,7 +127,6 @@ When contributing to Tootsie, please adhere to these architectural guardrails (d
 
 Planned features and known issues are tracked in [GitHub Issues](https://github.com/pfitzer/Tootsie/issues), for example:
 
-- Offline-first timelines with Paging `RemoteMediator` ([#149](https://github.com/pfitzer/Tootsie/issues/149))
 - Accessibility audit ([#2](https://github.com/pfitzer/Tootsie/issues/2))
 - Performance: avoid re-parsing post HTML during scrolling ([#190](https://github.com/pfitzer/Tootsie/issues/190))
 
