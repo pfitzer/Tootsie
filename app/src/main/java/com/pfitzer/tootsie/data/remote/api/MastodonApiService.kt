@@ -722,11 +722,12 @@ interface MastodonApiService {
      * @param id List ID
      * @param accountIds Array of account IDs to remove
      */
-    @FormUrlEncoded
+    // Query parameters instead of a form body: Retrofit rejects @FormUrlEncoded on DELETE,
+    // and Mastodon reads account_ids[] from the query string as well
     @DELETE("api/v1/lists/{id}/accounts")
     suspend fun removeAccountsFromList(
         @Path("id") id: String,
-        @Field("account_ids[]") accountIds: List<String>
+        @Query("account_ids[]") accountIds: List<String>
     )
 
     /**
