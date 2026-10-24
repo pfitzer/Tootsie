@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.activity)
     debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 
     // Navigation
     implementation(libs.navigation.compose)

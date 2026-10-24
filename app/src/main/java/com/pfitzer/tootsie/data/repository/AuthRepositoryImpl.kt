@@ -16,11 +16,13 @@ import com.pfitzer.tootsie.domain.model.AccessToken
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
 import com.pfitzer.tootsie.domain.repository.AuthRepository
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,15 +42,36 @@ class AuthRepositoryImpl @Inject constructor(
     private val instanceUrlProvider: InstanceUrlProvider,
     private val tokenProvider: TokenProvider,
     private val credentialCipher: CredentialCipher,
-    private val credentialMigration: CredentialMigration
+    private val credentialMigration: CredentialMigration,
+    private val statusInteractionStore: StatusInteractionStore
 ) : AuthRepository {
+
+    private val initMutex = Mutex()
+
+    @Volatile
+    private var providersInitialized = false
+
+    /**
+     * Initialize the providers once per process. Safe to call from every entry point
+     * (splash screen, WorkManager workers, push callbacks), which may start a cold process
+     * without the UI. Later changes (login, account switch) update the providers directly.
+     */
+    suspend fun ensureInitialized() {
+        if (providersInitialized) return
+        initMutex.withLock {
+            if (providersInitialized) return
+            withContext(Dispatchers.IO) { initializeProviders() }
+            providersInitialized = true
+        }
+    }
 
     /**
      * Initialize providers with stored credentials.
      * Must be called before making any API requests that require authentication.
      * This is separated from init block to avoid blocking during dependency injection.
+     * Use [ensureInitialized] instead of calling this directly.
      */
-    suspend fun initializeProviders() {
+    private suspend fun initializeProviders() {
         credentialMigration.migrate()
 
         if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Loading stored values from DataStore...")
@@ -201,6 +224,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             // Clear token from provider
             tokenProvider.clearToken()
+            statusInteractionStore.clear()
             if (BuildConfig.DEBUG) Log.d(TAG, "Token cleared from provider")
 
             // Delete account from database if exists

@@ -23,6 +23,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.domain.model.withInteractions
+import androidx.paging.map
+import kotlinx.coroutines.flow.combine
 
 /**
  * ViewModel for Notifications Screen.
@@ -30,6 +34,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val getNotificationsUseCase: GetNotificationsUseCase,
     private val dismissNotificationUseCase: DismissNotificationUseCase,
     private val clearAllNotificationsUseCase: ClearAllNotificationsUseCase,
@@ -56,7 +61,12 @@ class NotificationsViewModel @Inject constructor(
         )
 
     private val _notificationsPagingData = MutableStateFlow<PagingData<Notification>>(PagingData.empty())
-    val notificationsPagingData: Flow<PagingData<Notification>> = _notificationsPagingData.asStateFlow()
+    val notificationsPagingData: Flow<PagingData<Notification>> =
+        combine(_notificationsPagingData, statusInteractionStore.interactions) { pagingData, interactions ->
+            pagingData.map { notification ->
+                notification.copy(status = notification.status?.withInteractions(interactions))
+            }
+        }
 
     private var notificationsJob: Job? = null
 

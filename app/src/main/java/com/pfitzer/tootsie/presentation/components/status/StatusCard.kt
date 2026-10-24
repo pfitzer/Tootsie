@@ -9,8 +9,10 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -72,6 +74,11 @@ fun StatusCard(
     // Track if user has clicked to show filtered content
     var showFilteredContent by remember { mutableStateOf(false) }
 
+    // Content behind a content warning stays hidden until expanded
+    val hasContentWarning = displayStatus.spoilerText.isNotBlank()
+    var showContentBehindWarning by rememberSaveable(displayStatus.id) { mutableStateOf(false) }
+    val showBody = !hasContentWarning || showContentBehindWarning
+
     // Check if status is filtered with WARN action
     val isFiltered = status.filteredByKeyword != null && !showFilteredContent
 
@@ -115,29 +122,31 @@ fun StatusCard(
                 )
 
                 // Content warning
-                if (displayStatus.spoilerText.isNotBlank()) {
+                if (hasContentWarning) {
                     ContentWarning(
                         text = displayStatus.spoilerText,
+                        expanded = showContentBehindWarning,
+                        onToggle = { showContentBehindWarning = !showContentBehindWarning },
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
 
                 // Status content
-                StatusContent(
-                    content = displayStatus.content,
-                    mentions = displayStatus.mentions,
-                    tags = displayStatus.tags,
-                    sensitive = displayStatus.sensitive,
-                    spoilerText = displayStatus.spoilerText,
-                    onMentionClick = onMentionClick,
-                    onHashtagClick = onHashtagClick,
-                    onLinkClick = onLinkClick,
-                    onStatusClick = { onStatusClick(displayStatus.id) },
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
+                if (showBody) {
+                    StatusContent(
+                        content = displayStatus.content,
+                        mentions = displayStatus.mentions,
+                        tags = displayStatus.tags,
+                        onMentionClick = onMentionClick,
+                        onHashtagClick = onHashtagClick,
+                        onLinkClick = onLinkClick,
+                        onStatusClick = { onStatusClick(displayStatus.id) },
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
 
                 // Media attachments
-                if (displayStatus.mediaAttachments.isNotEmpty()) {
+                if (showBody && displayStatus.mediaAttachments.isNotEmpty()) {
                     MediaAttachmentGrid(
                         attachments = displayStatus.mediaAttachments,
                         sensitive = displayStatus.sensitive,
@@ -148,7 +157,7 @@ fun StatusCard(
                 }
 
                 // Poll
-                displayStatus.poll?.let { poll ->
+                displayStatus.poll?.takeIf { showBody }?.let { poll ->
                     PollComponent(
                         poll = poll,
                         onVoteClick = onVoteClick,
@@ -265,8 +274,10 @@ private fun StatusHeader(
  * Displays content warning text.
  */
 @Composable
-private fun ContentWarning(
+internal fun ContentWarning(
     text: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -274,12 +285,27 @@ private fun ContentWarning(
         color = MaterialTheme.colorScheme.errorContainer,
         shape = MaterialTheme.shapes.small
     ) {
-        Text(
-            text = stringResource(R.string.status_content_warning, text),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onErrorContainer,
-            modifier = Modifier.padding(8.dp)
-        )
+        Row(
+            modifier = Modifier.padding(start = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.status_content_warning, text),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 8.dp)
+            )
+            TextButton(onClick = onToggle) {
+                Text(
+                    text = stringResource(
+                        if (expanded) R.string.status_show_less else R.string.status_show_more
+                    ),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
     }
 }
 
@@ -291,8 +317,6 @@ private fun StatusContent(
     content: String,
     mentions: List<com.pfitzer.tootsie.domain.model.Mention>,
     tags: List<com.pfitzer.tootsie.domain.model.Tag>,
-    sensitive: Boolean,
-    spoilerText: String,
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
@@ -326,11 +350,33 @@ private fun MediaAttachmentGrid(
 ) {
     if (attachments.isEmpty()) return
 
-    when (attachments.size) {
-        1 -> SingleMediaAttachment(attachments[0], onImageClick, onVideoClick, modifier)
-        2 -> TwoMediaGrid(attachments, onImageClick, onVideoClick, modifier)
-        3 -> ThreeMediaGrid(attachments, onImageClick, onVideoClick, modifier)
-        else -> FourPlusMediaGrid(attachments, onImageClick, onVideoClick, modifier)
+    // Sensitive media is blurred until the user reveals it
+    var revealed by rememberSaveable(attachments.first().id) { mutableStateOf(!sensitive) }
+
+    Box(modifier = modifier) {
+        val gridModifier = if (revealed) Modifier else Modifier.blur(32.dp)
+        when (attachments.size) {
+            1 -> SingleMediaAttachment(attachments[0], onImageClick, onVideoClick, gridModifier)
+            2 -> TwoMediaGrid(attachments, onImageClick, onVideoClick, gridModifier)
+            3 -> ThreeMediaGrid(attachments, onImageClick, onVideoClick, gridModifier)
+            else -> FourPlusMediaGrid(attachments, onImageClick, onVideoClick, gridModifier)
+        }
+        if (!revealed) {
+            // Covers the grid and consumes clicks so media can't be opened while hidden
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                    .clickable { revealed = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.media_sensitive_tap_to_show),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.domain.model.PushStatus
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.push.NotificationHelper
@@ -21,6 +22,7 @@ import com.pfitzer.tootsie.util.Result as DomainResult
 class NotificationPollWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
+    private val authRepository: AuthRepositoryImpl,
     private val accountDao: AccountDao,
     private val notificationRepository: NotificationRepository,
     private val preferencesManager: PreferencesManager,
@@ -28,6 +30,10 @@ class NotificationPollWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): androidx.work.ListenableWorker.Result {
+        // The worker may run in a cold process where the splash screen never ran the
+        // credential migration
+        authRepository.ensureInitialized()
+
         // Poll every logged-in account that wants notifications but has no working push.
         // Each request uses that account's own credentials, not the active account's.
         val accountIds = accountDao.getAllLoggedInAccounts()

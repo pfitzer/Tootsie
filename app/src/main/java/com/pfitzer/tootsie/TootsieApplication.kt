@@ -3,6 +3,7 @@ package com.pfitzer.tootsie
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.domain.model.PushStatus
 import com.pfitzer.tootsie.domain.repository.PushRepository
 import com.pfitzer.tootsie.push.NotificationHelper
@@ -24,6 +25,7 @@ import javax.inject.Inject
 @HiltAndroidApp
 class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Provider {
 
+    @Inject lateinit var authRepository: AuthRepositoryImpl
     @Inject lateinit var pushRepository: PushRepository
     @Inject lateinit var pushDecryptor: PushDecryptor
     @Inject lateinit var notificationHelper: NotificationHelper
@@ -43,6 +45,9 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
      */
     override fun handleNewEndpoint(endpoint: String, accountId: String) {
         applicationScope.launch {
+            // Push callbacks may start a cold process without the splash screen
+            authRepository.ensureInitialized()
+
             // Get saved config with VAPID keys
             val configResult = pushRepository.getPushConfig(accountId)
             if (configResult is Result.Success) {
@@ -133,6 +138,8 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
      */
     override fun handleUnregistered(accountId: String) {
         applicationScope.launch {
+            authRepository.ensureInitialized()
+
             // Clean up subscription
             pushRepository.unsubscribeFromPush(accountId)
             pushRepository.deletePushConfig(accountId)

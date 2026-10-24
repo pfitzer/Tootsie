@@ -58,6 +58,25 @@ interface StatusDao {
     /**
      * Get statuses for a specific timeline and owner account as Flow.
      */
+    /**
+     * Update only the interaction columns of a cached status.
+     * Keeps ownerAccountId and timelineType intact, unlike replacing the whole row.
+     */
+    @Query(
+        "UPDATE statuses SET favourited = :favourited, favouritesCount = :favouritesCount, " +
+            "reblogged = :reblogged, reblogsCount = :reblogsCount, bookmarked = :bookmarked, " +
+            "pinned = :pinned WHERE id = :statusId"
+    )
+    suspend fun updateInteractionState(
+        statusId: String,
+        favourited: Boolean,
+        favouritesCount: Int,
+        reblogged: Boolean,
+        reblogsCount: Int,
+        bookmarked: Boolean,
+        pinned: Boolean
+    )
+
     @Query("SELECT * FROM statuses WHERE timelineType = :timelineType AND ownerAccountId = :ownerAccountId ORDER BY createdAt DESC LIMIT :limit")
     fun getStatusesFlow(timelineType: String, ownerAccountId: String, limit: Int = 20): Flow<List<StatusEntity>>
 
