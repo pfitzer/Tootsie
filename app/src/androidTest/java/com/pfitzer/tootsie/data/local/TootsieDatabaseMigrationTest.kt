@@ -112,6 +112,23 @@ class TootsieDatabaseMigrationTest {
     }
 
     @Test
+    fun migrate5To6_recreatesStatusCacheAndDropsRemoteKeys() {
+        helper.createDatabase(TEST_DB, 5).use { db ->
+            insertAccount(db, "acc-1", isActive = true)
+            insertStatus(db, "old", ownerAccountId = "acc-1", schemaVersion = 5)
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 6, true, TootsieDatabase.MIGRATION_5_6).use { db ->
+            // Only the timeline cache is cleared
+            assertEquals(0, count(db, "statuses"))
+            assertEquals(1, count(db, "accounts"))
+            db.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'timeline_remote_keys'").use {
+                assertEquals(0, it.count)
+            }
+        }
+    }
+
+    @Test
     fun migrateAll_opensWithCurrentSchema() {
         helper.createDatabase(TEST_DB, 2).use { db ->
             insertAccount(db, "acc-active", isActive = true)

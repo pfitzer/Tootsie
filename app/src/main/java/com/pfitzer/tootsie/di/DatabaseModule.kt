@@ -7,7 +7,6 @@ import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.DraftDao
 import com.pfitzer.tootsie.data.local.dao.FilterDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
-import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,15 +56,6 @@ object DatabaseModule {
     @Singleton
     fun provideStatusDao(database: TootsieDatabase): StatusDao {
         return database.statusDao()
-    }
-
-    /**
-     * Provides TimelineRemoteKeysDao from the database.
-     */
-    @Provides
-    @Singleton
-    fun provideTimelineRemoteKeysDao(database: TootsieDatabase): TimelineRemoteKeysDao {
-        return database.timelineRemoteKeysDao()
     }
 
     /**

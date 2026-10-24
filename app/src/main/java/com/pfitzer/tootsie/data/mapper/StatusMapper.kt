@@ -67,102 +67,45 @@ private val QUOTE_INLINE = Regex("""<p class="quote-inline">.*?</p>""", RegexOpt
 internal fun String.withoutQuoteInline(): String = QUOTE_INLINE.replace(this, "")
 
 /**
- * Maps StatusDto to StatusEntity for caching.
+ * Maps StatusDto to StatusEntity for the timeline cache.
  */
 fun StatusDto.toEntity(
-    timelineType: String? = null,
-    ownerAccountId: String? = null
+    timelineType: String,
+    ownerAccountId: String
 ): StatusEntity {
+    // Interaction state belongs to the status that is shown, i.e. the boosted one
+    val content = reblog ?: this
     return StatusEntity(
         id = id,
-        accountId = account.id,
-        uri = uri,
-        url = url,
-        content = content,
-        createdAt = createdAt,
-        editedAt = editedAt,
-        visibility = visibility,
-        sensitive = sensitive,
-        spoilerText = spoilerText,
-        reblogsCount = reblogsCount,
-        favouritesCount = favouritesCount,
-        repliesCount = repliesCount,
-        inReplyToId = inReplyToId,
-        inReplyToAccountId = inReplyToAccountId,
-        reblogged = reblogged,
-        favourited = favourited,
-        bookmarked = bookmarked,
-        pinned = pinned,
-        language = language,
-        accountJson = json.encodeToString(account),
-        mediaAttachmentsJson = if (mediaAttachments.isNotEmpty()) json.encodeToString(mediaAttachments) else null,
-        mentionsJson = if (mentions.isNotEmpty()) json.encodeToString(mentions) else null,
-        tagsJson = if (tags.isNotEmpty()) json.encodeToString(tags) else null,
-        emojisJson = if (emojis.isNotEmpty()) json.encodeToString(emojis) else null,
-        pollJson = poll?.let { json.encodeToString(it) },
-        reblogJson = reblog?.let { json.encodeToString(it) },
-        cardJson = card?.let { json.encodeToString(it) },
         timelineType = timelineType,
-        ownerAccountId = ownerAccountId
+        ownerAccountId = ownerAccountId,
+        contentId = content.id,
+        statusJson = json.encodeToString(this),
+        favourited = content.favourited,
+        favouritesCount = content.favouritesCount,
+        reblogged = content.reblogged,
+        reblogsCount = content.reblogsCount,
+        bookmarked = content.bookmarked,
+        pinned = content.pinned
     )
 }
 
 /**
  * Maps StatusEntity (database) to Status (domain).
+ * The interaction columns override the stored JSON, since they are updated in place.
  */
 fun StatusEntity.toDomain(): Status {
-    val accountDto = json.decodeFromString<AccountDto>(accountJson)
-    val mediaAttachmentsList = mediaAttachmentsJson?.let {
-        json.decodeFromString<List<MediaAttachmentDto>>(it)
-    } ?: emptyList()
-    val mentionsList = mentionsJson?.let {
-        json.decodeFromString<List<MentionDto>>(it)
-    } ?: emptyList()
-    val tagsList = tagsJson?.let {
-        json.decodeFromString<List<TagDto>>(it)
-    } ?: emptyList()
-    val emojisList = emojisJson?.let {
-        json.decodeFromString<List<CustomEmojiDto>>(it)
-    } ?: emptyList()
-    val pollData = pollJson?.let {
-        json.decodeFromString<PollDto>(it)
-    }
-    val reblogData = reblogJson?.let {
-        json.decodeFromString<StatusDto>(it)
-    }
-    val cardData = cardJson?.let {
-        json.decodeFromString<CardDto>(it)
-    }
-
-    return Status(
-        id = id,
-        uri = uri,
-        url = url,
-        account = accountDto.toDomain(),
-        content = content,
-        createdAt = createdAt,
-        editedAt = editedAt,
-        visibility = visibility.toVisibilityEnum(),
-        sensitive = sensitive,
-        spoilerText = spoilerText,
-        mediaAttachments = mediaAttachmentsList.map { it.toDomain() },
-        mentions = mentionsList.map { it.toDomain() },
-        tags = tagsList.map { it.toDomain() },
-        emojis = emojisList.map { it.toDomain() },
-        reblogsCount = reblogsCount,
-        favouritesCount = favouritesCount,
-        repliesCount = repliesCount,
-        poll = pollData?.toDomain(),
-        reblog = reblogData?.toDomain(),
-        inReplyToId = inReplyToId,
-        inReplyToAccountId = inReplyToAccountId,
-        reblogged = reblogged,
+    val status = json.decodeFromString<StatusDto>(statusJson).toDomain()
+    val content = status.reblog ?: status
+    val updatedContent = content.copy(
         favourited = favourited,
+        favouritesCount = favouritesCount,
+        reblogged = reblogged,
+        reblogsCount = reblogsCount,
         bookmarked = bookmarked,
-        pinned = pinned,
-        card = cardData?.toDomain(),
-        language = language
+        pinned = pinned
     )
+    return if (status.reblog != null) status.copy(reblog = updatedContent) else updatedContent
 }
 
 // Helper mappers for nested types

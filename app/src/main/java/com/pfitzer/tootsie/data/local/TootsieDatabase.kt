@@ -8,12 +8,10 @@ import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.dao.DraftDao
 import com.pfitzer.tootsie.data.local.dao.FilterDao
 import com.pfitzer.tootsie.data.local.dao.StatusDao
-import com.pfitzer.tootsie.data.local.dao.TimelineRemoteKeysDao
 import com.pfitzer.tootsie.data.local.entities.AccountEntity
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.data.local.entities.FilterEntity
 import com.pfitzer.tootsie.data.local.entities.StatusEntity
-import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
 
 /**
  * Room database for the Tootsie app.
@@ -23,11 +21,10 @@ import com.pfitzer.tootsie.data.local.entities.TimelineRemoteKeys
     entities = [
         AccountEntity::class,
         StatusEntity::class,
-        TimelineRemoteKeys::class,
         DraftEntity::class,
         FilterEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class TootsieDatabase : RoomDatabase() {
@@ -41,11 +38,6 @@ abstract class TootsieDatabase : RoomDatabase() {
      * Provides access to Status operations.
      */
     abstract fun statusDao(): StatusDao
-
-    /**
-     * Provides access to Timeline Remote Keys operations.
-     */
-    abstract fun timelineRemoteKeysDao(): TimelineRemoteKeysDao
 
     /**
      * Provides access to Draft operations.
@@ -186,9 +178,38 @@ abstract class TootsieDatabase : RoomDatabase() {
         }
 
         /**
+         * Migration from database version 5 to 6.
+         * The statuses table becomes the single source of truth for timelines
+         * (RemoteMediator): one row per status, timeline and owner account, with the full
+         * status as JSON. The table only holds a cache, so it is recreated instead of
+         * converted; the unused timeline_remote_keys table is dropped.
+         */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS statuses")
+                db.execSQL("DROP TABLE IF EXISTS timeline_remote_keys")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `statuses` (" +
+                        "`id` TEXT NOT NULL, `timelineType` TEXT NOT NULL, `ownerAccountId` TEXT NOT NULL, " +
+                        "`contentId` TEXT NOT NULL, `statusJson` TEXT NOT NULL, " +
+                        "`favourited` INTEGER NOT NULL, `favouritesCount` INTEGER NOT NULL, " +
+                        "`reblogged` INTEGER NOT NULL, `reblogsCount` INTEGER NOT NULL, " +
+                        "`bookmarked` INTEGER NOT NULL, `pinned` INTEGER NOT NULL, " +
+                        "`lastSyncedAt` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`id`, `timelineType`, `ownerAccountId`))"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_statuses_ownerAccountId_timelineType` " +
+                        "ON `statuses` (`ownerAccountId`, `timelineType`)"
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_statuses_contentId` ON `statuses` (`contentId`)")
+            }
+        }
+
+        /**
          * All manual migrations, in order. Schema version 1 was never released and is
          * handled by a destructive fallback instead (see DatabaseModule).
          */
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
     }
 }

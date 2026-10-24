@@ -120,7 +120,7 @@ The app follows Clean Architecture principles with three layers:
 - **Repository Pattern**: Abstract data sources behind interfaces
 - **Dependency Injection**: Hilt for compile-time DI
 - **Reactive Streams**: Coroutines + Flow for async operations
-- **Offline-First**: Paging 3 RemoteMediator for cached timelines
+- **Offline-First**: Paging 3 RemoteMediator for cached timelines (`TimelineRemoteMediator`: API → Room, the UI pages through Room; filters are applied to the paged data)
 - **Single Source of Truth**: Room database as canonical data source
 
 ---
@@ -354,7 +354,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 - **Smart Account Removal**: Auto-switches to another account or logs out if removing active account
 - **Reactive UI Updates**: flatMapLatest operator for automatic content updates on account switch
 - **Thread-Safe Provider Pattern**: TokenProvider and InstanceUrlProvider with AtomicReference
-- **Composite Primary Keys**: TimelineRemoteKeys uses (statusId, timelineType, ownerAccountId)
+- **Composite Primary Keys**: cached statuses use (id, timelineType, ownerAccountId), so a status can be in several timelines and accounts; the full status is stored as JSON (`statusJson`)
 
 ### Known Challenges
 1. **HTML Content Rendering**: Mastodon posts contain HTML that must be safely rendered
@@ -578,8 +578,7 @@ app/src/main/java/com/pfitzer/tootsie/
 │   │   │   └── TimelineDao.kt
 │   │   ├── entities/               # Room entities
 │   │   │   ├── AccountEntity.kt
-│   │   │   ├── StatusEntity.kt
-│   │   │   └── TimelineRemoteKeys.kt
+│   │   │   └── StatusEntity.kt
 │   │   ├── datastore/              # Preferences
 │   │   │   └── PreferencesManager.kt
 │   │   └── TootsieDatabase.kt      # Room database
@@ -602,7 +601,7 @@ app/src/main/java/com/pfitzer/tootsie/
 │   ├── mapper/                     # DTO ↔ Domain mappers
 │   │   └── StatusMapper.kt
 │   └── paging/                     # Paging sources
-│       └── TimelinePagingSource.kt
+│       └── TimelineRemoteMediator.kt
 │
 ├── domain/                         # Domain layer (business logic)
 │   ├── model/                      # Domain models

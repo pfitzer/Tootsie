@@ -40,17 +40,6 @@ interface TimelineRepository {
     ): Flow<PagingData<Status>>
 
     /**
-     * Refresh home timeline.
-     * Clears cache and fetches fresh data.
-     */
-    suspend fun refreshHomeTimeline()
-
-    /**
-     * Refresh public timeline.
-     */
-    suspend fun refreshPublicTimeline()
-
-    /**
      * Cleanup old statuses from the local database based on retention period.
      *
      * @param retentionHours Number of hours to keep statuses
