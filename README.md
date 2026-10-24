@@ -1,5 +1,6 @@
 # Tootsie - Mastodon Client for Android
 [![Tests](https://github.com/pfitzer/Tootsie/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/pfitzer/Tootsie/actions/workflows/tests.yml)
+[![Build APK](https://github.com/pfitzer/Tootsie/actions/workflows/build-apk.yml/badge.svg?branch=main)](https://github.com/pfitzer/Tootsie/actions/workflows/build-apk.yml)
 
 Tootsie is a modern, high-performance, and privacy-respecting Mastodon client for Android. Built from the ground up with Jetpack Compose and Kotlin, it follows Clean Architecture principles to provide a smooth experience for the Fediverse.
 
