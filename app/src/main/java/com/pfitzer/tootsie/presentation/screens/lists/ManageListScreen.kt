@@ -151,7 +151,7 @@ fun ManageListScreen(
                     }
                 }
             ) {
-                Text(error)
+                Text(error.asString())
             }
         }
     }

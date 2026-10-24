@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.editprofile
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.ui.text.input.TextFieldValue
@@ -52,7 +54,7 @@ class EditProfileViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Failed to load active account"
+                        errorMessage = UiText.of(R.string.error_load_active_account)
                     )
                 }
             }
@@ -89,7 +91,7 @@ class EditProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isSaving = false,
-                            errorMessage = result.message ?: "Failed to update profile"
+                            errorMessage = UiText.of(R.string.error_update_profile)
                         )
                     }
                 }
@@ -105,7 +107,7 @@ data class EditProfileUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isSuccess: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 sealed class EditProfileAction {

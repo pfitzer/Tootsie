@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.trendinglinks
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.TrendingLink
@@ -57,7 +59,7 @@ class TrendingLinksViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to load trending links",
+                            errorMessage = UiText.of(R.string.error_load_trending_links),
                             isLoading = false
                         )
                     }
@@ -83,7 +85,7 @@ class TrendingLinksViewModel @Inject constructor(
 data class TrendingLinksUiState(
     val trendingLinks: List<TrendingLink> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.settings
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -113,7 +115,7 @@ class SettingsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load accounts", e)
                 _uiState.update {
-                    SettingsUiState.Error("Failed to load accounts: ${e.message}")
+                    SettingsUiState.Error(UiText.of(R.string.error_load_accounts))
                 }
             }
         }
@@ -153,7 +155,7 @@ class SettingsViewModel @Inject constructor(
                     if (it is SettingsUiState.Success) {
                         it.copy(
                             isSwitching = false,
-                            errorMessage = "Failed to switch account: ${e.message}"
+                            errorMessage = UiText.of(R.string.error_switch_account)
                         )
                     } else it
                 }
@@ -217,7 +219,7 @@ class SettingsViewModel @Inject constructor(
                     if (it is SettingsUiState.Success) {
                         it.copy(
                             isRemoving = false,
-                            errorMessage = "Failed to remove account: ${e.message}"
+                            errorMessage = UiText.of(R.string.error_remove_account)
                         )
                     } else it
                 }
@@ -287,13 +289,13 @@ sealed class SettingsUiState {
         val isSwitching: Boolean = false,
         val isRemoving: Boolean = false,
         val accountToRemove: String? = null,
-        val errorMessage: String? = null,
+        val errorMessage: UiText? = null,
         val theme: String = "system",
         val databaseRetentionHours: String = "24",
         val textSize: String = "MEDIUM"
     ) : SettingsUiState()
 
-    data class Error(val message: String) : SettingsUiState()
+    data class Error(val message: UiText) : SettingsUiState()
 
     data object LoggedOut : SettingsUiState()
 }

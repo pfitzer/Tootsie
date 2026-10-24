@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.listtimeline
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -77,7 +79,7 @@ class ListTimelineViewModel @Inject constructor(
                     // Paging is reactive
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_vote)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -95,7 +97,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to favorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_favorite))
                     }
                 }
                 is Result.Loading -> Unit
@@ -114,7 +116,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unfavorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unfavorite))
                     }
                 }
                 is Result.Loading -> Unit
@@ -133,7 +135,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to boost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_boost))
                     }
                 }
                 is Result.Loading -> Unit
@@ -152,7 +154,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unboost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unboost))
                     }
                 }
                 is Result.Loading -> Unit
@@ -171,7 +173,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to bookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_bookmark))
                     }
                 }
                 is Result.Loading -> Unit
@@ -190,7 +192,7 @@ class ListTimelineViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unbookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unbookmark))
                     }
                 }
                 is Result.Loading -> Unit
@@ -210,7 +212,7 @@ class ListTimelineViewModel @Inject constructor(
  * UI state for List Timeline Screen.
  */
 data class ListTimelineUiState(
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

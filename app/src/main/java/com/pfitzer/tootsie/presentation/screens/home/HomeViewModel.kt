@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.home
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -150,7 +152,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to vote on poll")
+                        it.copy(errorMessage = UiText.of(R.string.error_vote))
                     }
                 }
                 is Result.Loading -> Unit
@@ -169,7 +171,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to favorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_favorite))
                     }
                 }
                 is Result.Loading -> Unit
@@ -188,7 +190,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unfavorite post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unfavorite))
                     }
                 }
                 is Result.Loading -> Unit
@@ -207,7 +209,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to boost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_boost))
                     }
                 }
                 is Result.Loading -> Unit
@@ -226,7 +228,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unboost post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unboost))
                     }
                 }
                 is Result.Loading -> Unit
@@ -245,7 +247,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to bookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_bookmark))
                     }
                 }
                 is Result.Loading -> Unit
@@ -264,7 +266,7 @@ class HomeViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to unbookmark post")
+                        it.copy(errorMessage = UiText.of(R.string.error_unbookmark))
                     }
                 }
                 is Result.Loading -> Unit
@@ -306,10 +308,10 @@ class HomeViewModel @Inject constructor(
                 category = category
             )) {
                 is Result.Success -> {
-                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                    _uiState.update { it.copy(successMessage = UiText.of(R.string.success_report)) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_report)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -345,8 +347,8 @@ class HomeViewModel @Inject constructor(
  */
 data class HomeUiState(
     val isRefreshing: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null
+    val errorMessage: UiText? = null,
+    val successMessage: UiText? = null
 )
 
 /**

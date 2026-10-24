@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.drafts
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
@@ -58,7 +60,7 @@ class DraftsViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update {
-                        it.copy(errorMessage = "Failed to delete draft")
+                        it.copy(errorMessage = UiText.of(R.string.error_delete_draft))
                     }
                 }
                 is Result.Loading -> Unit
@@ -81,7 +83,7 @@ class DraftsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isDeletingAll = false,
-                            errorMessage = "Failed to delete all drafts"
+                            errorMessage = UiText.of(R.string.error_delete_all_drafts)
                         )
                     }
                 }
@@ -103,7 +105,7 @@ class DraftsViewModel @Inject constructor(
  */
 data class DraftsUiState(
     val isDeletingAll: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

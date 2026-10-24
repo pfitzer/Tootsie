@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.trendingposts
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Status
@@ -63,7 +65,7 @@ class TrendingPostsViewModel @Inject constructor(
                     loadTrendingPosts()
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_vote)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -89,7 +91,7 @@ class TrendingPostsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to load trending posts",
+                            errorMessage = UiText.of(R.string.error_load_trending_posts),
                             isLoading = false
                         )
                     }
@@ -119,7 +121,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to favorite post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_favorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -143,7 +145,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unfavorite post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unfavorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -167,7 +169,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to boost post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_boost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -191,7 +193,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unboost post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unboost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -215,7 +217,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to bookmark post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_bookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -239,7 +241,7 @@ class TrendingPostsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unbookmark post") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unbookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -260,7 +262,7 @@ class TrendingPostsViewModel @Inject constructor(
 data class TrendingPostsUiState(
     val trendingPosts: List<Status> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

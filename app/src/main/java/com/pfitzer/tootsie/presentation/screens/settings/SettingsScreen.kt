@@ -99,7 +99,7 @@ fun SettingsScreen(
 
                 is SettingsUiState.Error -> {
                     ErrorContent(
-                        message = state.message,
+                        message = state.message.asString(),
                         onRetry = { viewModel.onAction(SettingsAction.Refresh) }
                     )
                 }
@@ -253,7 +253,7 @@ private fun SuccessContent(
         // Error message
         state.errorMessage?.let { errorMessage ->
             ErrorBanner(
-                message = errorMessage,
+                message = errorMessage.asString(),
                 onDismiss = { onAction(SettingsAction.DismissError) }
             )
         }

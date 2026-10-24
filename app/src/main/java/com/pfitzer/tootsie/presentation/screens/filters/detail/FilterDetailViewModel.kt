@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.filters.detail
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -67,7 +69,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_load_filter)
                         )
                     }
                 }
@@ -85,7 +87,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(filter = result.data, isUpdating = false) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_update_filter)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -101,7 +103,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(filter = result.data, isUpdating = false) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_update_filter)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -116,7 +118,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(filter = result.data, isUpdating = false) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_update_filter)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -131,7 +133,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(filter = result.data, isUpdating = false) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_update_filter)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -149,7 +151,7 @@ class FilterDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(isUpdating = false) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_add_keyword)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -172,7 +174,7 @@ class FilterDetailViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isUpdating = false, errorMessage = result.message) }
+                    _uiState.update { it.copy(isUpdating = false, errorMessage = UiText.of(R.string.error_delete_keyword)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -184,7 +186,7 @@ data class FilterDetailUiState(
     val filter: Filter? = null,
     val isLoading: Boolean = false,
     val isUpdating: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 sealed class FilterDetailAction {

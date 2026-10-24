@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.lists
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,7 +60,7 @@ class ManageListViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update { 
-                        it.copy(errorMessage = result.message, isLoadingMembers = false) 
+                        it.copy(errorMessage = UiText.of(R.string.error_load_list_members), isLoadingMembers = false) 
                     }
                 }
                 else -> Unit
@@ -76,7 +78,7 @@ class ManageListViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_remove_list_member)) }
                 }
                 else -> Unit
             }
@@ -103,7 +105,7 @@ class ManageListViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update { 
-                        it.copy(errorMessage = result.message, isSearching = false) 
+                        it.copy(errorMessage = UiText.of(R.string.error_search_accounts), isSearching = false) 
                     }
                 }
                 else -> Unit
@@ -122,7 +124,7 @@ class ManageListViewModel @Inject constructor(
                     _uiState.update { it.copy(searchQuery = "", searchResults = emptyList()) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_add_list_member)) }
                 }
                 else -> Unit
             }
@@ -136,7 +138,7 @@ data class ManageListUiState(
     val searchQuery: String = "",
     val searchResults: List<Account> = emptyList(),
     val isSearching: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 sealed interface ManageListAction {

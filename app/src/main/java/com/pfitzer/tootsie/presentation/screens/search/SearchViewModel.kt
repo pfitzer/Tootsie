@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.search
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Account
@@ -100,7 +102,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to favorite status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_favorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -117,7 +119,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unfavorite status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unfavorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -134,7 +136,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to boost status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_boost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -151,7 +153,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unboost status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unboost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -168,7 +170,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to bookmark status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_bookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -185,7 +187,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unbookmark status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unbookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -202,7 +204,7 @@ class SearchViewModel @Inject constructor(
                     performSearch(_uiState.value.query)
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_vote)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -289,7 +291,7 @@ class SearchViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message
+                            errorMessage = UiText.of(R.string.error_search)
                         )
                     }
                 }
@@ -318,7 +320,7 @@ data class SearchUiState(
     val statuses: List<Status> = emptyList(),
     val hashtags: List<Hashtag> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 ) {
     /**
      * Check if there are any results.

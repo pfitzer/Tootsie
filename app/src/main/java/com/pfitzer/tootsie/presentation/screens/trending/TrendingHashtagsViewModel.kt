@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.trending
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.TrendingTag
@@ -57,7 +59,7 @@ class TrendingHashtagsViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Failed to load trending hashtags",
+                            errorMessage = UiText.of(R.string.error_load_trending_hashtags),
                             isLoading = false
                         )
                     }
@@ -83,7 +85,7 @@ class TrendingHashtagsViewModel @Inject constructor(
 data class TrendingHashtagsUiState(
     val trendingTags: List<TrendingTag> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.blockedaccounts
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -66,7 +68,7 @@ class BlockedAccountsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             processingAccountId = null,
-                            errorMessage = result.message ?: "Failed to unblock account"
+                            errorMessage = UiText.of(R.string.error_unblock_account)
                         )
                     }
                 }
@@ -89,7 +91,7 @@ class BlockedAccountsViewModel @Inject constructor(
 data class BlockedAccountsUiState(
     val processingAccountId: String? = null,
     val unblockedAccountId: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

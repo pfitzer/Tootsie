@@ -146,7 +146,7 @@ fun FiltersScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

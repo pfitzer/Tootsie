@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -145,7 +146,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Failed to load profile: ${accountResult.message}"
+                            errorMessage = UiText.of(R.string.error_load_profile)
                         )
                     }
                 }
@@ -209,7 +210,7 @@ class ProfileViewModel @Inject constructor(
                     // otherwise we might need to manually refresh or update the paging data.
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to favorite status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_favorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -224,7 +225,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = unfavoriteStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unfavorite status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unfavorite)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -239,7 +240,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = reblogStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to boost status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_boost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -254,7 +255,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = unreblogStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unboost status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unboost)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -269,7 +270,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = bookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to bookmark status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_bookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -284,7 +285,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = unbookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unbookmark status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unbookmark)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -299,7 +300,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = pinStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to pin status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_pin)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -314,7 +315,7 @@ class ProfileViewModel @Inject constructor(
             when (val result = unpinStatusUseCase(status.id)) {
                 is Result.Success -> {}
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to unpin status") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_unpin)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -332,7 +333,7 @@ class ProfileViewModel @Inject constructor(
                     loadProfile()
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to vote: ${result.message}") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_vote)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -361,7 +362,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingFollow = false,
-                            errorMessage = "Failed to follow account"
+                            errorMessage = UiText.of(R.string.error_follow_account)
                         )
                     }
                 }
@@ -392,7 +393,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingFollow = false,
-                            errorMessage = "Failed to unfollow account"
+                            errorMessage = UiText.of(R.string.error_unfollow_account)
                         )
                     }
                 }
@@ -423,7 +424,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingMute = false,
-                            errorMessage = "Failed to mute account"
+                            errorMessage = UiText.of(R.string.error_mute_account)
                         )
                     }
                 }
@@ -454,7 +455,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingMute = false,
-                            errorMessage = "Failed to unmute account"
+                            errorMessage = UiText.of(R.string.error_unmute_account)
                         )
                     }
                 }
@@ -485,7 +486,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingBlock = false,
-                            errorMessage = "Failed to block account"
+                            errorMessage = UiText.of(R.string.error_block_account)
                         )
                     }
                 }
@@ -516,7 +517,7 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessingBlock = false,
-                            errorMessage = "Failed to unblock account"
+                            errorMessage = UiText.of(R.string.error_unblock_account)
                         )
                     }
                 }
@@ -533,10 +534,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             when (reportUseCase(currentAccountId, null, comment, forward, category)) {
                 is Result.Success -> {
-                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                    _uiState.update { it.copy(successMessage = UiText.of(R.string.success_report)) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_report)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -550,10 +551,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             when (reportUseCase(status.account.id, listOf(status.id), comment, forward, category)) {
                 is Result.Success -> {
-                    _uiState.update { it.copy(successMessage = "Report submitted") }
+                    _uiState.update { it.copy(successMessage = UiText.of(R.string.success_report)) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = "Failed to submit report") }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_report)) }
                 }
                 is Result.Loading -> Unit
             }
@@ -586,8 +587,8 @@ data class ProfileUiState(
     val isProcessingFollow: Boolean = false,
     val isProcessingMute: Boolean = false,
     val isProcessingBlock: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null
+    val errorMessage: UiText? = null,
+    val successMessage: UiText? = null
 )
 
 /**

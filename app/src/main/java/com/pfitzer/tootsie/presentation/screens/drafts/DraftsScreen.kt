@@ -128,7 +128,7 @@ fun DraftsScreen(
                         }
                     }
                 ) {
-                    Text(error)
+                    Text(error.asString())
                 }
             }
         }

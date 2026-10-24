@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.followrequests
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -62,7 +64,7 @@ class FollowRequestsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             processingAccountId = null,
-                            errorMessage = "Failed to authorize follow request"
+                            errorMessage = UiText.of(R.string.error_authorize_follow_request)
                         )
                     }
                 }
@@ -87,7 +89,7 @@ class FollowRequestsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             processingAccountId = null,
-                            errorMessage = "Failed to reject follow request"
+                            errorMessage = UiText.of(R.string.error_reject_follow_request)
                         )
                     }
                 }
@@ -109,7 +111,7 @@ class FollowRequestsViewModel @Inject constructor(
  */
 data class FollowRequestsUiState(
     val processingAccountId: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 /**

@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.conversations
 
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.domain.model.Conversation
@@ -57,7 +59,7 @@ class ConversationsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message ?: "Failed to load conversations"
+                            errorMessage = UiText.of(R.string.error_load_conversations)
                         )
                     }
                 }
@@ -75,7 +77,7 @@ class ConversationsViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(errorMessage = result.message) }
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_delete_conversation)) }
                 }
                 else -> {}
             }
@@ -105,7 +107,7 @@ class ConversationsViewModel @Inject constructor(
 data class ConversationsUiState(
     val conversations: List<Conversation> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: UiText? = null
 )
 
 sealed class ConversationsAction {
