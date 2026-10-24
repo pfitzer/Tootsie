@@ -53,6 +53,7 @@ class PreferencesManager @Inject constructor(
         private val KEY_LANGUAGE = stringPreferencesKey("language")
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
         private val KEY_TEXT_SIZE = stringPreferencesKey("text_size")
+        private val KEY_FOLLOWED_TAGS_SORT = stringPreferencesKey("followed_tags_sort")
         private val KEY_POST_LANGUAGE = stringPreferencesKey("post_language")
 
         // Queries are single-line, so a line break can separate them
@@ -301,6 +302,20 @@ class PreferencesManager @Inject constructor(
     }
 
     private fun recentSearchesKey(accountId: String) = stringPreferencesKey("recent_searches_$accountId")
+
+    // ========== Followed Tags ==========
+
+    /**
+     * Sort order of the followed tags (name of a FollowedTagSort), null if never chosen.
+     */
+    suspend fun getFollowedTagsSort(): String? =
+        dataStore.data.map { preferences -> preferences[KEY_FOLLOWED_TAGS_SORT] }.first()
+
+    suspend fun saveFollowedTagsSort(sort: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_FOLLOWED_TAGS_SORT] = sort
+        }
+    }
 
     // ========== Display Settings ==========
 

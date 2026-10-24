@@ -624,4 +624,10 @@
     <string name="filter_keyword_remove">Remove keyword %1$s</string>
     <string name="filter_action_warn_description">Matching posts are collapsed with a warning that names the filter.</string>
     <string name="filter_action_hide_description">Matching posts are not shown at all.</string>
+
+    <!-- Followed tags (#223) -->
+    <string name="followed_tags_sort">Sort</string>
+    <string name="followed_tags_sort_alphabetical">Alphabetical</string>
+    <string name="followed_tags_sort_activity">Most active (7 days)</string>
+    <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 </resources>

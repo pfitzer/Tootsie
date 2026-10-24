@@ -4,7 +4,9 @@ import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.FollowedTag
+import com.pfitzer.tootsie.domain.model.FollowedTagSort
 import com.pfitzer.tootsie.domain.usecase.followedtags.FollowTagUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.GetFollowedTagsUseCase
 import com.pfitzer.tootsie.domain.usecase.followedtags.UnfollowTagUseCase
@@ -25,13 +27,18 @@ import javax.inject.Inject
 class FollowedTagsViewModel @Inject constructor(
     private val getFollowedTagsUseCase: GetFollowedTagsUseCase,
     private val followTagUseCase: FollowTagUseCase,
-    private val unfollowTagUseCase: UnfollowTagUseCase
+    private val unfollowTagUseCase: UnfollowTagUseCase,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FollowedTagsUiState())
     val uiState: StateFlow<FollowedTagsUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val sort = FollowedTagSort.fromName(preferencesManager.getFollowedTagsSort())
+            _uiState.update { it.copy(sort = sort) }
+        }
         loadFollowedTags(scrollToTopOnSuccess = false)
     }
 
@@ -60,6 +67,10 @@ class FollowedTagsViewModel @Inject constructor(
             }
             is FollowedTagsAction.DismissFollowDialog -> {
                 _uiState.update { it.copy(showFollowDialog = false) }
+            }
+            is FollowedTagsAction.SelectSort -> {
+                _uiState.update { it.copy(sort = action.sort, scrollToTop = true) }
+                viewModelScope.launch { preferencesManager.saveFollowedTagsSort(action.sort.name) }
             }
             is FollowedTagsAction.FollowTag -> {
                 _uiState.update { it.copy(showFollowDialog = false) }
@@ -170,8 +181,12 @@ data class FollowedTagsUiState(
     val errorMessage: UiText? = null,
     val showUnfollowConfirmation: FollowedTag? = null,
     val showFollowDialog: Boolean = false,
-    val scrollToTop: Boolean = false
-)
+    val scrollToTop: Boolean = false,
+    val sort: FollowedTagSort = FollowedTagSort.ALPHABETICAL
+) {
+    /** The followed tags in the selected order. */
+    val sortedTags: List<FollowedTag> get() = sort.sort(followedTags)
+}
 
 /**
  * User actions for Followed Tags Screen.
@@ -186,4 +201,5 @@ sealed class FollowedTagsAction {
     data object DismissFollowDialog : FollowedTagsAction()
     data class FollowTag(val tagName: String) : FollowedTagsAction()
     data object ScrollToTopConsumed : FollowedTagsAction()
+    data class SelectSort(val sort: FollowedTagSort) : FollowedTagsAction()
 }

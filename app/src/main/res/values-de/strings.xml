@@ -625,4 +625,10 @@
     <string name="filter_keyword_remove">Schlüsselwort %1$s entfernen</string>
     <string name="filter_action_warn_description">Passende Beiträge werden eingeklappt und mit einem Hinweis auf den Filter angezeigt.</string>
     <string name="filter_action_hide_description">Passende Beiträge werden gar nicht angezeigt.</string>
+
+    <!-- Followed tags (#223) -->
+    <string name="followed_tags_sort">Sortieren</string>
+    <string name="followed_tags_sort_alphabetical">Alphabetisch</string>
+    <string name="followed_tags_sort_activity">Aktivste (7 Tage)</string>
+    <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
 </resources>
