@@ -65,8 +65,8 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
                     )
                     pushRepository.savePushConfig(updatedConfig)
 
-                    // Cancel WorkManager polling since push is active
-                    NotificationPollWorker.cancel(this@TootsieApplication)
+                    // Polling stops for this account; the worker cancels itself once no
+                    // account needs it anymore
                 }
             }
         }

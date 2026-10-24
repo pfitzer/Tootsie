@@ -29,6 +29,11 @@ class AuthInterceptor @Inject constructor(
             return chain.proceed(originalRequest)
         }
 
+        // Requests made on behalf of a specific account carry their own credentials
+        if (originalRequest.header("Authorization") != null) {
+            return chain.proceed(originalRequest)
+        }
+
         // Get access token synchronously (no blocking)
         val token = tokenProvider.getTokenSync()
         if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Token present: ${token != null}")
