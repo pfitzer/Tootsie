@@ -103,20 +103,17 @@ fun MutedAccountsScreen(
                             key = mutedAccountsPagingItems.itemKey { it.id }
                         ) { index ->
                             mutedAccountsPagingItems[index]?.let { account ->
-                                // Skip accounts that were just unmuted
-                                if (account.id != uiState.unmutedAccountId) {
-                                    MutedAccountItem(
-                                        account = account,
-                                        isProcessing = uiState.processingAccountId == account.id,
-                                        onAccountClick = { onNavigateToProfile(account.id) },
-                                        onUnmuteClick = {
-                                            viewModel.onAction(MutedAccountsAction.UnmuteAccount(account))
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    )
-                                }
+                                MutedAccountItem(
+                                    account = account,
+                                    isProcessing = account.id in uiState.processingAccountIds,
+                                    onAccountClick = { onNavigateToProfile(account.id) },
+                                    onUnmuteClick = {
+                                        viewModel.onAction(MutedAccountsAction.UnmuteAccount(account))
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
                             }
                         }
 

@@ -103,20 +103,17 @@ fun BlockedAccountsScreen(
                             key = blockedAccountsPagingItems.itemKey { it.id }
                         ) { index ->
                             blockedAccountsPagingItems[index]?.let { account ->
-                                // Skip accounts that were just unblocked
-                                if (account.id != uiState.unblockedAccountId) {
-                                    BlockedAccountItem(
-                                        account = account,
-                                        isProcessing = uiState.processingAccountId == account.id,
-                                        onAccountClick = { onNavigateToProfile(account.id) },
-                                        onUnblockClick = {
-                                            viewModel.onAction(BlockedAccountsAction.UnblockAccount(account))
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    )
-                                }
+                                BlockedAccountItem(
+                                    account = account,
+                                    isProcessing = account.id in uiState.processingAccountIds,
+                                    onAccountClick = { onNavigateToProfile(account.id) },
+                                    onUnblockClick = {
+                                        viewModel.onAction(BlockedAccountsAction.UnblockAccount(account))
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
                             }
                         }
 
