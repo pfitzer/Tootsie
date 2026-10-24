@@ -10,6 +10,7 @@ import com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProvider
 import com.pfitzer.tootsie.data.remote.interceptors.TokenProvider
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,7 +28,8 @@ class AccountManagementRepositoryImpl @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val tokenProvider: TokenProvider,
     private val instanceUrlProvider: InstanceUrlProvider,
-    private val credentialCipher: CredentialCipher
+    private val credentialCipher: CredentialCipher,
+    private val statusInteractionStore: StatusInteractionStore
 ) : AccountManagementRepository {
 
     override suspend fun getAllLoggedInAccounts(): List<Account> {
@@ -49,6 +51,7 @@ class AccountManagementRepositoryImpl @Inject constructor(
 
         // 2. Atomically update isActive flags in database
         accountDao.setActiveAccount(accountId)
+        statusInteractionStore.clear()
 
         // 3. Update PreferencesManager
         val token = decryptToken(targetAccount)
@@ -88,6 +91,7 @@ class AccountManagementRepositoryImpl @Inject constructor(
         // Insert into database (setActiveAccount will handle deactivating other accounts)
         accountDao.insertAccount(accountEntity)
         accountDao.setActiveAccount(account.id)
+        statusInteractionStore.clear()
 
         // Update PreferencesManager
         preferencesManager.saveActiveAccountId(account.id)
@@ -105,6 +109,7 @@ class AccountManagementRepositoryImpl @Inject constructor(
             ?: throw IllegalArgumentException("Account with ID $accountId not found")
 
         val isActive = accountToRemove.isActive
+        if (isActive) statusInteractionStore.clear()
 
         // Delete the account from database
         accountDao.deleteAccount(accountToRemove)

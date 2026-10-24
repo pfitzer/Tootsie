@@ -9,6 +9,7 @@ import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.MediaMeta
 import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
 import com.pfitzer.tootsie.domain.repository.StatusRepository
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.flow.Flow
@@ -28,14 +29,15 @@ import javax.inject.Singleton
 @Singleton
 class StatusRepositoryImpl @Inject constructor(
     private val mastodonApi: MastodonApiService,
-    private val statusDao: StatusDao
+    private val statusDao: StatusDao,
+    private val statusInteractionStore: StatusInteractionStore
 ) : StatusRepository {
 
     override suspend fun getStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.getStatus(statusId)
-            // Cache the status
-            statusDao.insertStatus(statusDto.toEntity())
+            // Not cached: the cache is scoped to timeline + owner account, and replacing a
+            // cached row with an unscoped copy would drop it from the timeline cache
             Result.Success(statusDto.toDomain())
         } catch (e: Exception) {
             // Try local cache if network fails
@@ -75,8 +77,7 @@ class StatusRepositoryImpl @Inject constructor(
                 pollMultiple = pollConfig?.multiple,
                 pollHideTotals = pollConfig?.hideTotals
             )
-            // Cache the posted status
-            statusDao.insertStatus(statusDto.toEntity())
+            // Not cached here; it is cached with its timeline scope when the timeline loads
             Result.Success(statusDto.toDomain())
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to post status")
@@ -97,9 +98,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun favoriteStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.favoriteStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to favorite status")
         }
@@ -108,9 +107,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun unfavoriteStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.unfavoriteStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unfavorite status")
         }
@@ -119,9 +116,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun reblogStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.reblogStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to reblog status")
         }
@@ -130,9 +125,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun unreblogStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.unreblogStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unreblog status")
         }
@@ -141,9 +134,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun bookmarkStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.bookmarkStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to bookmark status")
         }
@@ -152,9 +143,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun unbookmarkStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.unbookmarkStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unbookmark status")
         }
@@ -163,9 +152,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun pinStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.pinStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to pin status")
         }
@@ -174,9 +161,7 @@ class StatusRepositoryImpl @Inject constructor(
     override suspend fun unpinStatus(statusId: String): Result<Status> {
         return try {
             val statusDto = mastodonApi.unpinStatus(statusId)
-            // Update local cache
-            statusDao.updateStatus(statusDto.toEntity())
-            Result.Success(statusDto.toDomain())
+            Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unpin status")
         }
@@ -268,5 +253,23 @@ class StatusRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to vote on poll")
         }
+    }
+
+    /**
+     * Publish the confirmed interaction state and update the cached row in place.
+     */
+    private suspend fun recordInteraction(status: Status): Status {
+        statusInteractionStore.update(status)
+        val target = status.reblog ?: status
+        statusDao.updateInteractionState(
+            statusId = target.id,
+            favourited = target.favourited,
+            favouritesCount = target.favouritesCount,
+            reblogged = target.reblogged,
+            reblogsCount = target.reblogsCount,
+            bookmarked = target.bookmarked,
+            pinned = target.pinned
+        )
+        return status
     }
 }

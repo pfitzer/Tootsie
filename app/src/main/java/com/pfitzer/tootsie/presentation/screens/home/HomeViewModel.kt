@@ -24,6 +24,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.presentation.util.applyInteractions
 
 /**
  * ViewModel for Home Screen.
@@ -32,6 +34,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val getTimelineUseCase: GetTimelineUseCase,
     private val refreshTimelineUseCase: RefreshTimelineUseCase,
     private val updateTimelineFilterUseCase: UpdateTimelineFilterUseCase,
@@ -111,6 +114,7 @@ class HomeViewModel @Inject constructor(
             }
         }
         .cachedIn(viewModelScope)
+        .applyInteractions(statusInteractionStore)
 
     /**
      * Handle user actions.
@@ -161,7 +165,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (favoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -180,7 +184,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (unfavoriteStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -199,7 +203,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (reblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -218,7 +222,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (unreblogStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -237,7 +241,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (bookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -256,7 +260,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (unbookmarkStatusUseCase(status.id)) {
                 is Result.Success -> {
-                    // Success - Paging will refresh automatically via Room Flow
+                    // Reflected via StatusInteractionStore
                 }
                 is Result.Error -> {
                     _uiState.update {
