@@ -4,6 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -42,8 +45,9 @@ fun RichTextContent(
     modifier: Modifier = Modifier,
     emojis: List<CustomEmoji> = emptyList()
 ) {
-    // Parse HTML to extract plain text and clickable spans
-    val parsedContent = parseHtmlContent(content, mentions, tags)
+    // Parsing the HTML is the most expensive part of rendering a post, so it only runs
+    // when the content changes, not on every recomposition (e.g. while scrolling)
+    val parsedContent = remember(content, mentions, tags) { parseHtmlContent(content, mentions, tags) }
 
     if (parsedContent.plainText.isBlank()) {
         return
@@ -53,36 +57,42 @@ fun RichTextContent(
     val linkColor = MaterialTheme.colorScheme.primary
     val textStyle = MaterialTheme.typography.bodyLarge
 
-    // Build AnnotatedString with clickable spans
-    val annotatedString = buildAnnotatedString {
-        // Append the full plain text
-        append(parsedContent.plainText)
+    // The link annotations call the latest callbacks, so new lambdas from the caller
+    // don't force the text to be rebuilt
+    val currentOnMentionClick by rememberUpdatedState(onMentionClick)
+    val currentOnHashtagClick by rememberUpdatedState(onHashtagClick)
+    val currentOnLinkClick by rememberUpdatedState(onLinkClick)
 
-        // Add styling and annotations for each clickable span
-        parsedContent.clickableSpans.forEach { span ->
-            // Ensure indices are within bounds
-            if (span.start >= 0 && span.end <= parsedContent.plainText.length && span.start < span.end) {
-                // Link annotation handles both styling and click handling
-                addLink(
-                    clickable = LinkAnnotation.Clickable(
-                        tag = span.type.name,  // "LINK", "MENTION", or "HASHTAG"
-                        styles = TextLinkStyles(style = SpanStyle(color = linkColor)),
-                        linkInteractionListener = {
-                            when (span.type) {
-                                SpanType.MENTION -> onMentionClick(span.value)
-                                SpanType.HASHTAG -> onHashtagClick(span.value)
-                                SpanType.LINK -> onLinkClick(span.value)
+    // Build AnnotatedString with clickable spans and custom emojis
+    val (text, inlineContent) = remember(parsedContent, linkColor, emojis) {
+        buildAnnotatedString {
+            // Append the full plain text
+            append(parsedContent.plainText)
+
+            // Add styling and annotations for each clickable span
+            parsedContent.clickableSpans.forEach { span ->
+                // Ensure indices are within bounds
+                if (span.start >= 0 && span.end <= parsedContent.plainText.length && span.start < span.end) {
+                    // Link annotation handles both styling and click handling
+                    addLink(
+                        clickable = LinkAnnotation.Clickable(
+                            tag = span.type.name,  // "LINK", "MENTION", or "HASHTAG"
+                            styles = TextLinkStyles(style = SpanStyle(color = linkColor)),
+                            linkInteractionListener = {
+                                when (span.type) {
+                                    SpanType.MENTION -> currentOnMentionClick(span.value)
+                                    SpanType.HASHTAG -> currentOnHashtagClick(span.value)
+                                    SpanType.LINK -> currentOnLinkClick(span.value)
+                                }
                             }
-                        }
-                    ),
-                    start = span.start,
-                    end = span.end
-                )
+                        ),
+                        start = span.start,
+                        end = span.end
+                    )
+                }
             }
-        }
+        }.withCustomEmojis(emojis)
     }
-
-    val (text, inlineContent) = annotatedString.withCustomEmojis(emojis)
 
     // Render text; clicks on links are consumed by their LinkAnnotation,
     // clicks elsewhere fall through to the text click handler
