@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.repository
 
+import com.pfitzer.tootsie.data.local.crypto.CredentialCipher
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.local.entities.AccountEntity
@@ -9,8 +10,10 @@ import com.pfitzer.tootsie.data.remote.interceptors.InstanceUrlProvider
 import com.pfitzer.tootsie.data.remote.interceptors.TokenProvider
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.repository.AccountManagementRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +26,8 @@ class AccountManagementRepositoryImpl @Inject constructor(
     private val accountDao: AccountDao,
     private val preferencesManager: PreferencesManager,
     private val tokenProvider: TokenProvider,
-    private val instanceUrlProvider: InstanceUrlProvider
+    private val instanceUrlProvider: InstanceUrlProvider,
+    private val credentialCipher: CredentialCipher
 ) : AccountManagementRepository {
 
     override suspend fun getAllLoggedInAccounts(): List<Account> {
@@ -47,17 +51,19 @@ class AccountManagementRepositoryImpl @Inject constructor(
         accountDao.setActiveAccount(accountId)
 
         // 3. Update PreferencesManager
+        val token = decryptToken(targetAccount)
         preferencesManager.saveActiveAccountId(accountId)
-        targetAccount.accessToken?.let { preferencesManager.saveAccessToken(it) }
+        token?.let { preferencesManager.saveAccessToken(it) }
         targetAccount.instanceUrl?.let { preferencesManager.saveInstanceUrl(it) }
 
         // 4. Update providers for OkHttp interceptors
-        tokenProvider.setToken(targetAccount.accessToken)
+        tokenProvider.setToken(token)
         targetAccount.instanceUrl?.let { instanceUrlProvider.setInstanceUrl(it) }
     }
 
     override suspend fun addAccount(account: Account, token: String, instanceUrl: String) {
-        // Create AccountEntity from domain model
+        // Create AccountEntity from domain model (token encrypted at rest)
+        val encryptedToken = withContext(Dispatchers.IO) { credentialCipher.encrypt(token) }
         val accountEntity = AccountEntity(
             id = account.id,
             username = account.username,
@@ -73,7 +79,7 @@ class AccountManagementRepositoryImpl @Inject constructor(
             statusesCount = account.statusesCount,
             createdAt = account.createdAt,
             bot = account.bot,
-            accessToken = token,
+            accessToken = encryptedToken,
             instanceUrl = instanceUrl,
             isActive = true, // New account becomes active
             lastSyncedAt = System.currentTimeMillis()
@@ -113,12 +119,13 @@ class AccountManagementRepositoryImpl @Inject constructor(
                 accountDao.setActiveAccount(newActiveAccount.id)
 
                 // Update PreferencesManager
+                val token = decryptToken(newActiveAccount)
                 preferencesManager.saveActiveAccountId(newActiveAccount.id)
-                newActiveAccount.accessToken?.let { preferencesManager.saveAccessToken(it) }
+                token?.let { preferencesManager.saveAccessToken(it) }
                 newActiveAccount.instanceUrl?.let { preferencesManager.saveInstanceUrl(it) }
 
                 // Update providers
-                tokenProvider.setToken(newActiveAccount.accessToken)
+                tokenProvider.setToken(token)
                 newActiveAccount.instanceUrl?.let { instanceUrlProvider.setInstanceUrl(it) }
 
                 return false // No logout needed
@@ -135,4 +142,7 @@ class AccountManagementRepositoryImpl @Inject constructor(
 
         return false // Removed non-active account, no logout needed
     }
+
+    private suspend fun decryptToken(account: AccountEntity): String? =
+        account.accessToken?.let { withContext(Dispatchers.IO) { credentialCipher.decrypt(it) } }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <!--
-        Exclude encrypted prefs: Android Keystore keys are device-bound and cannot be
+        Exclude legacy encrypted prefs (deleted on first start since #179): Android Keystore keys are device-bound and cannot be
         restored on a different device, so restoring the file would produce unreadable data.
     -->
     <exclude domain="sharedpref" path="tootsie_secure_prefs.xml" />
@@ -11,4 +11,12 @@
         After restore the user must re-authenticate anyway.
     -->
     <exclude domain="file" path="datastore/" />
+
+    <!--
+        Exclude Room database: access tokens are encrypted with a device-bound
+        Android Keystore key and could not be decrypted after a restore.
+    -->
+    <exclude domain="database" path="tootsie_database" />
+    <exclude domain="database" path="tootsie_database-wal" />
+    <exclude domain="database" path="tootsie_database-shm" />
 </full-backup-content>
