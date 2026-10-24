@@ -7,6 +7,8 @@ import androidx.work.*
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
+import com.pfitzer.tootsie.domain.model.NotificationType
+import com.pfitzer.tootsie.domain.model.PushAlerts
 import com.pfitzer.tootsie.domain.model.PushStatus
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.push.NotificationHelper
@@ -90,7 +92,9 @@ class NotificationPollWorker @AssistedInject constructor(
             is DomainResult.Success -> {
                 val notifications = result.data
                 if (notifications.isNotEmpty()) {
-                    notifications.forEach { notification ->
+                    // Only the notification types enabled in the push settings
+                    val alerts = preferencesManager.getPushConfig(accountId).alerts
+                    notifications.filter { alerts.isEnabled(it.type) }.forEach { notification ->
                         notificationHelper.showNotification(notification, accountId)
                     }
                     // The first notification in the list is the most recent from Mastodon API
@@ -155,4 +159,16 @@ class NotificationPollWorker @AssistedInject constructor(
                 .cancelUniqueWork(WORK_NAME)
         }
     }
+}
+
+private fun PushAlerts.isEnabled(type: NotificationType): Boolean = when (type) {
+    NotificationType.MENTION -> mention
+    NotificationType.FOLLOW -> follow
+    NotificationType.FAVOURITE -> favourite
+    NotificationType.REBLOG -> reblog
+    NotificationType.POLL -> poll
+    NotificationType.STATUS -> status
+    NotificationType.UPDATE -> update
+    NotificationType.FOLLOW_REQUEST -> followRequest
+    NotificationType.UNKNOWN -> false
 }

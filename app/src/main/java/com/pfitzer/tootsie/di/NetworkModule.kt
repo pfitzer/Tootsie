@@ -74,6 +74,8 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
+            // Never write access tokens to logcat, not even in debug builds
+            redactHeader("Authorization")
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY // Log full request/response
             } else {

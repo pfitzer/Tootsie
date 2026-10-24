@@ -5,13 +5,17 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.pfitzer.tootsie.MainActivity
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Notification
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "NotificationHelper"
 
 /**
  * Helper for creating and displaying push notifications.
@@ -98,6 +102,7 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
+        if (!canPostNotifications()) return
         notificationManager.notify(payload.notification_id?.hashCode() ?: 0, notification)
     }
 
@@ -140,12 +145,24 @@ class NotificationHelper @Inject constructor(
             .setAutoCancel(true)
             .build()
 
+        if (!canPostNotifications()) return
         notificationManager.notify(notification.id.hashCode(), notificationObject)
     }
 
     /**
      * Format notification content based on notification type.
      */
+    /**
+     * Whether notifications can be shown: on Android 13+ this needs the POST_NOTIFICATIONS
+     * runtime permission, and the user can block notifications in the system settings.
+     * Without this check notify() is silently ignored.
+     */
+    fun canPostNotifications(): Boolean {
+        val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        if (!enabled) Log.w(TAG, "Notifications are disabled or not permitted, not showing notification")
+        return enabled
+    }
+
     private fun formatNotificationContent(notification: Notification): Pair<String, String> {
         return when (notification.type.apiValue) {
             "mention" -> {

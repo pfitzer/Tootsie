@@ -15,6 +15,11 @@ class UnifiedPushManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
+    private companion object {
+        // FEATURE_BYTES_MESSAGE allows receiving raw byte messages
+        val FEATURES = arrayListOf(UnifiedPush.FEATURE_BYTES_MESSAGE)
+    }
+
     /**
      * Register for push notifications with UnifiedPush.
      * Uses accountId as instance for multi-account support.
@@ -27,7 +32,7 @@ class UnifiedPushManager @Inject constructor(
         UnifiedPush.registerAppWithDialog(
             context,
             instance = accountId,
-            features = arrayListOf(UnifiedPush.FEATURE_BYTES_MESSAGE)
+            features = FEATURES
         )
     }
 
@@ -47,7 +52,9 @@ class UnifiedPushManager @Inject constructor(
      * @return True if distributor is available
      */
     fun isDistributorAvailable(): Boolean {
-        return UnifiedPush.getSavedDistributor(context)?.isNotEmpty() == true
+        // Installed distributors, not the saved one: a distributor is only saved during the
+        // first registration, so checking the saved one made enabling push impossible
+        return UnifiedPush.getDistributors(context, FEATURES).isNotEmpty()
     }
 
     /**

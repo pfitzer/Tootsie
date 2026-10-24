@@ -46,7 +46,7 @@ class PushRepositoryImpl @Inject constructor(
                     ),
                     standard = true
                 ),
-                data = alerts.toDto()
+                data = PushDataDto(alerts = alerts.toDto())
             )
 
             val credentials = credentialsFor(accountId)
@@ -79,7 +79,7 @@ class PushRepositoryImpl @Inject constructor(
                     ),
                     standard = true
                 ),
-                data = alerts.toDto()
+                data = PushDataDto(alerts = alerts.toDto())
             )
 
             val credentials = credentialsFor(accountId)

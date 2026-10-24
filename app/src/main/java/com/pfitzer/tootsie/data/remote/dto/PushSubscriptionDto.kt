@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.data.remote.dto
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +11,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PushSubscriptionRequestDto(
     val subscription: SubscriptionKeysDto,
-    val data: PushAlertsDto
+    val data: PushDataDto
+)
+
+/**
+ * `data` part of the subscription request: Mastodon expects `data[alerts][…]`.
+ */
+@Serializable
+data class PushDataDto(
+    val alerts: PushAlertsDto
 )
 
 /**
@@ -47,15 +57,18 @@ data class PushSubscriptionDto(
 
 /**
  * Push alerts configuration DTO.
+ * All values are always encoded: the Json config omits defaults, and Mastodon treats a
+ * missing alert as disabled.
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class PushAlertsDto(
-    val mention: Boolean = true,
-    val follow: Boolean = true,
-    val favourite: Boolean = true,
-    val reblog: Boolean = true,
-    val poll: Boolean = false,
-    val status: Boolean = false,
-    val update: Boolean = false,
-    @SerialName("follow_request") val followRequest: Boolean = false
+    @EncodeDefault val mention: Boolean = true,
+    @EncodeDefault val follow: Boolean = true,
+    @EncodeDefault val favourite: Boolean = true,
+    @EncodeDefault val reblog: Boolean = true,
+    @EncodeDefault val poll: Boolean = false,
+    @EncodeDefault val status: Boolean = false,
+    @EncodeDefault val update: Boolean = false,
+    @EncodeDefault @SerialName("follow_request") val followRequest: Boolean = false
 )
