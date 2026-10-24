@@ -35,11 +35,9 @@ object DatabaseModule {
             TootsieDatabase::class.java,
             TootsieDatabase.DATABASE_NAME
         )
-            .addMigrations(
-                TootsieDatabase.MIGRATION_2_3,
-                TootsieDatabase.MIGRATION_3_4,
-                TootsieDatabase.MIGRATION_4_5
-            )
+            .addMigrations(*TootsieDatabase.ALL_MIGRATIONS)
+            // Schema v1 only existed in early development builds and was never released
+            .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1)
             .build()
     }
 

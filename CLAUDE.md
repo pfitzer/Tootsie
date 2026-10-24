@@ -516,6 +516,25 @@ viewModelScope.launch {
 
 ---
 
+#### 5. Room Schema Changes Require a Version Bump and Schema File
+
+**Rule**: Every change to a Room entity (new column, table, index, etc.) must:
+1. Bump `version` in `TootsieDatabase`
+2. Add a migration (manual `MIGRATION_X_Y` in `TootsieDatabase.ALL_MIGRATIONS`, or an `AutoMigration`)
+3. Commit the generated schema file `app/schemas/com.pfitzer.tootsie.data.local.TootsieDatabase/<version>.json`
+4. Add a test to `TootsieDatabaseMigrationTest` (instrumented, `MigrationTestHelper`)
+
+**Why**: The Room Gradle plugin exports a schema JSON per version. `MigrationTestHelper` creates the old database from these files, so a missing schema file makes the migration untestable. Never edit an already committed schema file.
+
+Run the migration tests with a connected emulator (not part of CI, which only runs unit tests):
+```bash
+./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.pfitzer.tootsie.data.local.TootsieDatabaseMigrationTest
+```
+
+**Note**: Schema version 1 was never released and is handled by `fallbackToDestructiveMigrationFrom(1)`. Schema 3 never existed in a commit; `3.json` is structurally identical to `4.json` (the 3→4 migration only deletes data).
+
+---
+
 ### Implementation Patterns Summary
 
 **For Authentication/Network Layer**:
