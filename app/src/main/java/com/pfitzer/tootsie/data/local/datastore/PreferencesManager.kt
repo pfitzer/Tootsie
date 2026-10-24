@@ -53,6 +53,7 @@ class PreferencesManager @Inject constructor(
         private val KEY_LANGUAGE = stringPreferencesKey("language")
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
         private val KEY_TEXT_SIZE = stringPreferencesKey("text_size")
+        private val KEY_POST_LANGUAGE = stringPreferencesKey("post_language")
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_TIMELINE_HIDE_BOOSTS = booleanPreferencesKey("timeline_hide_boosts")
         private val KEY_TIMELINE_HIDE_REPLIES = booleanPreferencesKey("timeline_hide_replies")
@@ -252,6 +253,23 @@ class PreferencesManager @Inject constructor(
     val defaultVisibility: Flow<String> = dataStore.data.map { preferences ->
         preferences[KEY_DEFAULT_VISIBILITY] ?: "public"
     }
+
+    // ========== Compose Settings ==========
+
+    /**
+     * Save the language of the last post (ISO 639-1), used as default for the next one.
+     */
+    suspend fun savePostLanguage(language: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_POST_LANGUAGE] = language
+        }
+    }
+
+    /**
+     * Language of the last post, or null if none was chosen yet.
+     */
+    suspend fun getPostLanguage(): String? =
+        dataStore.data.map { preferences -> preferences[KEY_POST_LANGUAGE] }.first()
 
     // ========== Display Settings ==========
 

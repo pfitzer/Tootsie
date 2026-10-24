@@ -46,7 +46,8 @@ interface StatusRepository {
         sensitive: Boolean = false,
         spoilerText: String? = null,
         pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null,
-        quotedStatusId: String? = null
+        quotedStatusId: String? = null,
+        language: String? = null
     ): Result<Status>
 
     /**

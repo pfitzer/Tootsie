@@ -595,4 +595,12 @@
     <string name="settings_section_about">Über</string>
     <string name="settings_version">Version</string>
     <string name="settings_source_code">Quellcode</string>
+
+    <!-- Compose (#225) -->
+    <string name="compose_more_options">Weitere Optionen</string>
+    <string name="compose_switch_account">Mit anderem Konto posten</string>
+    <string name="cd_custom_emoji">Eigene Emojis</string>
+    <string name="cd_post_language">Sprache des Beitrags: %1$s</string>
+    <string name="compose_post_language">Sprache des Beitrags</string>
+    <string name="compose_language_search">Sprache suchen</string>
 </resources>
