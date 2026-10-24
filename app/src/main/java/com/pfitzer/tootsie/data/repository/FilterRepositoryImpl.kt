@@ -114,7 +114,8 @@ class FilterRepositoryImpl @Inject constructor(
                 title = title,
                 context = context?.map { it.toApiString() },
                 filterAction = filterAction?.toApiString(),
-                expiresIn = expiresIn
+                // 0 makes the filter permanent, which the API expects as an empty value
+                expiresIn = expiresIn?.let { if (it == 0) "" else it.toString() }
             )
             val filter = filterDto.toDomain()
 

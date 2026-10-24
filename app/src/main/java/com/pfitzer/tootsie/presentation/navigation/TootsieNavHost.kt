@@ -29,7 +29,7 @@ import com.pfitzer.tootsie.presentation.screens.lists.ListsScreen
 import com.pfitzer.tootsie.presentation.screens.lists.ManageListScreen
 import com.pfitzer.tootsie.presentation.screens.filters.FiltersScreen
 import com.pfitzer.tootsie.presentation.screens.followrequests.FollowRequestsScreen
-import com.pfitzer.tootsie.presentation.screens.filters.detail.FilterDetailScreen
+import com.pfitzer.tootsie.presentation.screens.filters.edit.FilterEditScreen
 import com.pfitzer.tootsie.presentation.screens.conversations.ConversationsScreen
 import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
@@ -590,7 +590,7 @@ fun TootsieNavHost(
                     navController.popBackStack()
                 },
                 onNavigateToFilter = { filterId ->
-                    navController.navigate(TootsieDestinations.FilterDetail.createRoute(filterId))
+                    navController.navigate(TootsieDestinations.FilterEdit.createRoute(filterId))
                 }
             )
         }
@@ -607,16 +607,18 @@ fun TootsieNavHost(
             )
         }
 
-        // Filter Detail screen - view and edit a single filter
+        // Filter editor - create or edit a filter
         composable(
-            route = TootsieDestinations.FilterDetail.route,
+            route = TootsieDestinations.FilterEdit.route,
             arguments = listOf(
-                navArgument(TootsieDestinations.FilterDetail.ARG_FILTER_ID) {
+                navArgument(TootsieDestinations.FilterEdit.ARG_FILTER_ID) {
                     type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
                 }
             )
         ) {
-            FilterDetailScreen(
+            FilterEditScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

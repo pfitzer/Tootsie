@@ -849,7 +849,8 @@ interface MastodonApiService {
         @Field("title") title: String? = null,
         @Field("context[]") context: List<String>? = null,
         @Field("filter_action") filterAction: String? = null,
-        @Field("expires_in") expiresIn: Int? = null
+        // An empty value removes the expiry
+        @Field("expires_in") expiresIn: String? = null
     ): FilterDto
 
     /**
