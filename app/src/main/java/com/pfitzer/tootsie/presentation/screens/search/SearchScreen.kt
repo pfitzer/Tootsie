@@ -1,27 +1,48 @@
 package com.pfitzer.tootsie.presentation.screens.search
 
+import android.icu.text.CompactDecimalFormat
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.Hashtag
 import com.pfitzer.tootsie.util.openInBrowser
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
+import java.util.Locale
 
 /**
  * Search Screen - search for accounts, posts, and hashtags.
@@ -44,9 +65,10 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activeAccount by viewModel.activeAccount.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
 
     // Pre-fill search with initial query if provided (e.g., from hashtag click)
-    androidx.compose.runtime.LaunchedEffect(initialQuery) {
+    LaunchedEffect(initialQuery) {
         if (initialQuery != null && initialQuery.isNotBlank() && uiState.query != initialQuery) {
             // If it's a hashtag, filter to show only posts
             if (initialQuery.startsWith("#")) {
@@ -57,9 +79,10 @@ fun SearchScreen(
         }
     }
 
-    // Handle hashtag clicks by navigating to hashtag timeline
-    val onHashtagClick: (String) -> Unit = { hashtagName ->
-        onNavigateToHashtag(hashtagName)
+    // Opening a result keeps the query in the recent searches
+    fun <T> remembering(navigate: (T) -> Unit): (T) -> Unit = { value ->
+        viewModel.onAction(SearchAction.RememberQuery)
+        navigate(value)
     }
 
     Scaffold(
@@ -95,6 +118,10 @@ fun SearchScreen(
                 query = uiState.query,
                 onQueryChange = { viewModel.onAction(SearchAction.UpdateQuery(it)) },
                 onClearClick = { viewModel.onAction(SearchAction.ClearSearch) },
+                onSearch = {
+                    focusManager.clearFocus()
+                    viewModel.onAction(SearchAction.Submit)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -114,7 +141,7 @@ fun SearchScreen(
                 uiState.isLoading -> {
                     LoadingIndicator()
                 }
-                uiState.errorMessage != null -> {
+                uiState.errorMessage != null && !uiState.hasResults -> {
                     ErrorMessage(
                         message = uiState.errorMessage!!,
                         modifier = Modifier.padding(16.dp)
@@ -126,16 +153,29 @@ fun SearchScreen(
                 uiState.hasResults -> {
                     SearchResults(
                         uiState = uiState,
-                        onAccountClick = onNavigateToProfile,
-                        onStatusClick = onNavigateToStatusDetail,
-                        onHashtagClick = onNavigateToHashtag,
+                        onAccountClick = remembering(onNavigateToProfile),
+                        onStatusClick = remembering(onNavigateToStatusDetail),
+                        onHashtagClick = remembering(onNavigateToHashtag),
+                        onShowAll = { viewModel.onAction(SearchAction.SelectFilter(it)) },
+                        onLoadMore = { viewModel.onAction(SearchAction.LoadMore) },
+                        onToggleFollowHashtag = { viewModel.onAction(SearchAction.ToggleFollowHashtag(it)) },
                         onStatusAction = { action -> viewModel.onAction(action) },
                         onImageClick = onNavigateToImageViewer,
                         onVideoClick = onNavigateToVideoPlayer
                     )
                 }
                 else -> {
-                    EmptyState()
+                    StartContent(
+                        recentSearches = uiState.recentSearches,
+                        trendingHashtags = uiState.trendingHashtags,
+                        onRecentClick = { query ->
+                            viewModel.onAction(SearchAction.UpdateQuery(query))
+                            viewModel.onAction(SearchAction.Submit)
+                        },
+                        onRemoveRecent = { viewModel.onAction(SearchAction.RemoveRecentSearch(it)) },
+                        onClearRecent = { viewModel.onAction(SearchAction.ClearRecentSearches) },
+                        onHashtagClick = onNavigateToHashtag
+                    )
                 }
             }
         }
@@ -150,6 +190,7 @@ private fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearClick: () -> Unit,
+    onSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
@@ -173,6 +214,8 @@ private fun SearchBar(
                 }
             }
         },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSearch() }),
         singleLine = true,
         shape = MaterialTheme.shapes.large
     )
@@ -188,21 +231,21 @@ private fun FilterChips(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SearchFilter.values().forEach { filter ->
+        SearchFilter.entries.forEach { filter ->
             FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(filter.displayName) }
+                label = { Text(stringResource(filter.labelRes)) }
             )
         }
     }
 }
 
 /**
- * Search results display.
+ * Search results: a preview of every type under "All", one paged type in the other tabs.
  */
 @Composable
 private fun SearchResults(
@@ -210,28 +253,39 @@ private fun SearchResults(
     onAccountClick: (String) -> Unit,
     onStatusClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onShowAll: (SearchFilter) -> Unit,
+    onLoadMore: () -> Unit,
+    onToggleFollowHashtag: (Hashtag) -> Unit,
     onStatusAction: (SearchAction) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit
 ) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+    val filter = uiState.selectedFilter
+    val isAll = filter == SearchFilter.ALL
+
+    // Load the next page shortly before the end of the list
+    val shouldLoadMore by remember(listState) {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisible >= listState.layoutInfo.totalItemsCount - 3
+        }
+    }
+    LaunchedEffect(shouldLoadMore, uiState.endReached, filter) {
+        if (shouldLoadMore && !isAll && !uiState.endReached) onLoadMore()
+    }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         // Accounts section
         if (uiState.accounts.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.search_section_accounts, uiState.accounts.size),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            items(uiState.accounts) { account ->
-                AccountResultCard(
+            if (isAll) sectionHeader(R.string.search_filter_accounts) { onShowAll(SearchFilter.ACCOUNTS) }
+            items(uiState.accounts, key = { "account-${it.id}" }) { account ->
+                AccountResultItem(
                     account = account,
                     onClick = { onAccountClick(account.id) }
                 )
@@ -240,15 +294,8 @@ private fun SearchResults(
 
         // Statuses section
         if (uiState.statuses.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.search_section_posts, uiState.statuses.size),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = if (uiState.accounts.isNotEmpty()) 16.dp else 0.dp)
-                )
-            }
-            items(uiState.statuses) { status ->
+            if (isAll) sectionHeader(R.string.search_filter_posts) { onShowAll(SearchFilter.STATUSES) }
+            items(uiState.statuses, key = { "status-${it.id}" }) { status ->
                 StatusCard(
                     status = status,
                     onStatusClick = { onStatusClick(status.id) },
@@ -256,7 +303,7 @@ private fun SearchResults(
                     onMentionClick = onAccountClick,
                     onHashtagClick = onHashtagClick,
                     onLinkClick = { url -> context.openInBrowser(url) },
-                    onReplyClick = { /* TODO */ },
+                    onReplyClick = { onStatusClick(status.id) },
                     onBoostClick = { s ->
                         if (s.reblogged) {
                             onStatusAction(SearchAction.UnboostStatus(s))
@@ -289,69 +336,25 @@ private fun SearchResults(
 
         // Hashtags section
         if (uiState.hashtags.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.search_section_hashtags, uiState.hashtags.size),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(
-                        top = if (uiState.accounts.isNotEmpty() || uiState.statuses.isNotEmpty()) 16.dp else 0.dp
-                    )
-                )
-            }
-            items(uiState.hashtags) { hashtag ->
-                HashtagCard(
+            if (isAll) sectionHeader(R.string.search_filter_hashtags) { onShowAll(SearchFilter.HASHTAGS) }
+            items(uiState.hashtags, key = { "tag-${it.name.lowercase()}" }) { hashtag ->
+                HashtagResultItem(
                     hashtag = hashtag,
-                    onClick = { onHashtagClick(hashtag.name) }
+                    onClick = { onHashtagClick(hashtag.name) },
+                    onToggleFollow = { onToggleFollowHashtag(hashtag) }
                 )
             }
         }
-    }
-}
 
-/**
- * Account result card.
- */
-@Composable
-private fun AccountResultCard(
-    account: com.pfitzer.tootsie.domain.model.Account,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Avatar
-            com.pfitzer.tootsie.presentation.components.common.AvatarImage(
-                url = account.avatar,
-                contentDescription = "${account.displayName} avatar",
-                modifier = Modifier.size(48.dp)
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = account.displayName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "@${account.acct}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (account.followersCount > 0) {
-                    Text(
-                        text = stringResource(R.string.search_followers_count, account.followersCount),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        if (uiState.isLoadingMore) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
@@ -359,41 +362,109 @@ private fun AccountResultCard(
 }
 
 /**
- * Hashtag result card.
+ * Section title with a "Show all" link to the tab of that type.
  */
-@Composable
-private fun HashtagCard(
-    hashtag: com.pfitzer.tootsie.domain.model.Hashtag,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
+private fun LazyListScope.sectionHeader(titleRes: Int, onShowAll: () -> Unit) {
+    item {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 8.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "#${hashtag.name}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                if (hashtag.totalUses > 0) {
-                    Text(
-                        text = stringResource(R.string.search_hashtag_uses, hashtag.totalUses),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Text(
+                text = stringResource(titleRes),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = onShowAll) {
+                Text(stringResource(R.string.search_show_all))
             }
         }
     }
 }
+
+/**
+ * Account result.
+ */
+@Composable
+private fun AccountResultItem(
+    account: Account,
+    onClick: () -> Unit
+) {
+    ListItem(
+        headlineContent = {
+            EmojiText(
+                text = account.displayName.ifBlank { account.username },
+                emojis = account.emojis,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        supportingContent = {
+            Column {
+                Text("@${account.acct}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (account.followersCount > 0) {
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.search_followers,
+                            account.followersCount,
+                            compactNumber(account.followersCount.toLong())
+                        ),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        leadingContent = {
+            AvatarImage(
+                url = account.avatar,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
+        },
+        modifier = Modifier.clickable(onClick = onClick)
+    )
+}
+
+/**
+ * Hashtag result with posts of the last week and a follow button.
+ */
+@Composable
+private fun HashtagResultItem(
+    hashtag: Hashtag,
+    onClick: () -> Unit,
+    onToggleFollow: () -> Unit
+) {
+    ListItem(
+        headlineContent = { Text("#${hashtag.name}") },
+        supportingContent = {
+            Text(
+                pluralStringResource(
+                    R.plurals.search_hashtag_posts_week,
+                    hashtag.totalUses,
+                    compactNumber(hashtag.totalUses.toLong())
+                )
+            )
+        },
+        leadingContent = { Icon(Icons.Default.Tag, contentDescription = null) },
+        trailingContent = {
+            hashtag.following?.let { following ->
+                if (following) {
+                    OutlinedButton(onClick = onToggleFollow) { Text(stringResource(R.string.unfollow)) }
+                } else {
+                    FilledTonalButton(onClick = onToggleFollow) { Text(stringResource(R.string.follow)) }
+                }
+            }
+        },
+        modifier = Modifier.clickable(onClick = onClick)
+    )
+}
+
+/** Short number in the device locale, e.g. 878932 -> "879K" / "879.000" -> "879K"/"878.932". */
+private fun compactNumber(value: Long): String =
+    CompactDecimalFormat.getInstance(Locale.getDefault(), CompactDecimalFormat.CompactStyle.SHORT).format(value)
 
 /**
  * Loading indicator.
@@ -440,6 +511,90 @@ private fun EmptyResults(query: String) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+        }
+    }
+}
+
+/**
+ * Before searching: recent searches and trending hashtags, or a hint if there are none.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StartContent(
+    recentSearches: List<String>,
+    trendingHashtags: List<String>,
+    onRecentClick: (String) -> Unit,
+    onRemoveRecent: (String) -> Unit,
+    onClearRecent: () -> Unit,
+    onHashtagClick: (String) -> Unit
+) {
+    if (recentSearches.isEmpty() && trendingHashtags.isEmpty()) {
+        EmptyState()
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ) {
+        if (recentSearches.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.search_recent),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = onClearRecent) {
+                        Text(stringResource(R.string.search_recent_clear))
+                    }
+                }
+            }
+            items(recentSearches, key = { "recent-$it" }) { query ->
+                ListItem(
+                    headlineContent = { Text(query, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    leadingContent = { Icon(Icons.Default.History, contentDescription = null) },
+                    trailingContent = {
+                        IconButton(onClick = { onRemoveRecent(query) }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.search_recent_remove, query)
+                            )
+                        }
+                    },
+                    modifier = Modifier.clickable { onRecentClick(query) }
+                )
+            }
+        }
+
+        if (trendingHashtags.isNotEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.search_trending_hashtags),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+                )
+            }
+            item {
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    trendingHashtags.forEach { tag ->
+                        SuggestionChip(
+                            onClick = { onHashtagClick(tag) },
+                            label = { Text("#$tag") }
+                        )
+                    }
+                }
+            }
         }
     }
 }

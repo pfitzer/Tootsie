@@ -28,7 +28,9 @@ data class SearchResults(
 data class Hashtag(
     val name: String, // Without the # prefix
     val url: String, // Tag URL
-    val history: List<HashtagHistory>? = null
+    val history: List<HashtagHistory>? = null,
+    /** Whether the user follows the tag; null if unknown. */
+    val following: Boolean? = null
 ) {
     /**
      * Get total uses across all history days.
