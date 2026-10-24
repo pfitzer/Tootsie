@@ -17,6 +17,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import okhttp3.Interceptor
 import okhttp3.Protocol
@@ -28,6 +29,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 class AccountScopedRequestTest {
 
@@ -69,6 +71,19 @@ class AccountScopedRequestTest {
         assertEquals("other.social", sent.url.host)
         assertEquals("Bearer other-token", sent.header("Authorization"))
         assertNull(sent.header(HEADER_INSTANCE))
+    }
+
+    @Test
+    fun `requests fail without a configured instance instead of using a fallback server`() {
+        every { instanceUrlProvider.getInstanceUrlSync() } returns null
+        val chain = mockk<Interceptor.Chain> {
+            every { request() } returns Request.Builder().url("https://placeholder.invalid/api/v1/timelines/home").build()
+        }
+
+        val error = runCatching { InstanceInterceptor(instanceUrlProvider).intercept(chain) }.exceptionOrNull()
+
+        assertTrue(error is IOException)
+        verify(exactly = 0) { chain.proceed(any()) }
     }
 
     @Test

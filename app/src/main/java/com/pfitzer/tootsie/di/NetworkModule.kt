@@ -115,7 +115,10 @@ object NetworkModule {
         val contentType = "application/json".toMediaType()
 
         return Retrofit.Builder()
-            .baseUrl("https://mastodon.social/") // Placeholder base URL
+            // Never reached: InstanceInterceptor replaces the host. ".invalid" (RFC 2606)
+            // can't resolve, so a request that bypasses the interceptor fails instead of
+            // reaching a real server
+            .baseUrl("https://placeholder.invalid/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

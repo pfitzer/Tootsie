@@ -97,7 +97,7 @@ class AuthRepositoryImpl @Inject constructor(
             instanceUrlProvider.setInstanceUrl(storedInstance)
             if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Instance URL loaded into provider: $storedInstance")
         } else {
-            Log.w(TAG, "initializeProviders() - No instance URL found, using default: mastodon.social")
+            Log.w(TAG, "initializeProviders() - No instance URL found, API requests will fail until login")
         }
 
         if (BuildConfig.DEBUG) Log.d(TAG, "initializeProviders() - Providers initialization complete")
