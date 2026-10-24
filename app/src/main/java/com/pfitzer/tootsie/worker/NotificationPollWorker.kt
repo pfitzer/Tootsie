@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.pfitzer.tootsie.data.local.dao.AccountDao
@@ -11,8 +12,22 @@ import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.push.NotificationHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import retrofit2.HttpException
 import java.util.concurrent.TimeUnit
 import com.pfitzer.tootsie.util.Result as DomainResult
+
+private const val TAG = "NotificationPollWorker"
+
+internal enum class PollOutcome { SUCCESS, RETRY, AUTH_FAILED }
+
+/**
+ * 401/403 mean the account's token was rejected and retrying can't help. Everything else
+ * (network errors, 429 rate limit, server errors) is treated as transient.
+ */
+internal fun pollOutcomeOf(error: DomainResult.Error): PollOutcome {
+    val code = (error.exception as? HttpException)?.code()
+    return if (code == 401 || code == 403) PollOutcome.AUTH_FAILED else PollOutcome.RETRY
+}
 
 /**
  * WorkManager worker for polling notifications when UnifiedPush is unavailable.
@@ -40,7 +55,8 @@ class NotificationPollWorker @AssistedInject constructor(
             .map { it.id }
             .filter { accountId ->
                 val config = preferencesManager.getPushConfig(accountId)
-                config.enabled && config.status != PushStatus.ACTIVE
+                // ERROR: polling stopped after the server rejected the account's token
+                config.enabled && config.status != PushStatus.ACTIVE && config.status != PushStatus.ERROR
             }
 
         if (accountIds.isEmpty()) {
@@ -49,21 +65,23 @@ class NotificationPollWorker @AssistedInject constructor(
             return androidx.work.ListenableWorker.Result.success()
         }
 
-        var anyFailed = false
-        for (accountId in accountIds) {
-            if (!pollAccount(accountId)) anyFailed = true
-        }
-        return if (anyFailed) {
-            androidx.work.ListenableWorker.Result.retry()
-        } else {
-            androidx.work.ListenableWorker.Result.success()
+        val outcomes = accountIds.map { pollAccount(it) }
+        return when {
+            // Transient failure (network, rate limit, server error): retry with backoff
+            PollOutcome.RETRY in outcomes -> androidx.work.ListenableWorker.Result.retry()
+            // Every remaining account was rejected: nothing left to poll
+            outcomes.all { it == PollOutcome.AUTH_FAILED } -> {
+                cancel(applicationContext)
+                androidx.work.ListenableWorker.Result.failure()
+            }
+            else -> androidx.work.ListenableWorker.Result.success()
         }
     }
 
     /**
-     * Fetch and show new notifications of one account. Returns false if the request failed.
+     * Fetch and show new notifications of one account.
      */
-    private suspend fun pollAccount(accountId: String): Boolean {
+    private suspend fun pollAccount(accountId: String): PollOutcome {
         val sinceId = preferencesManager.getLastNotificationId(accountId)
         return when (val result = notificationRepository.fetchRecentNotifications(
             sinceId = sinceId,
@@ -78,9 +96,21 @@ class NotificationPollWorker @AssistedInject constructor(
                     // The first notification in the list is the most recent from Mastodon API
                     preferencesManager.saveLastNotificationId(accountId, notifications.first().id)
                 }
-                true
+                PollOutcome.SUCCESS
             }
-            else -> false
+            is DomainResult.Error -> {
+                val outcome = pollOutcomeOf(result)
+                if (outcome == PollOutcome.AUTH_FAILED) {
+                    // Token revoked or expired: retrying can't succeed. Stop polling this
+                    // account; the push settings show the error state.
+                    Log.w(TAG, "Polling rejected for account $accountId, stopping")
+                    preferencesManager.savePushConfig(
+                        preferencesManager.getPushConfig(accountId).copy(status = PushStatus.ERROR)
+                    )
+                }
+                outcome
+            }
+            DomainResult.Loading -> PollOutcome.RETRY
         }
     }
 
