@@ -144,6 +144,11 @@ interface StatusRepository {
     suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context>
 
     /**
+     * Get the state of a server background job (see Context.asyncRefresh).
+     */
+    suspend fun getAsyncRefresh(id: String): Result<com.pfitzer.tootsie.domain.model.AsyncRefreshProgress>
+
+    /**
      * Vote on a poll.
      *
      * @param pollId Poll ID

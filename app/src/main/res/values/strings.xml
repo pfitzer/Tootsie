@@ -279,6 +279,11 @@
     <string name="empty_trending_posts">No trending posts</string>
     <string name="empty_trending_links">No trending links</string>
     <string name="empty_replies">No replies yet</string>
+    <string name="status_fetching_remote_replies">Loading replies from other servers…</string>
+    <plurals name="status_new_replies_loaded">
+        <item quantity="one">%1$d new reply loaded</item>
+        <item quantity="other">%1$d new replies loaded</item>
+    </plurals>
 
     <!-- Media Labels -->
     <string name="media_label_audio">AUDIO</string>
