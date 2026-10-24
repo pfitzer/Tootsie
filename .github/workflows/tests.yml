@@ -1,9 +1,26 @@
 name: Tests
 
+# Only for changes that can affect the build (docs-only changes are skipped)
 on:
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/tests.yml'
   pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/tests.yml'
   workflow_dispatch:
 
 permissions:

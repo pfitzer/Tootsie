@@ -3,9 +3,15 @@ name: Dependency Submission
 # Submits the resolved Gradle dependency graph (including the build classpath) to GitHub,
 # so Dependabot alerts reflect the versions actually used on main.
 
+# The dependency graph only changes with the build configuration
 on:
   push:
     branches: [main]
+    paths:
+      - '**/*.gradle.kts'
+      - 'gradle/**'
+      - 'gradle.properties'
+      - '.github/workflows/dependency-submission.yml'
   workflow_dispatch:
 
 permissions:
