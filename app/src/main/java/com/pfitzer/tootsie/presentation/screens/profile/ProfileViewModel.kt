@@ -123,12 +123,15 @@ class ProfileViewModel @Inject constructor(
 
             when (accountResult) {
                 is Result.Success -> {
-                    val ownAccountId = activeAccount.value?.id
+                    // Read the active account directly: activeAccount is a WhileSubscribed
+                    // StateFlow whose value is still null at this point
+                    val ownAccountId = observeActiveAccountUseCase().first()?.id
+                    val isOwnProfile = accountId == null ||
+                        (ownAccountId != null && accountResult.data.id == ownAccountId)
                     _uiState.update {
                         it.copy(
                             account = accountResult.data,
-                            isOwnProfile = accountId == null ||
-                                (ownAccountId != null && accountResult.data.id == ownAccountId)
+                            isOwnProfile = isOwnProfile
                         )
                     }
 
@@ -136,7 +139,7 @@ class ProfileViewModel @Inject constructor(
                     _resolvedAccountId.value = accountId ?: accountResult.data.id
 
                     // Load relationship if viewing another user's profile
-                    if (accountId != null) {
+                    if (accountId != null && !isOwnProfile) {
                         loadRelationship(accountId)
                     }
 
