@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.data.remote.api
 
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
+import com.pfitzer.tootsie.data.remote.interceptors.HEADER_INSTANCE
 import com.pfitzer.tootsie.data.remote.dto.AnnouncementDto
 import com.pfitzer.tootsie.data.remote.dto.FilterDto
 import com.pfitzer.tootsie.data.remote.dto.ReportDto
@@ -21,6 +22,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -527,7 +529,9 @@ interface MastodonApiService {
         @Query("min_id") minId: String? = null,
         @Query("limit") limit: Int = 20,
         @Query("exclude_types[]") excludeTypes: List<String>? = null,
-        @Query("account_id") accountId: String? = null
+        @Query("account_id") accountId: String? = null,
+        @Header("Authorization") authorization: String? = null,
+        @Header(HEADER_INSTANCE) instance: String? = null
     ): List<com.pfitzer.tootsie.data.remote.dto.NotificationDto>
 
     /**
@@ -880,7 +884,9 @@ interface MastodonApiService {
      */
     @POST("api/v1/push/subscription")
     suspend fun subscribeToPush(
-        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto
+        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto,
+        @Header("Authorization") authorization: String? = null,
+        @Header(HEADER_INSTANCE) instance: String? = null
     ): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
 
     /**
@@ -889,7 +895,10 @@ interface MastodonApiService {
      * @return Current push subscription or error if not subscribed
      */
     @GET("api/v1/push/subscription")
-    suspend fun getPushSubscription(): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
+    suspend fun getPushSubscription(
+        @Header("Authorization") authorization: String? = null,
+        @Header(HEADER_INSTANCE) instance: String? = null
+    ): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
 
     /**
      * Update push subscription alerts.
@@ -898,7 +907,9 @@ interface MastodonApiService {
      */
     @PUT("api/v1/push/subscription")
     suspend fun updatePushSubscription(
-        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto
+        @Body request: com.pfitzer.tootsie.data.remote.dto.PushSubscriptionRequestDto,
+        @Header("Authorization") authorization: String? = null,
+        @Header(HEADER_INSTANCE) instance: String? = null
     ): com.pfitzer.tootsie.data.remote.dto.PushSubscriptionDto
 
     /**
@@ -906,7 +917,10 @@ interface MastodonApiService {
      * Unsubscribes from push notifications.
      */
     @DELETE("api/v1/push/subscription")
-    suspend fun deletePushSubscription()
+    suspend fun deletePushSubscription(
+        @Header("Authorization") authorization: String? = null,
+        @Header(HEADER_INSTANCE) instance: String? = null
+    )
 
     // ========== Custom Emoji Endpoints ==========
 

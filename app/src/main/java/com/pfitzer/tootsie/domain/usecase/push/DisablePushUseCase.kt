@@ -1,11 +1,8 @@
 package com.pfitzer.tootsie.domain.usecase.push
 
-import android.content.Context
 import com.pfitzer.tootsie.domain.repository.PushRepository
 import com.pfitzer.tootsie.push.UnifiedPushManager
 import com.pfitzer.tootsie.util.Result
-import com.pfitzer.tootsie.worker.NotificationPollWorker
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
@@ -15,12 +12,11 @@ import javax.inject.Inject
  * 1. Unregister from UnifiedPush distributor
  * 2. Unsubscribe from Mastodon push API
  * 3. Delete local push configuration
- * 4. Cancel WorkManager polling
+ * 4. WorkManager polling stops for this account (the worker cancels itself when unused)
  */
 class DisablePushUseCase @Inject constructor(
     private val pushRepository: PushRepository,
-    private val unifiedPushManager: UnifiedPushManager,
-    @ApplicationContext private val context: Context
+    private val unifiedPushManager: UnifiedPushManager
 ) {
     /**
      * Disable push notifications for the specified account.
@@ -40,8 +36,8 @@ class DisablePushUseCase @Inject constructor(
             // Delete local configuration
             pushRepository.deletePushConfig(accountId)
 
-            // Cancel WorkManager polling
-            NotificationPollWorker.cancel(context)
+            // WorkManager polling stops for this account; the worker cancels itself once
+            // no account needs it anymore
 
             Result.Success(Unit)
         } catch (e: Exception) {

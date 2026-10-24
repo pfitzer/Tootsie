@@ -45,10 +45,12 @@ interface NotificationRepository {
      *
      * @param limit Maximum number of notifications to fetch
      * @param sinceId Only fetch notifications after this ID
+     * @param accountId Fetch with the credentials of this logged-in account (default: active account)
      * @return Result with list of notifications
      */
     suspend fun fetchRecentNotifications(
         limit: Int = 20,
-        sinceId: String? = null
+        sinceId: String? = null,
+        accountId: String? = null
     ): Result<List<Notification>>
 }

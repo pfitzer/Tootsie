@@ -11,6 +11,12 @@ import javax.inject.Inject
 private const val TAG = "InstanceInterceptor"
 
 /**
+ * Request header that pins a request to a specific instance instead of the active one.
+ * Removed before the request is sent.
+ */
+const val HEADER_INSTANCE = "X-Tootsie-Instance"
+
+/**
  * OkHttp interceptor that dynamically sets the base URL based on the current instance.
  * This allows the app to connect to different Mastodon instances.
  */
@@ -22,8 +28,10 @@ class InstanceInterceptor @Inject constructor(
         val originalRequest = chain.request()
         if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Original URL: ${originalRequest.url}")
 
-        // Get current instance URL synchronously
-        val instance = instanceUrlProvider.getInstanceUrlSync() ?: "mastodon.social"
+        // Use the explicitly requested instance, or the active one (synchronously)
+        val instance = originalRequest.header(HEADER_INSTANCE)
+            ?: instanceUrlProvider.getInstanceUrlSync()
+            ?: "mastodon.social"
         if (BuildConfig.DEBUG) Log.d(TAG, "intercept() - Instance from provider: $instance")
 
         // Build new URL with the correct instance
@@ -40,6 +48,7 @@ class InstanceInterceptor @Inject constructor(
 
         val request = originalRequest.newBuilder()
             .url(finalUrl)
+            .removeHeader(HEADER_INSTANCE)
             .build()
 
         if (BuildConfig.DEBUG) {

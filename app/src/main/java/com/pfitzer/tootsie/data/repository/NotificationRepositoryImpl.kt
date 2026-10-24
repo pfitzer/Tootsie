@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.paging.NotificationPagingSource
+import com.pfitzer.tootsie.data.remote.AccountCredentialsProvider
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
@@ -19,7 +20,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class NotificationRepositoryImpl @Inject constructor(
-    private val mastodonApi: MastodonApiService
+    private val mastodonApi: MastodonApiService,
+    private val accountCredentialsProvider: AccountCredentialsProvider
 ) : NotificationRepository {
 
     override fun getNotifications(
@@ -62,12 +64,19 @@ class NotificationRepositoryImpl @Inject constructor(
 
     override suspend fun fetchRecentNotifications(
         limit: Int,
-        sinceId: String?
+        sinceId: String?,
+        accountId: String?
     ): Result<List<Notification>> {
         return try {
+            val credentials = accountId?.let {
+                accountCredentialsProvider.forAccount(it)
+                    ?: return Result.Error("Account $it is not logged in")
+            }
             val notificationDtos = mastodonApi.getNotifications(
                 limit = limit,
-                sinceId = sinceId
+                sinceId = sinceId,
+                authorization = credentials?.authorization,
+                instance = credentials?.instance
             )
             val notifications = notificationDtos.map { it.toDomain() }
             Result.Success(notifications)
