@@ -47,7 +47,7 @@ class SplashViewModel @Inject constructor(
             // Initialize providers with stored credentials before checking auth status
             // Use IO dispatcher to avoid DataStore deadlock on main thread
             withContext(Dispatchers.IO) {
-                authRepository.initializeProviders()
+                authRepository.ensureInitialized()
                 Log.d(TAG, "checkAuthStatus() - Cleaning up database...")
                 cleanupDatabaseUseCase()
             }
