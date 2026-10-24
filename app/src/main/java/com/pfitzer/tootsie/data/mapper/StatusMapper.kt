@@ -2,6 +2,9 @@ package com.pfitzer.tootsie.data.mapper
 
 import com.pfitzer.tootsie.data.local.entities.StatusEntity
 import com.pfitzer.tootsie.data.remote.dto.*
+import com.pfitzer.tootsie.domain.model.Quote
+import com.pfitzer.tootsie.domain.model.QuotePermission
+import com.pfitzer.tootsie.domain.model.QuoteState
 import com.pfitzer.tootsie.domain.model.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -20,7 +23,8 @@ fun StatusDto.toDomain(): Status {
         uri = uri,
         url = url,
         account = account.toDomain(),
-        content = content,
+        // The quote is shown as a card, so drop the "RE: <link>" fallback paragraph
+        content = if (quote != null) content.withoutQuoteInline() else content,
         createdAt = createdAt,
         editedAt = editedAt,
         visibility = visibility.toVisibilityEnum(),
@@ -42,9 +46,25 @@ fun StatusDto.toDomain(): Status {
         bookmarked = bookmarked,
         pinned = pinned,
         card = card?.toDomain(),
-        language = language
+        language = language,
+        quote = quote?.let {
+            Quote(
+                state = QuoteState.fromApi(it.state),
+                quotedStatus = it.quotedStatus?.toDomain(),
+                quotedStatusId = it.quotedStatusId ?: it.quotedStatus?.id
+            )
+        },
+        quotePermission = quoteApproval?.let { QuotePermission.fromApi(it.currentUser) }
     )
 }
+
+/**
+ * Mastodon prepends `<p class="quote-inline">RE: <a …></a></p>` to quote posts for clients
+ * without quote support.
+ */
+private val QUOTE_INLINE = Regex("""<p class="quote-inline">.*?</p>""", RegexOption.DOT_MATCHES_ALL)
+
+internal fun String.withoutQuoteInline(): String = QUOTE_INLINE.replace(this, "")
 
 /**
  * Maps StatusDto to StatusEntity for caching.

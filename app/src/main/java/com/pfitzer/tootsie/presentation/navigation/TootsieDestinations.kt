@@ -35,11 +35,12 @@ sealed class TootsieDestinations(val route: String) {
      * Optionally takes replyToId parameter for replying to a status.
      * Optionally takes draftId parameter for resuming a draft.
      */
-    data object Compose : TootsieDestinations("compose?replyToId={replyToId}&draftId={draftId}") {
-        fun createRoute(replyToId: String? = null, draftId: Long? = null): String {
+    data object Compose : TootsieDestinations("compose?replyToId={replyToId}&draftId={draftId}&quoteId={quoteId}") {
+        fun createRoute(replyToId: String? = null, draftId: Long? = null, quoteId: String? = null): String {
             val params = buildList {
                 if (replyToId != null) add("replyToId=$replyToId")
                 if (draftId != null) add("draftId=$draftId")
+                if (quoteId != null) add("quoteId=$quoteId")
             }
             return if (params.isEmpty()) {
                 "compose"
@@ -49,6 +50,7 @@ sealed class TootsieDestinations(val route: String) {
         }
         const val ARG_REPLY_TO_ID = "replyToId"
         const val ARG_DRAFT_ID = "draftId"
+        const val ARG_QUOTE_ID = "quoteId"
     }
 
     /**

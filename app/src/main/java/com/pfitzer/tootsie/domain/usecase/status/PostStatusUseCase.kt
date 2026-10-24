@@ -31,7 +31,8 @@ class PostStatusUseCase @Inject constructor(
         mediaIds: List<String>? = null,
         sensitive: Boolean = false,
         spoilerText: String? = null,
-        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null,
+        quotedStatusId: String? = null
     ): Result<Status> {
         return statusRepository.postStatus(
             content = content,
@@ -40,7 +41,8 @@ class PostStatusUseCase @Inject constructor(
             mediaIds = mediaIds,
             sensitive = sensitive,
             spoilerText = spoilerText,
-            pollConfig = pollConfig
+            pollConfig = pollConfig,
+            quotedStatusId = quotedStatusId
         )
     }
 }

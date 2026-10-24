@@ -370,7 +370,8 @@ interface MastodonApiService {
         @Field("poll[options][]") pollOptions: List<String>? = null,
         @Field("poll[expires_in]") pollExpiresIn: Int? = null,
         @Field("poll[multiple]") pollMultiple: Boolean? = null,
-        @Field("poll[hide_totals]") pollHideTotals: Boolean? = null
+        @Field("poll[hide_totals]") pollHideTotals: Boolean? = null,
+        @Field("quoted_status_id") quotedStatusId: String? = null
     ): StatusDto
 
     /**

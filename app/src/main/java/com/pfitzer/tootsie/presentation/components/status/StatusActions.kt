@@ -44,6 +44,20 @@ fun StatusActions(
     onReportClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    // Servers with quote support (quote_approval present) offer boost or quote
+    val onQuote = LocalOnQuoteStatus.current
+    val offerQuote = onQuote != null && status.quotePermission != null
+    var showBoostOrQuote by remember { mutableStateOf(false) }
+
+    if (showBoostOrQuote && onQuote != null) {
+        BoostOrQuoteSheet(
+            status = status,
+            onBoost = onBoostClick,
+            onQuote = { onQuote(status) },
+            onDismissRequest = { showBoostOrQuote = false }
+        )
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,7 +77,7 @@ fun StatusActions(
             icon = Icons.Filled.Repeat,
             count = status.reblogsCount,
             isActive = status.reblogged,
-            onClick = onBoostClick,
+            onClick = { if (offerQuote) showBoostOrQuote = true else onBoostClick() },
             contentDescription = if (status.reblogged) stringResource(R.string.cd_unboost) else stringResource(R.string.cd_boost),
             activeColor = MaterialTheme.colorScheme.tertiary
         )

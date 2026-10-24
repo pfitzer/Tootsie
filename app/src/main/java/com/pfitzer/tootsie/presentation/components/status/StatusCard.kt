@@ -165,6 +165,15 @@ fun StatusCard(
                     )
                 }
 
+                // Quoted status
+                displayStatus.quote?.takeIf { showBody }?.let { quote ->
+                    QuotedStatusCard(
+                        quote = quote,
+                        onClick = onStatusClick,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
                 // Interaction counts and buttons
                 StatusActions(
                     status = displayStatus,

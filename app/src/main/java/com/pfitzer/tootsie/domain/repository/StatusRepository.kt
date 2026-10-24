@@ -45,7 +45,8 @@ interface StatusRepository {
         mediaIds: List<String>? = null,
         sensitive: Boolean = false,
         spoilerText: String? = null,
-        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
+        pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null,
+        quotedStatusId: String? = null
     ): Result<Status>
 
     /**

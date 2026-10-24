@@ -31,7 +31,9 @@ data class Status(
     val pinned: Boolean = false, // Whether this status is pinned
     val card: Card? = null, // Preview card for links
     val language: String? = null, // ISO 639 language code
-    val filteredByKeyword: String? = null // Name of filter that matched (for "warn" action)
+    val filteredByKeyword: String? = null, // Name of filter that matched (for "warn" action)
+    val quote: Quote? = null, // Quoted status (Mastodon >= 4.4)
+    val quotePermission: QuotePermission? = null // null: server without quote support (< 4.5)
 )
 
 /**

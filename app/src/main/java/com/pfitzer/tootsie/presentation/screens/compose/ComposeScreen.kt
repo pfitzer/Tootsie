@@ -16,6 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.domain.model.Quote
+import com.pfitzer.tootsie.domain.model.QuoteState
+import com.pfitzer.tootsie.presentation.components.status.QuotedStatusCard
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.domain.model.MediaAttachment
@@ -112,7 +115,11 @@ fun ComposeScreen(
             TopAppBar(
                 title = {
                     Text(stringResource(
-                        if (uiState.isReply) R.string.compose_title_reply else R.string.compose
+                        when {
+                            uiState.isReply -> R.string.compose_title_reply
+                            uiState.isQuote -> R.string.compose_title_quote
+                            else -> R.string.compose
+                        }
                     ))
                 },
                 navigationIcon = {
@@ -199,6 +206,15 @@ fun ComposeScreen(
                     .weight(1f),
                 minLines = 5
             )
+
+            // Preview of the quoted status
+            uiState.quotedStatus?.let { quoted ->
+                Spacer(modifier = Modifier.height(16.dp))
+                QuotedStatusCard(
+                    quote = Quote(state = QuoteState.ACCEPTED, quotedStatus = quoted),
+                    onClick = null
+                )
+            }
 
             // Media preview grid
             if (uiState.mediaAttachments.isNotEmpty()) {
