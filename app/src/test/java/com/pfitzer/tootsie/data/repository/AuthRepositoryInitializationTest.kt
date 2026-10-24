@@ -35,7 +35,8 @@ class AuthRepositoryInitializationTest {
         instanceUrlProvider = instanceUrlProvider,
         tokenProvider = tokenProvider,
         credentialCipher = mockk(relaxed = true),
-        credentialMigration = credentialMigration
+        credentialMigration = credentialMigration,
+        statusInteractionStore = mockk(relaxed = true)
     )
 
     @Before
