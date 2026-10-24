@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pfitzer.tootsie.R
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
@@ -349,7 +350,7 @@ private fun SingleMediaAttachment(
             .height(300.dp)
             .then(
                 when (attachment.type) {
-                    MediaType.IMAGE, MediaType.GIFV -> {
+                    MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                         Modifier.clickable {
                             onImageClick(attachment.url, attachment.description)
                         }
@@ -410,18 +411,28 @@ private fun SingleMediaAttachment(
                 }
             }
             MediaType.UNKNOWN -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.media_label_media),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                // Remote media the server has not cached is often still served via its
+                // media proxy, so try to load it and fall back to a placeholder
+                SubcomposeAsyncImage(
+                    model = attachment.previewUrl ?: attachment.url,
+                    contentDescription = attachment.description ?: stringResource(R.string.cd_image),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    error = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.media_preview_unavailable),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                )
             }
         }
     }
@@ -449,7 +460,7 @@ private fun TwoMediaGrid(
                     .weight(1f)
                     .then(
                         when (attachment.type) {
-                            MediaType.IMAGE, MediaType.GIFV -> {
+                            MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                                 Modifier.clickable {
                                     onImageClick(attachment.url, attachment.description)
                                 }
@@ -506,7 +517,7 @@ private fun ThreeMediaGrid(
                 .weight(1f)
                 .then(
                     when (attachments[0].type) {
-                        MediaType.IMAGE, MediaType.GIFV -> {
+                        MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                             Modifier.clickable {
                                 onImageClick(attachments[0].url, attachments[0].description)
                             }
@@ -538,7 +549,7 @@ private fun ThreeMediaGrid(
                         .weight(1f)
                         .then(
                             when (attachment.type) {
-                                MediaType.IMAGE, MediaType.GIFV -> {
+                                MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                                     Modifier.clickable {
                                         onImageClick(attachment.url, attachment.description)
                                     }
@@ -591,7 +602,7 @@ private fun FourPlusMediaGrid(
                         .weight(1f)
                         .then(
                             when (attachment.type) {
-                                MediaType.IMAGE, MediaType.GIFV -> {
+                                MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                                     Modifier.clickable {
                                         onImageClick(attachment.url, attachment.description)
                                     }
@@ -625,7 +636,7 @@ private fun FourPlusMediaGrid(
                         .weight(1f)
                         .then(
                             when (attachment.type) {
-                                MediaType.IMAGE, MediaType.GIFV -> {
+                                MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
                                     Modifier.clickable {
                                         onImageClick(attachment.url, attachment.description)
                                     }

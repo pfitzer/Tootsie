@@ -285,6 +285,7 @@
     <string name="media_label_audio">AUDIO</string>
     <string name="media_label_alt">ALT</string>
     <string name="media_label_media">MEDIEN</string>
+    <string name="media_preview_unavailable">Vorschau nicht verfügbar – zum Öffnen tippen</string>
 
     <!-- Status Labels -->
     <string name="status_boosted">%1$s hat geteilt</string>
