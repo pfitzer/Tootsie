@@ -76,4 +76,10 @@ interface PushRepository {
      * @return Result indicating success or failure
      */
     suspend fun deletePushConfig(accountId: String): Result<Unit>
+
+    /**
+     * Whether the account's server subscription was created with standard (aes128gcm)
+     * encryption, which is the only scheme that can be decrypted via UnifiedPush.
+     */
+    suspend fun isStandardSubscription(accountId: String): Boolean
 }

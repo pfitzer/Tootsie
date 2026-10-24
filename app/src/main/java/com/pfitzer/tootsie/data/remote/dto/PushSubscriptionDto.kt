@@ -18,7 +18,11 @@ data class PushSubscriptionRequestDto(
 @Serializable
 data class SubscriptionKeysDto(
     val endpoint: String,
-    val keys: KeysDto
+    val keys: KeysDto,
+    // true: standard RFC 8291 aes128gcm (Mastodon >= 4.4). The legacy scheme puts salt and
+    // server key in HTTP headers, which UnifiedPush doesn't forward. No default value:
+    // the Json config doesn't encode defaults.
+    val standard: Boolean
 )
 
 /**
