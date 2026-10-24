@@ -1,10 +1,13 @@
 package com.pfitzer.tootsie.domain.usecase.push
 
+import android.content.Context
 import com.pfitzer.tootsie.domain.model.*
 import com.pfitzer.tootsie.domain.repository.PushRepository
 import com.pfitzer.tootsie.push.UnifiedPushManager
 import com.pfitzer.tootsie.util.Result
 import com.pfitzer.tootsie.util.VapidKeyGenerator
+import com.pfitzer.tootsie.worker.NotificationPollWorker
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
@@ -13,13 +16,14 @@ import javax.inject.Inject
  */
 class EnablePushUseCase @Inject constructor(
     private val pushRepository: PushRepository,
-    private val unifiedPushManager: UnifiedPushManager
+    private val unifiedPushManager: UnifiedPushManager,
+    @ApplicationContext private val context: Context
 ) {
     /**
      * Enable push notifications for an account.
      *
      * Flow:
-     * 1. Check if UnifiedPush distributor is available
+     * 1. Check if a UnifiedPush distributor is installed; if not, enable polling instead
      * 2. Generate VAPID keys and auth secret
      * 3. Save initial config to DataStore
      * 4. Register with UnifiedPush (triggers onNewEndpoint callback)
@@ -29,9 +33,22 @@ class EnablePushUseCase @Inject constructor(
      * @return Result indicating success or failure
      */
     suspend operator fun invoke(accountId: String, alerts: PushAlerts): Result<Unit> {
-        // Check if distributor is available
+        // Without a distributor, fall back to polling every 15 minutes
         if (!unifiedPushManager.isDistributorAvailable()) {
-            return Result.Error("No UnifiedPush distributor available")
+            pushRepository.savePushConfig(
+                AccountPushConfig(
+                    accountId = accountId,
+                    enabled = true,
+                    endpoint = null,
+                    vapidPublicKey = null,
+                    vapidPrivateKey = null,
+                    authSecret = null,
+                    alerts = alerts,
+                    status = PushStatus.POLLING
+                )
+            )
+            NotificationPollWorker.schedule(context)
+            return Result.Success(Unit)
         }
 
         // Generate VAPID keys
