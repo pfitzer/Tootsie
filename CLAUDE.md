@@ -492,6 +492,8 @@ class SplashViewModel @Inject constructor(
 
 **Key Takeaway**: Don't initialize providers in repository init blocks. Use explicit initialization methods called from ViewModels with proper dispatcher context.
 
+**Background entry points**: WorkManager workers and UnifiedPush callbacks can start a cold process without the splash screen. Every entry point that calls the API must first call `AuthRepositoryImpl.ensureInitialized()` (idempotent, runs once per process on `Dispatchers.IO`). Otherwise requests go out without a token.
+
 ---
 
 #### 4. Coroutine Dispatcher Selection for DataStore

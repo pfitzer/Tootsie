@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
+import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
 import com.pfitzer.tootsie.push.NotificationHelper
 import dagger.assisted.Assisted
@@ -19,14 +20,23 @@ import com.pfitzer.tootsie.util.Result as DomainResult
 class NotificationPollWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
+    private val authRepository: AuthRepositoryImpl,
     private val notificationRepository: NotificationRepository,
     private val preferencesManager: PreferencesManager,
     private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): androidx.work.ListenableWorker.Result {
+        // The worker may run in a cold process where the splash screen never initialized
+        // the token and instance providers
+        authRepository.ensureInitialized()
+
         val activeAccountId = preferencesManager.getActiveAccountId()
             ?: return androidx.work.ListenableWorker.Result.failure()
+        if (preferencesManager.getAccessToken() == null) {
+            // Logged out: nothing to poll, don't send unauthenticated requests
+            return androidx.work.ListenableWorker.Result.success()
+        }
 
         val sinceId = preferencesManager.getLastNotificationId(activeAccountId)
 
