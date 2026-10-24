@@ -453,7 +453,18 @@ interface MastodonApiService {
      * @param id Status ID
      */
     @GET("api/v1/statuses/{id}/context")
-    suspend fun getContext(@Path("id") id: String): com.pfitzer.tootsie.data.remote.dto.ContextDto
+    suspend fun getContext(
+        @Path("id") id: String
+    ): retrofit2.Response<com.pfitzer.tootsie.data.remote.dto.ContextDto>
+
+    /**
+     * Get the state of a server background job announced via the Mastodon-Async-Refresh
+     * header (experimental API, Mastodon >= 4.4).
+     */
+    @GET("api/v1_alpha/async_refreshes/{id}")
+    suspend fun getAsyncRefresh(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.AsyncRefreshResponseDto
 
     // ========== Bookmarks & Favorites Endpoints ==========
 

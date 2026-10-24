@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -54,6 +55,20 @@ fun StatusDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showShareMenu by remember { mutableStateOf<Status?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Hint after replies from other instances were added to the thread
+    val newRepliesMessage = if (uiState.newRepliesCount > 0) {
+        pluralStringResource(R.plurals.status_new_replies_loaded, uiState.newRepliesCount, uiState.newRepliesCount)
+    } else {
+        null
+    }
+    LaunchedEffect(newRepliesMessage) {
+        if (newRepliesMessage != null) {
+            snackbarHostState.showSnackbar(newRepliesMessage)
+            viewModel.onAction(StatusDetailAction.DismissNewReplies)
+        }
+    }
 
     showShareMenu?.let { status ->
         ShareBottomSheet(
@@ -63,6 +78,7 @@ fun StatusDetailScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.post)) },
@@ -97,6 +113,7 @@ fun StatusDetailScreen(
                         mainStatus = uiState.status!!,
                         ancestors = uiState.ancestors,
                         descendants = uiState.descendants,
+                        isFetchingRemoteReplies = uiState.isFetchingRemoteReplies,
                         onStatusClick = onNavigateToStatus,
                         onAvatarClick = onNavigateToProfile,
                         onMentionClick = onNavigateToProfile,
@@ -159,6 +176,7 @@ private fun ConversationThread(
     mainStatus: Status,
     ancestors: List<Status>,
     descendants: List<Status>,
+    isFetchingRemoteReplies: Boolean,
     onStatusClick: (String) -> Unit,
     onAvatarClick: (String) -> Unit,
     onMentionClick: (String) -> Unit,
@@ -179,7 +197,8 @@ private fun ConversationThread(
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         // Ancestors (posts before this one)
-        items(ancestors) { status ->
+        // Stable keys keep the scroll position when new replies are merged in
+        items(ancestors, key = { "ancestor-${it.id}" }) { status ->
             StatusCard(
                 status = status,
                 onStatusClick = onStatusClick,
@@ -202,7 +221,7 @@ private fun ConversationThread(
         }
 
         // Main status (highlighted)
-        item {
+        item(key = "main-status") {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -231,7 +250,7 @@ private fun ConversationThread(
         }
 
         // Descendants (replies)
-        itemsIndexed(descendants) { index, status ->
+        itemsIndexed(descendants, key = { _, status -> "reply-${status.id}" }) { index, status ->
             ReplyItem(
                 status = status,
                 isFirst = index == 0,
@@ -252,8 +271,32 @@ private fun ConversationThread(
             )
         }
 
+        // The server is fetching replies from other instances
+        if (isFetchingRemoteReplies) {
+            item(key = "fetching-remote-replies") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.status_fetching_remote_replies),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
         // Show message if no replies
-        if (descendants.isEmpty()) {
+        if (descendants.isEmpty() && !isFetchingRemoteReplies) {
             item {
                 Text(
                     text = stringResource(R.string.empty_replies),

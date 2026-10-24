@@ -280,6 +280,11 @@
     <string name="empty_trending_posts">Keine Trending-Beiträge</string>
     <string name="empty_trending_links">Keine Trending-Links</string>
     <string name="empty_replies">Noch keine Antworten</string>
+    <string name="status_fetching_remote_replies">Antworten von anderen Servern werden geladen…</string>
+    <plurals name="status_new_replies_loaded">
+        <item quantity="one">%1$d neue Antwort geladen</item>
+        <item quantity="other">%1$d neue Antworten geladen</item>
+    </plurals>
 
     <!-- Media Labels -->
     <string name="media_label_audio">AUDIO</string>

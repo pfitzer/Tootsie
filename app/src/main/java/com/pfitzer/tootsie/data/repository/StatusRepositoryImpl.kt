@@ -3,8 +3,10 @@ package com.pfitzer.tootsie.data.repository
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
+import com.pfitzer.tootsie.data.remote.AsyncRefreshHeader
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.data.remote.dto.StatusDto
+import com.pfitzer.tootsie.domain.model.AsyncRefreshProgress
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.MediaMeta
 import com.pfitzer.tootsie.domain.model.MediaType
@@ -238,11 +240,29 @@ class StatusRepositoryImpl @Inject constructor(
 
     override suspend fun getStatusContext(statusId: String): Result<com.pfitzer.tootsie.domain.model.Context> {
         return try {
-            val contextDto = mastodonApi.getContext(statusId)
-            val context: com.pfitzer.tootsie.domain.model.Context = contextDto.toDomain()
+            val response = mastodonApi.getContext(statusId)
+            val contextDto = response.body()
+            if (!response.isSuccessful || contextDto == null) throw retrofit2.HttpException(response)
+            val context = contextDto.toDomain().copy(
+                asyncRefresh = AsyncRefreshHeader.parse(response.headers()[AsyncRefreshHeader.NAME])
+            )
             Result.Success(context)
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to load conversation context")
+        }
+    }
+
+    override suspend fun getAsyncRefresh(id: String): Result<AsyncRefreshProgress> {
+        return try {
+            val refresh = mastodonApi.getAsyncRefresh(id).asyncRefresh
+            Result.Success(
+                AsyncRefreshProgress(
+                    finished = refresh.status == "finished",
+                    resultCount = refresh.resultCount
+                )
+            )
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to get async refresh state", e)
         }
     }
 

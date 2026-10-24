@@ -3,11 +3,14 @@ package com.pfitzer.tootsie.presentation.screens.statusdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pfitzer.tootsie.domain.model.AsyncRefresh
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.repository.StatusRepository
+import com.pfitzer.tootsie.domain.usecase.status.AwaitRemoteRepliesUseCase
 import com.pfitzer.tootsie.domain.usecase.status.GetStatusContextUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +32,7 @@ class StatusDetailViewModel @Inject constructor(
     private val statusInteractionStore: StatusInteractionStore,
     private val statusRepository: StatusRepository,
     private val getStatusContextUseCase: GetStatusContextUseCase,
+    private val awaitRemoteRepliesUseCase: AwaitRemoteRepliesUseCase,
     private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
     private val unfavoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.UnfavoriteStatusUseCase,
     private val reblogStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.ReblogStatusUseCase,
@@ -50,6 +54,8 @@ class StatusDetailViewModel @Inject constructor(
                 descendants = state.descendants.map { it.withInteractions(interactions) }
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
+
+    private var remoteRepliesJob: Job? = null
 
     init {
         loadStatusAndContext()
@@ -89,6 +95,7 @@ class StatusDetailViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    contextResult.data.asyncRefresh?.let { awaitRemoteReplies(it) }
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -104,12 +111,45 @@ class StatusDetailViewModel @Inject constructor(
     }
 
     /**
+     * The server started fetching replies from other instances: wait for the job and merge
+     * new replies into the thread. Cancelled with the ViewModel or on a new load.
+     */
+    private fun awaitRemoteReplies(refresh: AsyncRefresh) {
+        remoteRepliesJob?.cancel()
+        remoteRepliesJob = viewModelScope.launch {
+            _uiState.update { it.copy(isFetchingRemoteReplies = true) }
+            try {
+                if (awaitRemoteRepliesUseCase(refresh)) {
+                    mergeNewReplies()
+                }
+            } finally {
+                _uiState.update { it.copy(isFetchingRemoteReplies = false) }
+            }
+        }
+    }
+
+    private suspend fun mergeNewReplies() {
+        val context = (getStatusContextUseCase(statusId) as? Result.Success)?.data ?: return
+        // Not following context.asyncRefresh again: the job just finished
+        val knownIds = _uiState.value.descendants.mapTo(HashSet()) { it.id }
+        val added = context.descendants.count { it.id !in knownIds }
+        _uiState.update {
+            it.copy(
+                ancestors = context.ancestors,
+                descendants = context.descendants,
+                newRepliesCount = added
+            )
+        }
+    }
+
+    /**
      * Handle user actions.
      */
     fun onAction(action: StatusDetailAction) {
         when (action) {
             is StatusDetailAction.Refresh -> loadStatusAndContext()
             is StatusDetailAction.DismissError -> dismissError()
+            is StatusDetailAction.DismissNewReplies -> _uiState.update { it.copy(newRepliesCount = 0) }
             is StatusDetailAction.FavoriteStatus -> favoriteStatus(action.status)
             is StatusDetailAction.UnfavoriteStatus -> unfavoriteStatus(action.status)
             is StatusDetailAction.BoostStatus -> boostStatus(action.status)
@@ -258,7 +298,11 @@ data class StatusDetailUiState(
     val ancestors: List<Status> = emptyList(),
     val descendants: List<Status> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    /** The server is fetching replies from other instances */
+    val isFetchingRemoteReplies: Boolean = false,
+    /** Replies added by the last remote fetch, shown once as a hint */
+    val newRepliesCount: Int = 0
 )
 
 /**
@@ -267,6 +311,7 @@ data class StatusDetailUiState(
 sealed class StatusDetailAction {
     data object Refresh : StatusDetailAction()
     data object DismissError : StatusDetailAction()
+    data object DismissNewReplies : StatusDetailAction()
     data class FavoriteStatus(val status: Status) : StatusDetailAction()
     data class UnfavoriteStatus(val status: Status) : StatusDetailAction()
     data class BoostStatus(val status: Status) : StatusDetailAction()
