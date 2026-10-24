@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -154,8 +155,9 @@ private fun QuotedStatusContent(status: Status) {
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(
+            EmojiText(
                 text = status.account.displayName.ifBlank { status.account.username },
+                emojis = status.account.emojis,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -174,14 +176,16 @@ private fun QuotedStatusContent(status: Status) {
         Spacer(modifier = Modifier.padding(top = 6.dp))
         // Respect the quoted post's content warning: show only the warning text
         if (status.spoilerText.isNotBlank()) {
-            Text(
+            EmojiText(
                 text = stringResource(R.string.status_content_warning, status.spoilerText),
+                emojis = status.emojis,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else if (plainText.isNotBlank()) {
-            Text(
+            EmojiText(
                 text = plainText,
+                emojis = status.emojis,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 6,
                 overflow = TextOverflow.Ellipsis

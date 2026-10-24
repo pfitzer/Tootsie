@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import com.pfitzer.tootsie.presentation.components.common.EmojiText
+import com.pfitzer.tootsie.domain.model.CustomEmoji
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,7 +36,8 @@ import java.time.format.FormatStyle
 fun PollComponent(
     poll: Poll,
     onVoteClick: (String, List<Int>) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emojis: List<CustomEmoji> = emptyList()
 ) {
     // Track if user has voted locally (optimistic UI update)
     var hasVotedLocally by remember(poll.id) { mutableStateOf(false) }
@@ -50,6 +53,7 @@ fun PollComponent(
         poll.options.forEachIndexed { index, option ->
             PollOptionItem(
                 option = option,
+                emojis = emojis,
                 index = index,
                 totalVotes = poll.votesCount,
                 showResults = poll.voted || poll.expired || hasVotedLocally,
@@ -132,6 +136,7 @@ fun PollComponent(
 @Composable
 private fun PollOptionItem(
     option: PollOption,
+    emojis: List<CustomEmoji>,
     index: Int,
     totalVotes: Int,
     showResults: Boolean,
@@ -204,8 +209,9 @@ private fun PollOptionItem(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text(
+                EmojiText(
                     text = option.title,
+                    emojis = emojis,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = if (isVoted) FontWeight.Bold else FontWeight.Normal,
                     maxLines = 1

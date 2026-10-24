@@ -109,6 +109,7 @@ fun StatusCard(
                 if (isReblog) {
                     BoostIndicator(
                         boosterName = status.account.displayName,
+                        boosterEmojis = status.account.emojis,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -126,6 +127,7 @@ fun StatusCard(
                 if (hasContentWarning) {
                     ContentWarning(
                         text = displayStatus.spoilerText,
+                        emojis = displayStatus.emojis,
                         expanded = showContentBehindWarning,
                         onToggle = { showContentBehindWarning = !showContentBehindWarning },
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -138,6 +140,7 @@ fun StatusCard(
                         content = displayStatus.content,
                         mentions = displayStatus.mentions,
                         tags = displayStatus.tags,
+                        emojis = displayStatus.emojis,
                         onMentionClick = onMentionClick,
                         onHashtagClick = onHashtagClick,
                         onLinkClick = onLinkClick,
@@ -161,6 +164,7 @@ fun StatusCard(
                 displayStatus.poll?.takeIf { showBody }?.let { poll ->
                     PollComponent(
                         poll = poll,
+                        emojis = displayStatus.emojis,
                         onVoteClick = onVoteClick,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
@@ -197,6 +201,7 @@ fun StatusCard(
 @Composable
 private fun BoostIndicator(
     boosterName: String,
+    boosterEmojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji>,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -210,8 +215,9 @@ private fun BoostIndicator(
             tint = MaterialTheme.colorScheme.secondary
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
+        EmojiText(
             text = stringResource(R.string.status_boosted, boosterName),
+            emojis = boosterEmojis,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -289,7 +295,8 @@ internal fun ContentWarning(
     text: String,
     expanded: Boolean,
     onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji> = emptyList()
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -300,8 +307,9 @@ internal fun ContentWarning(
             modifier = Modifier.padding(start = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            EmojiText(
                 text = stringResource(R.string.status_content_warning, text),
+                emojis = emojis,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier
@@ -328,6 +336,7 @@ private fun StatusContent(
     content: String,
     mentions: List<com.pfitzer.tootsie.domain.model.Mention>,
     tags: List<com.pfitzer.tootsie.domain.model.Tag>,
+    emojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji>,
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
@@ -343,7 +352,8 @@ private fun StatusContent(
             onHashtagClick = onHashtagClick,
             onLinkClick = onLinkClick,
             onTextClick = onStatusClick,
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            emojis = emojis
         )
     }
 }
