@@ -256,11 +256,11 @@
     <string name="retention_12h">12 Stunden</string>
     <string name="retention_24h">24 Stunden</string>
     <string name="retention_48h">48 Stunden</string>
-    <string name="settings_title">Kontoeinstellungen</string>
+    <string name="settings_title">Einstellungen</string>
     <string name="settings_account_title">Kontoeinstellungen</string>
     <string name="settings_active_account">Aktives Konto</string>
     <string name="settings_remove_account">Konto entfernen</string>
-    <string name="settings_add_account">Weiteres Konto hinzufügen</string>
+    <string name="settings_add_account">Konto hinzufügen</string>
     <string name="settings_remove_dialog_title">Konto entfernen?</string>
     <string name="settings_remove_dialog_message">Sind Sie sicher, dass Sie @%1$s entfernen möchten? Alle zwischengespeicherten Daten für dieses Konto werden gelöscht.</string>
     <string name="settings_remove_dialog_message_generic">Sind Sie sicher, dass Sie dieses Konto entfernen möchten?</string>
@@ -577,4 +577,22 @@
     <string name="error_verify_credentials">Account konnte nicht überprüft werden: %1$s</string>
     <string name="error_vote">Stimme konnte nicht abgegeben werden</string>
     <string name="success_report">Meldung gesendet</string>
+
+    <!-- Settings (#218) -->
+    <string name="settings_section_active_account">Konto @%1$s</string>
+    <string name="settings_account_active_label">Aktiv</string>
+    <string name="settings_account_options">Kontooptionen</string>
+    <string name="settings_edit_profile_description">Name, Bio, Avatar und Titelbild</string>
+    <string name="settings_push_description">Festlegen, welche Benachrichtigungen ankommen</string>
+    <string name="settings_follow_requests_description">Neue Follower annehmen oder ablehnen</string>
+    <string name="settings_filters_description">Beiträge mit bestimmten Wörtern ausblenden</string>
+    <string name="settings_muted_description">Konten, deren Beiträge ausgeblendet werden</string>
+    <string name="settings_blocked_description">Konten, die keinen Kontakt aufnehmen können</string>
+    <string name="theme_system_short">System</string>
+    <string name="settings_section_storage">Speicher</string>
+    <string name="settings_cache_retention">Timeline-Cache behalten</string>
+    <string name="settings_cache_retention_description">Ältere zwischengespeicherte Beiträge werden automatisch gelöscht</string>
+    <string name="settings_section_about">Über</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_source_code">Quellcode</string>
 </resources>
