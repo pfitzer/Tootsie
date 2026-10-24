@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.usecase.account.UnblockAccountUseCase
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,10 +35,20 @@ class BlockedAccountsViewModel @Inject constructor(
     val uiState: StateFlow<BlockedAccountsUiState> = _uiState.asStateFlow()
 
     /**
+     * Accounts unblocked on this screen. They are filtered out of the paged list, so the
+     * item count (and with it the empty state) stays correct without reloading.
+     */
+    private val unblockedAccountIds = MutableStateFlow<Set<String>>(emptySet())
+
+    /**
      * Paging data flow for blocked accounts.
      */
     val blockedAccountsPagingData: Flow<PagingData<Account>> =
-        accountRepository.getBlockedAccounts().cachedIn(viewModelScope)
+        accountRepository.getBlockedAccounts()
+            .cachedIn(viewModelScope)
+            .combine(unblockedAccountIds) { pagingData, removedIds ->
+                pagingData.filter { it.id !in removedIds }
+            }
 
     /**
      * Handle user actions.
@@ -53,21 +65,18 @@ class BlockedAccountsViewModel @Inject constructor(
      */
     private fun unblockAccount(account: Account) {
         viewModelScope.launch {
-            _uiState.update { it.copy(processingAccountId = account.id) }
+            if (account.id in _uiState.value.processingAccountIds) return@launch
+            _uiState.update { it.copy(processingAccountIds = it.processingAccountIds + account.id) }
 
             when (val result = unblockAccountUseCase(account.id)) {
                 is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            processingAccountId = null,
-                            unblockedAccountId = account.id
-                        )
-                    }
+                    unblockedAccountIds.update { it + account.id }
+                    _uiState.update { it.copy(processingAccountIds = it.processingAccountIds - account.id) }
                 }
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(
-                            processingAccountId = null,
+                            processingAccountIds = it.processingAccountIds - account.id,
                             errorMessage = UiText.of(R.string.error_unblock_account)
                         )
                     }
@@ -89,8 +98,7 @@ class BlockedAccountsViewModel @Inject constructor(
  * UI state for Blocked Accounts Screen.
  */
 data class BlockedAccountsUiState(
-    val processingAccountId: String? = null,
-    val unblockedAccountId: String? = null,
+    val processingAccountIds: Set<String> = emptySet(),
     val errorMessage: UiText? = null
 )
 
