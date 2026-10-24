@@ -4,39 +4,57 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.pfitzer.tootsie.BuildConfig
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 
+private const val SOURCE_CODE_URL = "https://github.com/pfitzer/Tootsie"
+
 /**
- * Settings screen showing account management.
- * Allows users to:
- * - View all logged-in accounts
- * - Switch between accounts
- * - Remove accounts
- * - Add new accounts
+ * Settings screen.
+ * Sections:
+ * - Accounts: switch, remove and add accounts
+ * - Active account: profile, push, follow requests, filters, muted and blocked accounts
+ * - Appearance: theme and text size
+ * - Storage: how long cached timelines are kept
+ * - About: version and source code
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +65,8 @@ fun SettingsScreen(
     onNavigateToFollowRequests: () -> Unit = {},
     onNavigateToMutedAccounts: () -> Unit = {},
     onNavigateToBlockedAccounts: () -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {},
+    onNavigateToFilters: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -89,11 +109,15 @@ fun SettingsScreen(
                     SuccessContent(
                         state = state,
                         onAction = viewModel::onAction,
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToPushSettings = onNavigateToPushSettings,
-                        onNavigateToFollowRequests = onNavigateToFollowRequests,
-                        onNavigateToMutedAccounts = onNavigateToMutedAccounts,
-                        onNavigateToBlockedAccounts = onNavigateToBlockedAccounts
+                        navigation = SettingsNavigation(
+                            onAddAccount = onNavigateToLogin,
+                            onEditProfile = onNavigateToEditProfile,
+                            onPushSettings = onNavigateToPushSettings,
+                            onFollowRequests = onNavigateToFollowRequests,
+                            onFilters = onNavigateToFilters,
+                            onMutedAccounts = onNavigateToMutedAccounts,
+                            onBlockedAccounts = onNavigateToBlockedAccounts
+                        )
                     )
                 }
 
@@ -113,36 +137,39 @@ fun SettingsScreen(
 }
 
 /**
- * Success state content showing account list.
+ * Navigation targets reachable from the settings screen.
+ */
+private class SettingsNavigation(
+    val onAddAccount: () -> Unit,
+    val onEditProfile: () -> Unit,
+    val onPushSettings: () -> Unit,
+    val onFollowRequests: () -> Unit,
+    val onFilters: () -> Unit,
+    val onMutedAccounts: () -> Unit,
+    val onBlockedAccounts: () -> Unit
+)
+
+/**
+ * Success state content.
  */
 @Composable
 private fun SuccessContent(
     state: SettingsUiState.Success,
     onAction: (SettingsAction) -> Unit,
-    onNavigateToLogin: () -> Unit,
-    onNavigateToPushSettings: () -> Unit,
-    onNavigateToFollowRequests: () -> Unit,
-    onNavigateToMutedAccounts: () -> Unit,
-    onNavigateToBlockedAccounts: () -> Unit
+    navigation: SettingsNavigation
 ) {
+    val isEnabled = !state.isSwitching && !state.isRemoving
+    val activeAccount = state.accounts.find { it.id == state.activeAccountId }
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Scrollable content
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            // Accounts Section
-            item {
-                Text(
-                    text = stringResource(R.string.accounts),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
+            // Accounts
+            item { SectionHeader(stringResource(R.string.accounts)) }
 
             items(state.accounts, key = { it.id }) { account ->
                 AccountItem(
@@ -150,102 +177,154 @@ private fun SuccessContent(
                     isActive = account.id == state.activeAccountId,
                     onSwitch = { onAction(SettingsAction.SwitchAccount(account.id)) },
                     onRemove = { onAction(SettingsAction.RemoveAccount(account.id)) },
-                    isEnabled = !state.isSwitching && !state.isRemoving
-                )
-            }
-
-            // Push settings button
-            item {
-                PushSettingsButton(
-                    onClick = onNavigateToPushSettings,
-                    isEnabled = !state.isSwitching && !state.isRemoving
-                )
-            }
-
-            // Follow requests button
-            item {
-                FollowRequestsButton(
-                    onClick = onNavigateToFollowRequests,
-                    isEnabled = !state.isSwitching && !state.isRemoving
-                )
-            }
-
-            // Muted accounts button
-            item {
-                MutedAccountsButton(
-                    onClick = onNavigateToMutedAccounts,
-                    isEnabled = !state.isSwitching && !state.isRemoving
-                )
-            }
-
-            // Blocked accounts button
-            item {
-                BlockedAccountsButton(
-                    onClick = onNavigateToBlockedAccounts,
-                    isEnabled = !state.isSwitching && !state.isRemoving
-                )
-            }
-
-            // Add account button
-            item {
-                AddAccountButton(
-                    onClick = onNavigateToLogin,
-                    isEnabled = !state.isSwitching && !state.isRemoving
+                    isEnabled = isEnabled
                 )
             }
 
             item {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.settings_add_account),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    },
+                    modifier = Modifier.clickable(enabled = isEnabled, onClick = navigation.onAddAccount)
+                )
             }
 
-            // Theme Section
+            // Settings of the active account
             item {
-                Text(
-                    text = stringResource(R.string.theme),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                SectionHeader(
+                    if (activeAccount != null) {
+                        stringResource(R.string.settings_section_active_account, activeAccount.acct)
+                    } else {
+                        stringResource(R.string.settings_active_account)
+                    }
                 )
             }
 
             item {
-                ThemeSelectionCard(
-                    currentTheme = state.theme,
-                    onThemeChange = { onAction(SettingsAction.ChangeTheme(it)) }
+                NavigationItem(
+                    icon = Icons.Default.Edit,
+                    title = stringResource(R.string.edit_profile),
+                    description = stringResource(R.string.settings_edit_profile_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onEditProfile
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.Default.Notifications,
+                    title = stringResource(R.string.push_notifications),
+                    description = stringResource(R.string.settings_push_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onPushSettings
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.Default.PersonAdd,
+                    title = stringResource(R.string.follow_requests_title),
+                    description = stringResource(R.string.settings_follow_requests_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onFollowRequests
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.Default.FilterList,
+                    title = stringResource(R.string.filters_title),
+                    description = stringResource(R.string.settings_filters_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onFilters
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.AutoMirrored.Filled.VolumeOff,
+                    title = stringResource(R.string.muted_accounts_title),
+                    description = stringResource(R.string.settings_muted_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onMutedAccounts
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.Default.Block,
+                    title = stringResource(R.string.blocked_accounts_title),
+                    description = stringResource(R.string.settings_blocked_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onBlockedAccounts
                 )
             }
 
-            // Appearance Section
+            // Appearance
+            item { SectionHeader(stringResource(R.string.appearance)) }
+
             item {
-                Text(
-                    text = stringResource(R.string.appearance),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                SegmentedSetting(
+                    title = stringResource(R.string.theme),
+                    options = listOf(
+                        "light" to stringResource(R.string.theme_light),
+                        "dark" to stringResource(R.string.theme_dark),
+                        "system" to stringResource(R.string.theme_system_short)
+                    ),
+                    selected = state.theme,
+                    onSelect = { onAction(SettingsAction.ChangeTheme(it)) }
                 )
             }
 
             item {
-                TextSizeCard(
+                TextSizeItem(
                     currentTextSize = state.textSize,
                     onTextSizeChange = { onAction(SettingsAction.ChangeTextSize(it)) }
                 )
             }
 
-            // Database Cleanup Section
+            // Storage
+            item { SectionHeader(stringResource(R.string.settings_section_storage)) }
+
             item {
-                Text(
-                    text = stringResource(R.string.database_cleanup),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                SegmentedSetting(
+                    title = stringResource(R.string.settings_cache_retention),
+                    description = stringResource(R.string.settings_cache_retention_description),
+                    options = listOf(
+                        "12" to stringResource(R.string.retention_12h),
+                        "24" to stringResource(R.string.retention_24h),
+                        "48" to stringResource(R.string.retention_48h)
+                    ),
+                    selected = state.databaseRetentionHours,
+                    onSelect = { onAction(SettingsAction.ChangeDatabaseRetentionHours(it)) }
+                )
+            }
+
+            // About
+            item { SectionHeader(stringResource(R.string.settings_section_about)) }
+
+            item {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_version)) },
+                    supportingContent = { Text(BuildConfig.VERSION_NAME) },
+                    leadingContent = { Icon(Icons.Default.Info, contentDescription = null) }
                 )
             }
 
             item {
-                DatabaseRetentionCard(
-                    currentRetentionHours = state.databaseRetentionHours,
-                    onRetentionChange = { onAction(SettingsAction.ChangeDatabaseRetentionHours(it)) }
+                val uriHandler = LocalUriHandler.current
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.settings_source_code)) },
+                    supportingContent = { Text(SOURCE_CODE_URL.removePrefix("https://")) },
+                    leadingContent = { Icon(Icons.Default.Code, contentDescription = null) },
+                    modifier = Modifier.clickable { uriHandler.openUri(SOURCE_CODE_URL) }
                 )
             }
         }
@@ -271,148 +350,162 @@ private fun SuccessContent(
 }
 
 /**
- * Single account item card.
+ * Section header in the settings list.
  */
 @Composable
-private fun ThemeSelectionCard(
-    currentTheme: String,
-    onThemeChange: (String) -> Unit
+private fun SectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp)
+    )
+}
+
+/**
+ * List entry that opens another screen.
+ */
+@Composable
+private fun NavigationItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(description) },
+        leadingContent = { Icon(icon, contentDescription = null) },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null
+            )
+        },
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
+    )
+}
+
+/**
+ * Setting with a few options, shown as a segmented button row.
+ */
+@Composable
+private fun SegmentedSetting(
+    title: String,
+    options: List<Pair<String, String>>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    description: String? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ThemeOption(
-                label = stringResource(R.string.theme_light),
-                selected = currentTheme == "light",
-                onClick = { onThemeChange("light") }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        if (description != null) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            ThemeOption(
-                label = stringResource(R.string.theme_dark),
-                selected = currentTheme == "dark",
-                onClick = { onThemeChange("dark") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.theme_system),
-                selected = currentTheme == "system",
-                onClick = { onThemeChange("system") }
-            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { index, (value, label) ->
+                SegmentedButton(
+                    selected = value == selected,
+                    onClick = { onSelect(value) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    label = {
+                        Text(
+                            text = label,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                )
+            }
         }
     }
 }
 
-@Composable
-private fun ThemeOption(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-    }
-}
-
 /**
- * Card for selecting text size.
+ * Text size entry showing the current size; opens a dialog to change it.
  */
 @Composable
-private fun TextSizeCard(
+private fun TextSizeItem(
     currentTextSize: String,
     onTextSizeChange: (String) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    var showDialog by remember { mutableStateOf(false) }
+    val options = listOf(
+        "SMALL" to stringResource(R.string.text_size_small),
+        "MEDIUM" to stringResource(R.string.text_size_medium),
+        "LARGE" to stringResource(R.string.text_size_large),
+        "EXTRA_LARGE" to stringResource(R.string.text_size_extra_large)
+    )
+    val currentLabel = options.firstOrNull { it.first == currentTextSize }?.second.orEmpty()
+
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.text_size)) },
+        supportingContent = { Text(currentLabel) },
+        leadingContent = { Icon(Icons.Default.FormatSize, contentDescription = null) },
+        modifier = Modifier.clickable { showDialog = true }
+    )
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(stringResource(R.string.text_size)) },
+            text = {
+                Column {
+                    options.forEach { (value, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = value == currentTextSize,
+                                    role = Role.RadioButton,
+                                    onClick = {
+                                        onTextSizeChange(value)
+                                        showDialog = false
+                                    }
+                                )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = value == currentTextSize,
+                                onClick = null
+                            )
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.text_size),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            ThemeOption(
-                label = stringResource(R.string.text_size_small),
-                selected = currentTextSize == "SMALL",
-                onClick = { onTextSizeChange("SMALL") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.text_size_medium),
-                selected = currentTextSize == "MEDIUM",
-                onClick = { onTextSizeChange("MEDIUM") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.text_size_large),
-                selected = currentTextSize == "LARGE",
-                onClick = { onTextSizeChange("LARGE") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.text_size_extra_large),
-                selected = currentTextSize == "EXTRA_LARGE",
-                onClick = { onTextSizeChange("EXTRA_LARGE") }
-            )
-        }
     }
 }
 
 /**
- * Card for selecting database retention period.
+ * Account entry. Tapping switches to the account; removing is in the overflow menu.
  */
-@Composable
-private fun DatabaseRetentionCard(
-    currentRetentionHours: String,
-    onRetentionChange: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.retention_period),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            ThemeOption(
-                label = stringResource(R.string.retention_12h),
-                selected = currentRetentionHours == "12",
-                onClick = { onRetentionChange("12") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.retention_24h),
-                selected = currentRetentionHours == "24",
-                onClick = { onRetentionChange("24") }
-            )
-            ThemeOption(
-                label = stringResource(R.string.retention_48h),
-                selected = currentRetentionHours == "48",
-                onClick = { onRetentionChange("48") }
-            )
-        }
-    }
-}
-
 @Composable
 private fun AccountItem(
     account: Account,
@@ -421,105 +514,86 @@ private fun AccountItem(
     onRemove: () -> Unit,
     isEnabled: Boolean
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled && !isActive) { onSwitch() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar
+    var showMenu by remember { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = {
+            Text(
+                text = account.displayName.ifBlank { account.username },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        supportingContent = {
+            Text(
+                text = "@${account.acct}",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        leadingContent = {
             AsyncImage(
                 model = account.avatar,
-                contentDescription = "Avatar for ${account.displayName}",
+                contentDescription = stringResource(R.string.cd_avatar),
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(40.dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Account info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = account.displayName,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "@${account.acct}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isActive) {
+                    Text(
+                        text = stringResource(R.string.settings_account_active_label),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        enabled = isEnabled
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.settings_account_options)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.settings_remove_account),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onRemove()
+                            }
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Active indicator
-            if (isActive) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = stringResource(R.string.settings_active_account),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            // Remove button
-            IconButton(
-                onClick = onRemove,
-                enabled = isEnabled
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.settings_remove_account),
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-    }
-}
-
-/**
- * Add account button.
- */
-@Composable
-private fun AddAccountButton(
-    onClick: () -> Unit,
-    isEnabled: Boolean
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled) { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.settings_add_account),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
+        },
+        colors = if (isActive) {
+            ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f))
+        } else {
+            ListItemDefaults.colors()
+        },
+        modifier = Modifier.clickable(enabled = isEnabled && !isActive, onClick = onSwitch)
+    )
 }
 
 /**
@@ -610,138 +684,6 @@ private fun ErrorBanner(
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.dismiss))
             }
-        }
-    }
-}
-
-/**
- * Push settings button.
- */
-@Composable
-private fun PushSettingsButton(
-    onClick: () -> Unit,
-    isEnabled: Boolean
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled) { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.push_notifications),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/**
- * Follow requests button.
- */
-@Composable
-private fun FollowRequestsButton(
-    onClick: () -> Unit,
-    isEnabled: Boolean
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled) { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.follow_requests_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/**
- * Muted accounts button.
- */
-@Composable
-private fun MutedAccountsButton(
-    onClick: () -> Unit,
-    isEnabled: Boolean
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled) { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.muted_accounts_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/**
- * Blocked accounts button.
- */
-@Composable
-private fun BlockedAccountsButton(
-    onClick: () -> Unit,
-    isEnabled: Boolean
-) {
-    OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = isEnabled) { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.blocked_accounts_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

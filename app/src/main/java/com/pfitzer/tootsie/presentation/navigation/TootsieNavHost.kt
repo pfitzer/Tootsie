@@ -443,7 +443,7 @@ fun TootsieNavHost(
             )
         }
 
-        // Settings screen - account management
+        // Settings screen
         composable(route = TootsieDestinations.Settings.route) {
             SettingsScreen(
                 onNavigateBack = {
@@ -463,6 +463,12 @@ fun TootsieNavHost(
                 },
                 onNavigateToBlockedAccounts = {
                     navController.navigate(TootsieDestinations.BlockedAccounts.route)
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(TootsieDestinations.EditProfile.route)
+                },
+                onNavigateToFilters = {
+                    navController.navigate(TootsieDestinations.Filters.route)
                 }
             )
         }

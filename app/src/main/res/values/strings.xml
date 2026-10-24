@@ -255,11 +255,11 @@
     <string name="retention_12h">12 hours</string>
     <string name="retention_24h">24 hours</string>
     <string name="retention_48h">48 hours</string>
-    <string name="settings_title">Account Settings</string>
+    <string name="settings_title">Settings</string>
     <string name="settings_account_title">Account Settings</string>
     <string name="settings_active_account">Active account</string>
     <string name="settings_remove_account">Remove account</string>
-    <string name="settings_add_account">Add Another Account</string>
+    <string name="settings_add_account">Add account</string>
     <string name="settings_remove_dialog_title">Remove Account?</string>
     <string name="settings_remove_dialog_message">Are you sure you want to remove @%1$s? This will delete all cached data for this account.</string>
     <string name="settings_remove_dialog_message_generic">Are you sure you want to remove this account?</string>
@@ -576,4 +576,22 @@
     <string name="error_verify_credentials">Couldn\'t verify the account: %1$s</string>
     <string name="error_vote">Couldn\'t submit your vote</string>
     <string name="success_report">Report submitted</string>
+
+    <!-- Settings (#218) -->
+    <string name="settings_section_active_account">Account @%1$s</string>
+    <string name="settings_account_active_label">Active</string>
+    <string name="settings_account_options">Account options</string>
+    <string name="settings_edit_profile_description">Name, bio, avatar and header</string>
+    <string name="settings_push_description">Choose which notifications you receive</string>
+    <string name="settings_follow_requests_description">Accept or reject new followers</string>
+    <string name="settings_filters_description">Hide posts containing keywords</string>
+    <string name="settings_muted_description">Accounts whose posts you don\'t see</string>
+    <string name="settings_blocked_description">Accounts that can\'t interact with you</string>
+    <string name="theme_system_short">System</string>
+    <string name="settings_section_storage">Storage</string>
+    <string name="settings_cache_retention">Keep timeline cache</string>
+    <string name="settings_cache_retention_description">Cached posts older than this are deleted automatically</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_source_code">Source code</string>
 </resources>
