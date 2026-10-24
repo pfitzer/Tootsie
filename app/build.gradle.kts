@@ -64,6 +64,18 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// AGP's lint tool classpath (androidLintTool) pulls in BouncyCastle 1.80.2, affected by
+// GHSA-9pwp-9qqc-pr26 and GHSA-qp49-qgx5-5m26. Use the catalog version everywhere until a
+// stable AGP ships a fixed version (see also the buildscript block in the root build file).
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.bouncycastle" && requested.name.endsWith("-jdk18on")) {
+            useVersion(libs.versions.bouncycastle.get())
+            because("BouncyCastle < 1.85 is affected by GHSA-9pwp-9qqc-pr26 and GHSA-qp49-qgx5-5m26")
+        }
+    }
+}
+
 dependencies {
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
