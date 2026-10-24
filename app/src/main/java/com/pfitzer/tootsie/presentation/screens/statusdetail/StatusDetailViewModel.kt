@@ -14,6 +14,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.domain.model.withInteractions
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * ViewModel for Status Detail Screen.
@@ -21,6 +26,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class StatusDetailViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val statusRepository: StatusRepository,
     private val getStatusContextUseCase: GetStatusContextUseCase,
     private val favoriteStatusUseCase: com.pfitzer.tootsie.domain.usecase.status.FavoriteStatusUseCase,
@@ -36,7 +42,14 @@ class StatusDetailViewModel @Inject constructor(
     private val statusId: String = checkNotNull(savedStateHandle["statusId"])
 
     private val _uiState = MutableStateFlow(StatusDetailUiState())
-    val uiState: StateFlow<StatusDetailUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<StatusDetailUiState> =
+        combine(_uiState, statusInteractionStore.interactions) { state, interactions ->
+            state.copy(
+                status = state.status?.withInteractions(interactions),
+                ancestors = state.ancestors.map { it.withInteractions(interactions) },
+                descendants = state.descendants.map { it.withInteractions(interactions) }
+            )
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
 
     init {
         loadStatusAndContext()
@@ -140,10 +153,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun favoriteStatus(status: Status) {
         viewModelScope.launch {
             when (favoriteStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    // Success - status will refresh via repository
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to favorite post")
@@ -160,9 +170,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun unfavoriteStatus(status: Status) {
         viewModelScope.launch {
             when (unfavoriteStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to unfavorite post")
@@ -179,9 +187,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun boostStatus(status: Status) {
         viewModelScope.launch {
             when (reblogStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to boost post")
@@ -198,9 +204,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun unboostStatus(status: Status) {
         viewModelScope.launch {
             when (unreblogStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to unboost post")
@@ -217,9 +221,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun bookmarkStatus(status: Status) {
         viewModelScope.launch {
             when (bookmarkStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to bookmark post")
@@ -236,9 +238,7 @@ class StatusDetailViewModel @Inject constructor(
     private fun unbookmarkStatus(status: Status) {
         viewModelScope.launch {
             when (unbookmarkStatusUseCase(status.id)) {
-                is Result.Success -> {
-                    loadStatusAndContext()
-                }
+                is Result.Success -> Unit // Reflected via StatusInteractionStore
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(errorMessage = "Failed to unbookmark post")

@@ -16,6 +16,7 @@ import com.pfitzer.tootsie.domain.model.AccessToken
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.AppCredentials
 import com.pfitzer.tootsie.domain.repository.AuthRepository
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +42,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val instanceUrlProvider: InstanceUrlProvider,
     private val tokenProvider: TokenProvider,
     private val credentialCipher: CredentialCipher,
-    private val credentialMigration: CredentialMigration
+    private val credentialMigration: CredentialMigration,
+    private val statusInteractionStore: StatusInteractionStore
 ) : AuthRepository {
 
     private val initMutex = Mutex()
@@ -222,6 +224,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             // Clear token from provider
             tokenProvider.clearToken()
+            statusInteractionStore.clear()
             if (BuildConfig.DEBUG) Log.d(TAG, "Token cleared from provider")
 
             // Delete account from database if exists

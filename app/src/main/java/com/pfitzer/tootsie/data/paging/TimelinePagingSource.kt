@@ -9,7 +9,6 @@ import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
 import com.pfitzer.tootsie.domain.model.Filter
-import com.pfitzer.tootsie.domain.model.FilterAction
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.TimelineFilter
 import kotlinx.coroutines.flow.first
@@ -32,6 +31,8 @@ class TimelinePagingSource(
     private val filter: TimelineFilter = TimelineFilter.DEFAULT,
     private val keywordFilters: List<Filter> = emptyList()
 ) : PagingSource<String, Status>() {
+
+    private val keywordFilterMatcher = KeywordFilterMatcher(keywordFilters)
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Status> {
         // Get active account for scoping cached data
@@ -187,67 +188,12 @@ class TimelinePagingSource(
         }
 
         // Apply keyword filters
-        if (keywordFilters.isNotEmpty()) {
+        if (!keywordFilterMatcher.isEmpty) {
             result = result.mapNotNull { status ->
-                applyKeywordFilter(status)
+                keywordFilterMatcher.apply(status)
             }
         }
 
         return result
-    }
-
-    /**
-     * Apply keyword filters to a single status.
-     * Returns null if status should be hidden, or status with filteredByKeyword set if warning.
-     */
-    private fun applyKeywordFilter(status: Status): Status? {
-        val matchedFilter = findMatchingFilter(status)
-        return when {
-            matchedFilter == null -> status
-            matchedFilter.filterAction == FilterAction.HIDE -> null
-            matchedFilter.filterAction == FilterAction.WARN -> status.copy(
-                filteredByKeyword = matchedFilter.title
-            )
-            else -> status
-        }
-    }
-
-    /**
-     * Find the first filter that matches the status content.
-     */
-    private fun findMatchingFilter(status: Status): Filter? {
-        // Build content to check (main status + reblog if present)
-        val contentToCheck = buildString {
-            append(status.content)
-            append(" ")
-            append(status.spoilerText)
-            status.reblog?.let { reblog ->
-                append(" ")
-                append(reblog.content)
-                append(" ")
-                append(reblog.spoilerText)
-            }
-        }.lowercase()
-
-        return keywordFilters.find { filter ->
-            filter.keywords.any { keyword ->
-                matchesKeyword(contentToCheck, keyword.keyword, keyword.wholeWord)
-            }
-        }
-    }
-
-    /**
-     * Check if content matches a keyword.
-     */
-    private fun matchesKeyword(content: String, keyword: String, wholeWord: Boolean): Boolean {
-        val keywordLower = keyword.lowercase()
-        return if (wholeWord) {
-            // Match whole word using word boundaries
-            val pattern = "\\b${Regex.escape(keywordLower)}\\b"
-            Regex(pattern, RegexOption.IGNORE_CASE).containsMatchIn(content)
-        } else {
-            // Partial match
-            content.contains(keywordLower)
-        }
     }
 }

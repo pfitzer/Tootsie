@@ -14,6 +14,11 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.domain.model.withInteractions
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * ViewModel for Search Screen.
@@ -22,6 +27,7 @@ import javax.inject.Inject
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val statusInteractionStore: StatusInteractionStore,
     private val searchUseCase: SearchUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
@@ -34,7 +40,10 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
-    val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<SearchUiState> =
+        combine(_uiState, statusInteractionStore.interactions) { state, interactions ->
+            state.copy(statuses = state.statuses.map { it.withInteractions(interactions) })
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
 
     /**
      * Observe the currently active account.
