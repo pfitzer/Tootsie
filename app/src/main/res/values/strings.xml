@@ -284,6 +284,7 @@
     <string name="media_label_audio">AUDIO</string>
     <string name="media_label_alt">ALT</string>
     <string name="media_label_media">MEDIA</string>
+    <string name="media_preview_unavailable">Preview not available – tap to open</string>
 
     <!-- Status Labels -->
     <string name="status_boosted">%1$s boosted</string>
