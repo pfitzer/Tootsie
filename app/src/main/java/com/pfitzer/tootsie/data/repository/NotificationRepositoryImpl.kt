@@ -81,7 +81,8 @@ class NotificationRepositoryImpl @Inject constructor(
             val notifications = notificationDtos.map { it.toDomain() }
             Result.Success(notifications)
         } catch (e: Exception) {
-            Result.Error(e.message ?: "Failed to fetch recent notifications")
+            // Keep the exception so callers can tell auth errors from transient failures
+            Result.Error(e.message ?: "Failed to fetch recent notifications", e)
         }
     }
 }
