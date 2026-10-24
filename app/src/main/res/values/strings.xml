@@ -76,7 +76,7 @@
     <string name="compose_placeholder_content">What\'s on your mind?</string>
     <string name="compose_placeholder_warning">Warning text</string>
     <string name="compose_replying_to">Replying to @%1$s</string>
-    <string name="compose_character_count">%1$d / 500</string>
+    <string name="compose_character_count">%1$d / %2$d</string>
     <string name="compose_button_post">Post</string>
     <string name="compose_button_posting">Posting…</string>
 

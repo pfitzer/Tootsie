@@ -221,4 +221,13 @@ abstract class RepositoryModule {
     abstract fun bindReportRepository(
         reportRepositoryImpl: ReportRepositoryImpl
     ): ReportRepository
+
+    /**
+     * Binds InstanceRepositoryImpl to InstanceRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindInstanceRepository(
+        instanceRepositoryImpl: InstanceRepositoryImpl
+    ): InstanceRepository
 }

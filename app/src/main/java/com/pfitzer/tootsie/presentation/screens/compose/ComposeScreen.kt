@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.compose
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,11 +75,16 @@ fun ComposeScreen(
         }
     }
 
-    // Navigate back when post is successful
-    LaunchedEffect(uiState.isPosted) {
-        if (uiState.isPosted) {
+    // Navigate back when the post is sent, or once the draft is saved after leaving
+    LaunchedEffect(uiState.isPosted, uiState.isExited) {
+        if (uiState.isPosted || uiState.isExited) {
             onNavigateBack()
         }
+    }
+
+    // System back saves the draft first, like the back arrow
+    BackHandler(enabled = !uiState.isPosted && !uiState.isExited) {
+        viewModel.onAction(ComposeAction.Exit)
     }
 
     // Alt text dialog
@@ -123,7 +129,7 @@ fun ComposeScreen(
                     ))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { viewModel.onAction(ComposeAction.Exit) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
@@ -164,6 +170,9 @@ fun ComposeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                // Keeps the counter and the toolbar above the keyboard (edge-to-edge)
+                .imePadding()
                 .padding(16.dp)
         ) {
             // Reply context (if replying)
@@ -267,9 +276,9 @@ fun ComposeScreen(
 
             // Character counter
             Text(
-                text = stringResource(R.string.compose_character_count, uiState.characterCount),
+                text = stringResource(R.string.compose_character_count, uiState.characterCount, uiState.maxCharacters),
                 style = MaterialTheme.typography.bodySmall,
-                color = if (uiState.characterCount > 500) {
+                color = if (uiState.isOverCharacterLimit) {
                     MaterialTheme.colorScheme.error
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant

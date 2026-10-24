@@ -7,8 +7,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
+import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.domain.usecase.instance.GetInstanceLimitsUseCase
+import com.pfitzer.tootsie.domain.util.StatusLengthCounter
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -34,6 +37,7 @@ class ComposeViewModel @Inject constructor(
     private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
     private val draftRepository: DraftRepository,
     private val getCustomEmojisUseCase: com.pfitzer.tootsie.domain.usecase.emoji.GetCustomEmojisUseCase,
+    private val getInstanceLimitsUseCase: GetInstanceLimitsUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -48,8 +52,9 @@ class ComposeViewModel @Inject constructor(
     private var autoSaveJob: Job? = null
 
     init {
-        // Load custom emojis from instance
+        // Load custom emojis and posting limits from the instance
         loadCustomEmojis()
+        loadInstanceLimits()
 
         // Load draft if resuming from drafts
         if (draftId != null) {
@@ -76,6 +81,16 @@ class ComposeViewModel @Inject constructor(
                 _uiState.update { it.copy(quotedStatus = result.data) }
             }
             // Without the preview the quote can still be posted
+        }
+    }
+
+    /**
+     * Load the posting limits (character limit etc.) of the instance.
+     */
+    private fun loadInstanceLimits() {
+        viewModelScope.launch {
+            val limits = getInstanceLimitsUseCase()
+            _uiState.update { it.copy(limits = limits) }
         }
     }
 
@@ -135,6 +150,7 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.DismissError -> dismissError()
             is ComposeAction.LoadDraft -> loadDraft(action.draftId)
             is ComposeAction.SaveDraftNow -> saveDraftNow()
+            is ComposeAction.Exit -> exit()
             is ComposeAction.DeleteDraft -> deleteDraft()
             ComposeAction.AddPoll -> addPoll()
             ComposeAction.RemovePoll -> removePoll()
@@ -338,6 +354,23 @@ class ComposeViewModel @Inject constructor(
         autoSaveJob?.cancel()
         viewModelScope.launch {
             saveDraft()
+        }
+    }
+
+    /**
+     * Leave the compose screen: save the draft first, so text typed within the last
+     * auto-save delay isn't lost. A draft that has been emptied is deleted instead.
+     */
+    private fun exit() {
+        autoSaveJob?.cancel()
+        viewModelScope.launch {
+            val state = _uiState.value
+            when {
+                state.isPosted -> Unit
+                state.hasDraftContent -> saveDraft()
+                state.currentDraftId != null -> draftRepository.deleteDraft(state.currentDraftId)
+            }
+            _uiState.update { it.copy(isExited = true) }
         }
     }
 
@@ -586,19 +619,26 @@ data class ComposeUiState(
     val lastDraftSavedAt: Long? = null,
     val customEmojis: List<com.pfitzer.tootsie.domain.model.CustomEmoji> = emptyList(),
     val isLoadingEmojis: Boolean = true,
-    val pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null
+    val pollConfig: com.pfitzer.tootsie.domain.model.PollConfig? = null,
+    val limits: InstanceLimits = InstanceLimits(),
+    val isExited: Boolean = false
 ) {
-    val characterCount: Int get() = content.length
+    /** Length as Mastodon counts it (URLs, mentions, content warning). */
+    val characterCount: Int by lazy {
+        StatusLengthCounter.count(content, contentWarning, limits.charactersReservedPerUrl)
+    }
+    val maxCharacters: Int get() = limits.maxCharacters
+    val isOverCharacterLimit: Boolean get() = characterCount > maxCharacters
     val hasMedia: Boolean get() = mediaAttachments.isNotEmpty()
     val hasPoll: Boolean get() = pollConfig != null
     val canPost: Boolean get() {
         val hasContent = content.isNotBlank()
         val hasCompletePoll = hasPoll && pollConfig?.options?.all { it.isNotBlank() } == true
-        return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && characterCount <= 500
+        return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && !isOverCharacterLimit
     }
     val isReply: Boolean get() = replyToId != null
     val isQuote: Boolean get() = quoteId != null
-    val canAddMedia: Boolean get() = mediaAttachments.size < 4 && !isUploadingMedia && !hasPoll
+    val canAddMedia: Boolean get() = mediaAttachments.size < limits.maxMediaAttachments && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
     val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank() || hasPoll
 }
@@ -618,6 +658,8 @@ sealed class ComposeAction {
     data object DismissError : ComposeAction()
     data class LoadDraft(val draftId: Long) : ComposeAction()
     data object SaveDraftNow : ComposeAction()
+    /** Leave the screen; the draft is saved before isExited is set. */
+    data object Exit : ComposeAction()
     data object DeleteDraft : ComposeAction()
 
     // Poll actions
