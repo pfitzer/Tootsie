@@ -4,6 +4,35 @@
 
 Tootsie is a modern, high-performance, and privacy-respecting Mastodon client for Android. Built from the ground up with Jetpack Compose and Kotlin, it follows Clean Architecture principles to provide a smooth experience for the Fediverse.
 
+## 📱 Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/light/01_home.png" width="200" alt="Home timeline">
+  <img src="docs/screenshots/light/02_thread.png" width="200" alt="Thread">
+  <img src="docs/screenshots/light/03_profile.png" width="200" alt="Profile">
+  <img src="docs/screenshots/light/04_compose.png" width="200" alt="Compose with poll">
+  <img src="docs/screenshots/light/05_search.png" width="200" alt="Search">
+  <img src="docs/screenshots/light/06_menu.png" width="200" alt="Menu">
+  <img src="docs/screenshots/light/07_trending.png" width="200" alt="Trending hashtags">
+  <img src="docs/screenshots/light/08_settings.png" width="200" alt="Settings">
+</p>
+
+<details>
+<summary>Dark mode</summary>
+
+<p align="center">
+  <img src="docs/screenshots/dark/01_home.png" width="200" alt="Home timeline">
+  <img src="docs/screenshots/dark/02_thread.png" width="200" alt="Thread">
+  <img src="docs/screenshots/dark/03_profile.png" width="200" alt="Profile">
+  <img src="docs/screenshots/dark/04_compose.png" width="200" alt="Compose with poll">
+  <img src="docs/screenshots/dark/05_search.png" width="200" alt="Search">
+  <img src="docs/screenshots/dark/06_menu.png" width="200" alt="Menu">
+  <img src="docs/screenshots/dark/07_trending.png" width="200" alt="Trending hashtags">
+  <img src="docs/screenshots/dark/08_settings.png" width="200" alt="Settings">
+</p>
+
+</details>
+
 ## 🚀 Features
 
 - **Multi-Account Support**: Seamlessly switch between multiple Mastodon accounts without app reloads.
@@ -14,18 +43,24 @@ Tootsie is a modern, high-performance, and privacy-respecting Mastodon client fo
     - Access tokens are encrypted at rest with a non-exportable Android Keystore key (AES-GCM), in DataStore and in the Room database.
 - **Posts & Threads**:
     - Favourite, boost, bookmark and reply; the state updates immediately in every list.
+    - **Edit own posts** (text, content warning, media and alt texts, poll), see the **edit history** of edited posts, **delete** or **delete & redraft**.
+    - See who **favourited and boosted** a post.
+    - **Translate** posts in other languages through the server's translation service, or hand them to a translator app.
     - **Quote posts**: boost or quote a post, with the author's quote policy respected (Mastodon 4.5+).
     - **Content warnings** hide text, media and polls until expanded; sensitive media is blurred.
     - Threads automatically load **missing replies from other servers** (Mastodon 4.5+).
-    - Polls (view, vote, create), custom emoji picker, draft auto-save and management.
+    - Polls (view, vote, create), custom emoji picker, draft auto-save and management (media, poll and language included); mark media as sensitive.
 - **Rich Media**: Images, videos and audio (ExoPlayer); uncached remote media is loaded through the instance's media proxy.
 - **Filters**:
     - Timeline filters (hide boosts, replies, or show only media).
     - **Keyword filters** to hide or warn about posts, matched against the visible text of a post.
 - **Organization**: Lists (create, edit, manage members), followed hashtags, bookmarks, favourites, drafts.
 - **Discovery**: Search for accounts, posts and hashtags; trending hashtags, posts and links; announcements.
+- **Profiles**: Followers and following lists, notifications for new posts of an account, private notes, the server of remote accounts.
 - **Account Management**: Profile editing, follow requests, muted and blocked accounts, blocked domains.
 - **Scheduled Posts**: Pick a publication time when composing; reschedule, edit or delete scheduled posts.
+- **Reading position**: The home timeline position and read notifications are synced with Mastodon's markers, shared with the web interface and other apps.
+- **Accessible**: TalkBack actions on every post, counts read with their buttons, alt texts and fallbacks for media.
 - **Internationalized**: English and German.
 
 Some features depend on the server version: quote posts and fetching remote replies need Mastodon 4.5 or newer, decrypting push notifications needs Mastodon 4.4 or newer. On older servers Tootsie falls back to the previous behaviour (e.g. the boost button boosts directly).
@@ -128,8 +163,9 @@ When contributing to Tootsie, please adhere to these architectural guardrails (d
 
 Planned features and known issues are tracked in [GitHub Issues](https://github.com/pfitzer/Tootsie/issues), for example:
 
-- Accessibility audit ([#2](https://github.com/pfitzer/Tootsie/issues/2))
-- Performance: avoid re-parsing post HTML during scrolling ([#190](https://github.com/pfitzer/Tootsie/issues/190))
+- Accessibility: manual TalkBack pass and keyboard focus order ([#2](https://github.com/pfitzer/Tootsie/issues/2))
+- Optional own DeepL API key for translations ([#257](https://github.com/pfitzer/Tootsie/issues/257))
+- Project website with GitHub Pages ([#266](https://github.com/pfitzer/Tootsie/issues/266))
 
 ## 📄 License
 
