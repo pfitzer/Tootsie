@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import com.pfitzer.tootsie.domain.model.remoteDomain
+import com.pfitzer.tootsie.domain.usecase.domainblock.BlockDomainUseCase
+import com.pfitzer.tootsie.domain.usecase.domainblock.UnblockDomainUseCase
 import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -37,6 +40,8 @@ class ProfileViewModel @Inject constructor(
     private val unmuteAccountUseCase: UnmuteAccountUseCase,
     private val blockAccountUseCase: BlockAccountUseCase,
     private val unblockAccountUseCase: UnblockAccountUseCase,
+    private val blockDomainUseCase: BlockDomainUseCase,
+    private val unblockDomainUseCase: UnblockDomainUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
@@ -185,6 +190,8 @@ class ProfileViewModel @Inject constructor(
             is ProfileAction.UnmuteAccount -> unmuteAccount()
             is ProfileAction.BlockAccount -> blockAccount()
             is ProfileAction.UnblockAccount -> unblockAccount()
+            is ProfileAction.BlockDomain -> setDomainBlocked(true)
+            is ProfileAction.UnblockDomain -> setDomainBlocked(false)
             is ProfileAction.Refresh -> loadProfile()
             is ProfileAction.DismissError -> dismissError()
             is ProfileAction.FavoriteStatus -> favoriteStatus(action.status)
@@ -530,6 +537,46 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
+     * Block or unblock the server of the (remote) account.
+     */
+    private fun setDomainBlocked(blocked: Boolean) {
+        val currentAccountId = accountId ?: return
+        val domain = _uiState.value.account?.remoteDomain ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingDomainBlock = true) }
+
+            val result = if (blocked) blockDomainUseCase(domain) else unblockDomainUseCase(domain)
+            when (result) {
+                is Result.Success -> {
+                    // Blocking a domain also removes follows, so reload the whole relationship
+                    loadRelationship(currentAccountId)
+                    _uiState.update {
+                        it.copy(
+                            isProcessingDomainBlock = false,
+                            successMessage = UiText.of(
+                                if (blocked) R.string.success_block_domain else R.string.success_unblock_domain,
+                                domain
+                            )
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessingDomainBlock = false,
+                            errorMessage = UiText.of(
+                                if (blocked) R.string.error_block_domain else R.string.error_unblock_domain
+                            )
+                        )
+                    }
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
      * Report the account.
      */
     private fun reportAccount(category: String, comment: String?, forward: Boolean) {
@@ -590,6 +637,7 @@ data class ProfileUiState(
     val isProcessingFollow: Boolean = false,
     val isProcessingMute: Boolean = false,
     val isProcessingBlock: Boolean = false,
+    val isProcessingDomainBlock: Boolean = false,
     val errorMessage: UiText? = null,
     val successMessage: UiText? = null
 )
@@ -604,6 +652,8 @@ sealed class ProfileAction {
     data object UnmuteAccount : ProfileAction()
     data object BlockAccount : ProfileAction()
     data object UnblockAccount : ProfileAction()
+    data object BlockDomain : ProfileAction()
+    data object UnblockDomain : ProfileAction()
     data object Refresh : ProfileAction()
     data object DismissError : ProfileAction()
     data class FavoriteStatus(val status: Status) : ProfileAction()

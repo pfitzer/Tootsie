@@ -238,6 +238,43 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 40
     ): retrofit2.Response<List<AccountDto>>
 
+    // ========== Domain Block Endpoints ==========
+
+    /**
+     * Get blocked domains.
+     * Returns Response to access Link header for pagination.
+     *
+     * @param maxId Return results older than this ID (internal block ID from Link header)
+     * @param limit Maximum number of results (default 100, max 200)
+     */
+    @GET("api/v1/domain_blocks")
+    suspend fun getBlockedDomains(
+        @Query("max_id") maxId: String? = null,
+        @Query("limit") limit: Int = 100
+    ): retrofit2.Response<List<String>>
+
+    /**
+     * Block a domain: hides all its posts and notifications, and removes followers from it.
+     *
+     * @param domain Domain to block, e.g. "example.social"
+     */
+    @FormUrlEncoded
+    @POST("api/v1/domain_blocks")
+    suspend fun blockDomain(
+        @Field("domain") domain: String
+    )
+
+    /**
+     * Unblock a domain.
+     *
+     * @param domain Domain to unblock
+     */
+    // Query parameter instead of a form body: Retrofit rejects @FormUrlEncoded on DELETE
+    @DELETE("api/v1/domain_blocks")
+    suspend fun unblockDomain(
+        @Query("domain") domain: String
+    )
+
     // ========== Follow Requests Endpoints ==========
 
     /**

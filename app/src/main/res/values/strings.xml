@@ -160,6 +160,24 @@
     <string name="error_block_account">Failed to block account</string>
     <string name="error_unblock_account">Failed to unblock account</string>
 
+    <!-- Domain blocks -->
+    <string name="blocked_domains_title">Blocked Domains</string>
+    <string name="empty_blocked_domains">No blocked domains</string>
+    <string name="settings_blocked_domains_description">Servers whose posts and notifications you don\'t see</string>
+    <string name="block_domain">Block domain</string>
+    <string name="block_domain_named">Block %1$s</string>
+    <string name="unblock_domain_named">Unblock %1$s</string>
+    <string name="block_domain_confirm_title">Block %1$s?</string>
+    <string name="block_domain_confirm_message">You won\'t see any posts or notifications from this server, and your followers from it will be removed.</string>
+    <string name="domain_name">Domain</string>
+    <string name="profile_domain_blocked">Domain blocked</string>
+    <string name="cd_server">Server</string>
+    <string name="error_invalid_domain">Not a valid domain</string>
+    <string name="error_block_domain">Failed to block domain</string>
+    <string name="error_unblock_domain">Failed to unblock domain</string>
+    <string name="success_block_domain">%1$s blocked</string>
+    <string name="success_unblock_domain">%1$s unblocked</string>
+
     <!-- Lists -->
     <string name="lists_title">Lists</string>
     <string name="lists_empty_state">No lists yet\nTap + to create one</string>

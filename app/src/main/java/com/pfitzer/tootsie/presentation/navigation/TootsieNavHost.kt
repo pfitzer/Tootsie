@@ -464,6 +464,9 @@ fun TootsieNavHost(
                 onNavigateToBlockedAccounts = {
                     navController.navigate(TootsieDestinations.BlockedAccounts.route)
                 },
+                onNavigateToBlockedDomains = {
+                    navController.navigate(TootsieDestinations.BlockedDomains.route)
+                },
                 onNavigateToEditProfile = {
                     navController.navigate(TootsieDestinations.EditProfile.route)
                 },
@@ -810,6 +813,15 @@ fun TootsieNavHost(
                 },
                 onNavigateToProfile = { accountId ->
                     navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
+                }
+            )
+        }
+
+        // Blocked Domains screen - view and manage blocked domains
+        composable(route = TootsieDestinations.BlockedDomains.route) {
+            com.pfitzer.tootsie.presentation.screens.blockeddomains.BlockedDomainsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
