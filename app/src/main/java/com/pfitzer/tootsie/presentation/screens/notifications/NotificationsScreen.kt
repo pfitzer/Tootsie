@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.notifications
 
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +54,15 @@ fun NotificationsScreen(
     val notificationsPagingItems = viewModel.notificationsPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // Leaving the screen marks the newest notification as read on the server
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        if (notificationsPagingItems.itemCount > 0) {
+            notificationsPagingItems.peek(0)?.id?.let {
+                viewModel.onAction(NotificationsAction.MarkRead(it))
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -112,6 +123,7 @@ fun NotificationsScreen(
                         ) {
                             NotificationCard(
                                 notification = notification,
+                                isUnread = uiState.isUnread(notification.id),
                                 onNotificationClick = { clickedNotification ->
                                     // Navigate to status detail if notification has a status
                                     // If the status is a reply, navigate to the original status instead

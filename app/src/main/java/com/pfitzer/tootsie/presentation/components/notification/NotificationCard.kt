@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.components.notification
 
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -48,14 +50,22 @@ fun NotificationCard(
     onFavoriteClick: (Status) -> Unit = {},
     onBookmarkClick: (Status) -> Unit = {},
     onShareClick: (Status) -> Unit = {},
+    isUnread: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val unreadLabel = stringResource(R.string.cd_notification_unread)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onNotificationClick(notification) },
+            .clickable { onNotificationClick(notification) }
+            .then(if (isUnread) Modifier.semantics { stateDescription = unreadLabel } else Modifier),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            // New since the last visit
+            containerColor = if (isUnread) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
         )
     ) {
         Row(

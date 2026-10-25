@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.home
 
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -405,8 +407,17 @@ fun HomeScreen(
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
+                // Only the home timeline has a reading position
+                val isHomePage = page == 0 && activeTimelineType == TimelineType.HOME
                 TimelineList(
                     timelinePagingItems = timelinePagingItems,
+                    restoreToStatusId = uiState.homeMarker.takeIf { isHomePage },
+                    onRestored = { viewModel.onAction(HomeAction.MarkerRestored) },
+                    onLeave = if (isHomePage) {
+                        { statusId -> viewModel.onAction(HomeAction.SaveReadingPosition(statusId)) }
+                    } else {
+                        null
+                    },
                     onStatusClick = onNavigateToStatus,
                     onAvatarClick = onNavigateToProfile,
                     onMentionClick = onNavigateToProfile,  // Mentions navigate to profile
@@ -474,6 +485,9 @@ fun HomeScreen(
 @Composable
 private fun TimelineList(
     timelinePagingItems: LazyPagingItems<Status>,
+    restoreToStatusId: String?,
+    onRestored: () -> Unit,
+    onLeave: ((topStatusId: String) -> Unit)?,
     onStatusClick: (String) -> Unit,
     onAvatarClick: (String) -> Unit,
     onMentionClick: (String) -> Unit,
@@ -496,6 +510,32 @@ private fun TimelineList(
     // Determine if we're actually refreshing based on paging state
     val loadState = timelinePagingItems.loadState.refresh
     val isActuallyRefreshing = loadState is LoadState.Loading
+
+    // Scroll to the reading position from the server once, unless the user has scrolled
+    if (restoreToStatusId != null) {
+        LaunchedEffect(restoreToStatusId, timelinePagingItems.itemCount, loadState) {
+            val index = timelinePagingItems.itemSnapshotList.indexOfFirst { it?.id == restoreToStatusId }
+            when {
+                listState.firstVisibleItemIndex > 0 -> onRestored()
+                index >= 0 -> {
+                    listState.scrollToItem(index)
+                    onRestored()
+                }
+                // Not in the loaded range once loading is done: stay at the top
+                loadState is LoadState.NotLoading && timelinePagingItems.itemCount > 0 -> onRestored()
+            }
+        }
+    }
+
+    // Leaving the timeline (other screen, app in the background) saves the reading position
+    if (onLeave != null) {
+        LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+            val top = listState.firstVisibleItemIndex
+            if (top < timelinePagingItems.itemCount) {
+                timelinePagingItems.peek(top)?.id?.let(onLeave)
+            }
+        }
+    }
 
     // Scroll to top only when explicitly requested (e.g., after an account change or manual refresh)
     // Removed automatic scroll to top on every load state change to NotLoading to preserve scroll position

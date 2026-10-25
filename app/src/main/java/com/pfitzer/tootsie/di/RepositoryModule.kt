@@ -248,4 +248,13 @@ abstract class RepositoryModule {
     abstract fun bindScheduledStatusRepository(
         scheduledStatusRepositoryImpl: ScheduledStatusRepositoryImpl
     ): ScheduledStatusRepository
+
+    /**
+     * Binds MarkerRepositoryImpl to MarkerRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindMarkerRepository(
+        markerRepositoryImpl: MarkerRepositoryImpl
+    ): MarkerRepository
 }

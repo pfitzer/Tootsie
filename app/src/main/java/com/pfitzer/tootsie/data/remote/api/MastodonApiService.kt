@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.remote.api
 
+import retrofit2.http.FieldMap
 import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.data.remote.interceptors.HEADER_INSTANCE
 import com.pfitzer.tootsie.data.remote.dto.AnnouncementDto
@@ -789,6 +790,30 @@ interface MastodonApiService {
      */
     @POST("api/v1/notifications/clear")
     suspend fun clearAllNotifications()
+
+    // ========== Marker Endpoints ==========
+
+    /**
+     * Get the reading positions of timelines.
+     *
+     * @param timelines "home" and/or "notifications"
+     * @return Marker by timeline name; missing timelines have no marker
+     */
+    @GET("api/v1/markers")
+    suspend fun getMarkers(
+        @Query("timeline[]") timelines: List<String>
+    ): Map<String, com.pfitzer.tootsie.data.remote.dto.MarkerDto>
+
+    /**
+     * Save reading positions.
+     *
+     * @param fields e.g. "home[last_read_id]" to a status ID
+     */
+    @FormUrlEncoded
+    @POST("api/v1/markers")
+    suspend fun saveMarkers(
+        @FieldMap fields: Map<String, String>
+    ): Map<String, com.pfitzer.tootsie.data.remote.dto.MarkerDto>
 
     // ========== Instance Endpoints ==========
 

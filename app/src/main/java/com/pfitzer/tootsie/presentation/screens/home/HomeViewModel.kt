@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.home
 
+import com.pfitzer.tootsie.domain.repository.MarkerTimeline
+import com.pfitzer.tootsie.domain.repository.MarkerRepository
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
@@ -48,7 +50,8 @@ class HomeViewModel @Inject constructor(
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
     private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
     private val voteOnPollUseCase: VoteOnPollUseCase,
-    private val reportUseCase: ReportUseCase
+    private val reportUseCase: ReportUseCase,
+    private val markerRepository: MarkerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -116,6 +119,27 @@ class HomeViewModel @Inject constructor(
         .cachedIn(viewModelScope)
         .applyInteractions(statusInteractionStore, viewModelScope)
 
+    /** Reading position saved last in this session, so unchanged positions aren't sent again. */
+    private var savedReadingPosition: String? = null
+
+    init {
+        // The reading position of each account is restored once, when the app starts or the
+        // account becomes active; going back to the timeline keeps the position it had
+        viewModelScope.launch {
+            observeActiveAccountUseCase()
+                .map { it?.id }
+                .distinctUntilChanged()
+                .collect { accountId ->
+                    savedReadingPosition = null
+                    _uiState.update { it.copy(homeMarker = null) }
+                    if (accountId == null) return@collect
+                    val marker = (markerRepository.getMarker(MarkerTimeline.HOME) as? Result.Success)?.data
+                    savedReadingPosition = marker
+                    _uiState.update { it.copy(homeMarker = marker) }
+                }
+        }
+    }
+
     /**
      * Handle user actions.
      */
@@ -133,6 +157,8 @@ class HomeViewModel @Inject constructor(
             is HomeAction.ChangeTimelineType -> changeTimelineType(action.timelineType)
             is HomeAction.VoteOnPoll -> voteOnPoll(action.pollId, action.choices)
             is HomeAction.ReportStatus -> reportStatus(action.status, action.category, action.comment, action.forward)
+            is HomeAction.MarkerRestored -> _uiState.update { it.copy(homeMarker = null) }
+            is HomeAction.SaveReadingPosition -> saveReadingPosition(action.statusId)
         }
     }
 
@@ -279,6 +305,21 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Store the topmost visible status of the home timeline as reading position, shared with
+     * the web interface and other clients. Called when leaving the timeline.
+     */
+    private fun saveReadingPosition(statusId: String) {
+        if (statusId == savedReadingPosition) return
+        savedReadingPosition = statusId
+        viewModelScope.launch {
+            if (markerRepository.saveMarker(MarkerTimeline.HOME, statusId) is Result.Error) {
+                // Sent again the next time the timeline is left
+                savedReadingPosition = null
+            }
+        }
+    }
+
+    /**
      * Report a status.
      */
     private fun reportStatus(status: Status, category: String, comment: String?, forward: Boolean) {
@@ -330,7 +371,9 @@ class HomeViewModel @Inject constructor(
  */
 data class HomeUiState(
     val errorMessage: UiText? = null,
-    val successMessage: UiText? = null
+    val successMessage: UiText? = null,
+    /** Reading position from the server to scroll to once; null when handled. */
+    val homeMarker: String? = null
 )
 
 /**
@@ -348,6 +391,11 @@ sealed class HomeAction {
     data class UpdateFilter(val filter: TimelineFilter) : HomeAction()
     data class ChangeTimelineType(val timelineType: TimelineType) : HomeAction()
     data class VoteOnPoll(val pollId: String, val choices: List<Int>) : HomeAction()
+    /** The home timeline scrolled to the reading position, or it isn't in the loaded range. */
+    data object MarkerRestored : HomeAction()
+
+    /** Leaving the home timeline with [statusId] at the top. */
+    data class SaveReadingPosition(val statusId: String) : HomeAction()
     data class ReportStatus(
         val status: Status,
         val category: String,
