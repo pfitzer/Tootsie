@@ -2,6 +2,15 @@
 
 All notable changes to Tootsie are documented here.
 
+## [1.3.1] - 2026-10-25
+
+### Fixed
+- Removing an account now deletes all of its data on the device (cached timelines, drafts, filters, recent searches, push keys); an active push subscription is ended on the server first.
+- Empty boxes in posts and bios that contain Unicode line separators (U+2028/U+2029).
+
+### Under the hood
+- Dependency updates; patched versions of vulnerable build tool dependencies (jose4j, jdom2, commons-lang3, httpclient); the Gradle wrapper verifies the distribution checksum.
+
 ## [1.3.0] - 2026-10-25
 
 ### New
@@ -48,5 +57,6 @@ All notable changes to Tootsie are documented here.
 
 First public alpha.
 
+[1.3.1]: https://github.com/pfitzer/Tootsie/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/pfitzer/Tootsie/compare/1.2.3-alpha...v1.3.0
 [1.2.3-alpha]: https://github.com/pfitzer/Tootsie/releases/tag/1.2.3-alpha
