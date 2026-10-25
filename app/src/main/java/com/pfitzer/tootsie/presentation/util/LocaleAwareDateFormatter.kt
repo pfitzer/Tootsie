@@ -72,6 +72,12 @@ object LocaleAwareDateFormatter {
     }
 
     /**
+     * Format an absolute date/time, e.g. the publication time of a scheduled post
+     */
+    fun formatAbsoluteTime(context: Context, instant: Instant): String =
+        formatAbsoluteTime(context, instant.toString())
+
+    /**
      * Format timestamp for drafts from Long milliseconds
      * (e.g., "Just now", "5m ago", "3h ago", "Jan 15")
      *

@@ -88,6 +88,7 @@ gh pr checks
 - Text size customization (small, medium, large, extra large)
 - Profile editing
 - Domain blocking (block a remote user's server from the profile, manage blocked domains in settings)
+- Scheduled posts (schedule from the compose screen, reschedule, edit or delete them)
 
 ### Planned
 See open GitHub issues for planned features: `gh issue list --label enhancement`

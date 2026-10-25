@@ -239,4 +239,13 @@ abstract class RepositoryModule {
     abstract fun bindDomainBlockRepository(
         domainBlockRepositoryImpl: DomainBlockRepositoryImpl
     ): DomainBlockRepository
+
+    /**
+     * Binds ScheduledStatusRepositoryImpl to ScheduledStatusRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindScheduledStatusRepository(
+        scheduledStatusRepositoryImpl: ScheduledStatusRepositoryImpl
+    ): ScheduledStatusRepository
 }

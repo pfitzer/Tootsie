@@ -120,7 +120,7 @@ private fun String.toVisibilityEnum(): StatusVisibility {
     }
 }
 
-private fun MediaAttachmentDto.toDomain(): MediaAttachment {
+internal fun MediaAttachmentDto.toDomain(): MediaAttachment {
     return MediaAttachment(
         id = id,
         type = type.toMediaTypeEnum(),

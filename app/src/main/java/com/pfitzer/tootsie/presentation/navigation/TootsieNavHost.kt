@@ -255,6 +255,11 @@ fun TootsieNavHost(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
+                },
+                navArgument(TootsieDestinations.Compose.ARG_SCHEDULED_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
                 }
             )
         ) {
@@ -264,6 +269,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToDrafts = {
                     navController.navigate(TootsieDestinations.Drafts.route)
+                },
+                onNavigateToScheduledPosts = {
+                    navController.navigate(TootsieDestinations.ScheduledPosts.route)
                 }
             )
         }
@@ -427,6 +435,18 @@ fun TootsieNavHost(
                 },
                 onNavigateToReply = { statusId ->
                     navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                }
+            )
+        }
+
+        // Scheduled posts screen
+        composable(route = TootsieDestinations.ScheduledPosts.route) {
+            com.pfitzer.tootsie.presentation.screens.scheduled.ScheduledPostsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onEditScheduledPost = { scheduledId ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(scheduledId = scheduledId))
                 }
             )
         }

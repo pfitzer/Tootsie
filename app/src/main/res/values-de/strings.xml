@@ -650,4 +650,30 @@
     <string name="sort_activity">Aktivste (7 Tage)</string>
     <string name="sort_trending">Im Trend</string>
     <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
+
+    <!-- Scheduled posts -->
+    <string name="next">Weiter</string>
+    <string name="scheduled_posts_title">Geplante Beiträge</string>
+    <string name="empty_scheduled_posts">Keine geplanten Beiträge</string>
+    <string name="compose_schedule">Beitrag planen</string>
+    <string name="compose_scheduled_for">Geplant für %1$s</string>
+    <string name="compose_button_schedule">Planen</string>
+    <string name="compose_title_edit_scheduled">Geplanten Beitrag bearbeiten</string>
+    <string name="cd_remove_schedule">Planung entfernen</string>
+    <string name="schedule_pick_time">Uhrzeit wählen</string>
+    <string name="scheduled_change_time">Zeit ändern</string>
+    <string name="scheduled_no_text">(kein Text)</string>
+    <string name="scheduled_delete_confirm_title">Geplanten Beitrag löschen?</string>
+    <string name="scheduled_delete_confirm_message">Er wird nicht veröffentlicht.</string>
+    <string name="toast_post_scheduled">Beitrag geplant für %1$s</string>
+    <string name="error_schedule_too_soon">Plane den Beitrag mindestens 5 Minuten im Voraus</string>
+    <string name="error_schedule_failed">Beitrag konnte nicht geplant werden: %1$s</string>
+    <string name="error_load_scheduled_posts">Geplante Beiträge konnten nicht geladen werden</string>
+    <string name="error_load_scheduled_post">Der geplante Beitrag konnte nicht geladen werden</string>
+    <string name="error_reschedule_post">Die Zeit konnte nicht geändert werden</string>
+    <string name="error_delete_scheduled_post">Der geplante Beitrag konnte nicht gelöscht werden</string>
+    <plurals name="scheduled_media_count">
+        <item quantity="one">1 Anhang</item>
+        <item quantity="other">%d Anhänge</item>
+    </plurals>
 </resources>

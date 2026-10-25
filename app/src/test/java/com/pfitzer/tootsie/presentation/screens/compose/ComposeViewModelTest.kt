@@ -3,6 +3,12 @@ package com.pfitzer.tootsie.presentation.screens.compose
 import androidx.lifecycle.SavedStateHandle
 import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.domain.repository.ScheduledStatusRepository
+import com.pfitzer.tootsie.domain.model.ScheduledStatus
+import com.pfitzer.tootsie.R
+import com.pfitzer.tootsie.presentation.util.UiText
+import java.time.Duration
+import java.time.Instant
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.CustomEmoji
@@ -37,6 +43,7 @@ import org.junit.Test
 class ComposeViewModelTest {
 
     private val draftRepository = mockk<DraftRepository>()
+    private val scheduledStatusRepository = mockk<ScheduledStatusRepository>()
     private val getCustomEmojisUseCase = mockk<GetCustomEmojisUseCase>()
     private val getInstanceLimitsUseCase = mockk<GetInstanceLimitsUseCase>()
     private val observeActiveAccountUseCase = mockk<ObserveActiveAccountUseCase>()
@@ -61,11 +68,12 @@ class ComposeViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = ComposeViewModel(
+    private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = ComposeViewModel(
         postStatusUseCase = mockk(),
         uploadMediaUseCase = mockk(),
         statusRepository = mockk(),
         draftRepository = draftRepository,
+        scheduledStatusRepository = scheduledStatusRepository,
         getCustomEmojisUseCase = getCustomEmojisUseCase,
         getInstanceLimitsUseCase = getInstanceLimitsUseCase,
         observeActiveAccountUseCase = observeActiveAccountUseCase,
@@ -73,7 +81,7 @@ class ComposeViewModelTest {
         switchAccountUseCase = mockk(relaxed = true),
         searchUseCase = searchUseCase,
         preferencesManager = preferencesManager,
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = savedStateHandle
     )
 
     @Test
@@ -165,6 +173,78 @@ class ComposeViewModelTest {
         assertEquals("own", viewModel.uiState.value.account?.id)
         assertTrue(viewModel.uiState.value.canSwitchAccount)
     }
+
+    @Test
+    fun `a scheduled post is sent with its time instead of being posted`() = runTest {
+        val at = Instant.now().plus(Duration.ofHours(2))
+        coEvery { scheduledStatusRepository.scheduleStatus(any(), any()) } returns Result.Success(scheduled("1", at))
+        val viewModel = viewModel()
+
+        viewModel.onAction(ComposeAction.UpdateContent("Later"))
+        viewModel.onAction(ComposeAction.SetSchedule(at))
+        viewModel.onAction(ComposeAction.Post)
+
+        coVerify { scheduledStatusRepository.scheduleStatus(match { it.content == "Later" }, at) }
+        assertTrue(viewModel.uiState.value.isPosted)
+    }
+
+    @Test
+    fun `a time less than 5 minutes ahead is rejected`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.onAction(ComposeAction.UpdateContent("Too soon"))
+        viewModel.onAction(ComposeAction.SetSchedule(Instant.now().plus(Duration.ofMinutes(2))))
+        viewModel.onAction(ComposeAction.Post)
+
+        assertEquals(UiText.of(R.string.error_schedule_too_soon), viewModel.uiState.value.errorMessage)
+        coVerify(exactly = 0) { scheduledStatusRepository.scheduleStatus(any(), any()) }
+        assertFalse(viewModel.uiState.value.isPosted)
+    }
+
+    @Test
+    fun `an edited scheduled post replaces the old one and is not kept as draft`() = runTest {
+        val at = Instant.now().plus(Duration.ofDays(1))
+        coEvery { scheduledStatusRepository.getScheduledStatus("old") } returns Result.Success(scheduled("old", at, "Before"))
+        coEvery { scheduledStatusRepository.scheduleStatus(any(), any()) } returns Result.Success(scheduled("new", at))
+        coEvery { scheduledStatusRepository.deleteScheduledStatus("old") } returns Result.Success(Unit)
+        val viewModel = viewModel(SavedStateHandle(mapOf("scheduledId" to "old")))
+
+        assertEquals("Before", viewModel.uiState.value.content)
+        assertEquals(at, viewModel.uiState.value.scheduledAt)
+
+        viewModel.onAction(ComposeAction.UpdateContent("After"))
+        viewModel.onAction(ComposeAction.Post)
+
+        coVerify { scheduledStatusRepository.scheduleStatus(match { it.content == "After" }, at) }
+        coVerify { scheduledStatusRepository.deleteScheduledStatus("old") }
+        coVerify(exactly = 0) { draftRepository.saveDraft(any()) }
+    }
+
+    @Test
+    fun `the edited scheduled post is kept if scheduling the new one fails`() = runTest {
+        val at = Instant.now().plus(Duration.ofDays(1))
+        coEvery { scheduledStatusRepository.getScheduledStatus("old") } returns Result.Success(scheduled("old", at, "Before"))
+        coEvery { scheduledStatusRepository.scheduleStatus(any(), any()) } returns Result.Error("boom")
+        val viewModel = viewModel(SavedStateHandle(mapOf("scheduledId" to "old")))
+
+        viewModel.onAction(ComposeAction.Post)
+
+        coVerify(exactly = 0) { scheduledStatusRepository.deleteScheduledStatus(any()) }
+        assertFalse(viewModel.uiState.value.isPosted)
+    }
+
+    private fun scheduled(id: String, at: Instant, text: String = "") = ScheduledStatus(
+        id = id,
+        scheduledAt = at,
+        text = text,
+        spoilerText = null,
+        visibility = "unlisted",
+        sensitive = false,
+        language = null,
+        inReplyToId = null,
+        poll = null,
+        mediaAttachments = emptyList()
+    )
 
     private fun emoji(shortcode: String, visible: Boolean = true) =
         CustomEmoji(shortcode = shortcode, url = "", staticUrl = "", visibleInPicker = visible)
