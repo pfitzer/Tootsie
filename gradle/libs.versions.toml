@@ -30,6 +30,12 @@ bouncycastle = "1.86"
 hilt-work = "1.4.0"
 compose-googlefonts = "1.11.4"
 errorprone-annotations = "2.51.0"
+# Build tooling only: minimum versions for vulnerable transitive dependencies of AGP and
+# its lint tool (applied as constraints, so newer versions requested by AGP still win)
+build-jose4j = "0.9.6"
+build-jdom2 = "2.0.6.1"
+build-commons-lang3 = "3.18.0"
+build-httpclient = "4.5.14"
 mockk = "1.14.11"
 
 [libraries]
@@ -128,6 +134,12 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+# Build tooling security floors (see the versions above)
+build-jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "build-jose4j" }
+build-jdom2 = { group = "org.jdom", name = "jdom2", version.ref = "build-jdom2" }
+build-commons-lang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "build-commons-lang3" }
+build-httpclient = { group = "org.apache.httpcomponents", name = "httpclient", version.ref = "build-httpclient" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
