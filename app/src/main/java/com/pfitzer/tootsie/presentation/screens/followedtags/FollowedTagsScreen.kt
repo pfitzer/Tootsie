@@ -8,8 +8,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import com.pfitzer.tootsie.presentation.icons.CustomIcons
 import com.pfitzer.tootsie.presentation.icons.Tags
@@ -31,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.FollowedTag
 import com.pfitzer.tootsie.domain.model.FollowedTagSort
+import com.pfitzer.tootsie.presentation.components.common.SortMenu
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 
 /**
@@ -72,7 +71,14 @@ fun FollowedTagsScreen(
                 },
                 actions = {
                     SortMenu(
+                        options = FollowedTagSort.entries,
                         selected = uiState.sort,
+                        label = { sort ->
+                            when (sort) {
+                                FollowedTagSort.ALPHABETICAL -> R.string.sort_alphabetical
+                                FollowedTagSort.ACTIVITY -> R.string.sort_activity
+                            }
+                        },
                         onSelect = { viewModel.onAction(FollowedTagsAction.SelectSort(it)) }
                     )
                     IconButton(onClick = { viewModel.onAction(FollowedTagsAction.ShowFollowDialog) }) {
@@ -240,48 +246,6 @@ private fun FollowedTagItem(
         },
         modifier = Modifier.clickable(onClick = onTagClick)
     )
-}
-
-/**
- * Sort menu: alphabetical (default) or by activity.
- */
-@Composable
-private fun SortMenu(
-    selected: FollowedTagSort,
-    onSelect: (FollowedTagSort) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Sort,
-                contentDescription = stringResource(R.string.followed_tags_sort)
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            FollowedTagSort.entries.forEach { sort ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(
-                                when (sort) {
-                                    FollowedTagSort.ALPHABETICAL -> R.string.followed_tags_sort_alphabetical
-                                    FollowedTagSort.ACTIVITY -> R.string.followed_tags_sort_activity
-                                }
-                            )
-                        )
-                    },
-                    trailingIcon = {
-                        if (sort == selected) Icon(Icons.Default.Check, contentDescription = null)
-                    },
-                    onClick = {
-                        expanded = false
-                        onSelect(sort)
-                    }
-                )
-            }
-        }
-    }
 }
 
 @Composable

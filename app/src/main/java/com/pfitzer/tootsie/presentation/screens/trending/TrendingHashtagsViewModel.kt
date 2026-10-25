@@ -4,7 +4,9 @@ import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.TrendingTag
+import com.pfitzer.tootsie.domain.model.TrendingTagSort
 import com.pfitzer.tootsie.domain.usecase.trending.GetTrendingHashtagsUseCase
 import com.pfitzer.tootsie.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,13 +22,18 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class TrendingHashtagsViewModel @Inject constructor(
-    private val getTrendingHashtagsUseCase: GetTrendingHashtagsUseCase
+    private val getTrendingHashtagsUseCase: GetTrendingHashtagsUseCase,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TrendingHashtagsUiState())
     val uiState: StateFlow<TrendingHashtagsUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val sort = TrendingTagSort.fromName(preferencesManager.getTrendingTagsSort())
+            _uiState.update { it.copy(sort = sort) }
+        }
         loadTrendingHashtags()
     }
 
@@ -37,6 +44,13 @@ class TrendingHashtagsViewModel @Inject constructor(
         when (action) {
             is TrendingHashtagsAction.Refresh -> loadTrendingHashtags()
             is TrendingHashtagsAction.DismissError -> dismissError()
+            is TrendingHashtagsAction.SelectSort -> {
+                _uiState.update { it.copy(sort = action.sort, scrollToTop = true) }
+                viewModelScope.launch { preferencesManager.saveTrendingTagsSort(action.sort.name) }
+            }
+            is TrendingHashtagsAction.ScrollToTopConsumed -> {
+                _uiState.update { it.copy(scrollToTop = false) }
+            }
         }
     }
 
@@ -85,8 +99,13 @@ class TrendingHashtagsViewModel @Inject constructor(
 data class TrendingHashtagsUiState(
     val trendingTags: List<TrendingTag> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: UiText? = null
-)
+    val errorMessage: UiText? = null,
+    val scrollToTop: Boolean = false,
+    val sort: TrendingTagSort = TrendingTagSort.TRENDING
+) {
+    /** The trending tags in the selected order. */
+    val sortedTags: List<TrendingTag> get() = sort.sort(trendingTags)
+}
 
 /**
  * User actions for Trending Hashtags Screen.
@@ -94,4 +113,6 @@ data class TrendingHashtagsUiState(
 sealed class TrendingHashtagsAction {
     data object Refresh : TrendingHashtagsAction()
     data object DismissError : TrendingHashtagsAction()
+    data class SelectSort(val sort: TrendingTagSort) : TrendingHashtagsAction()
+    data object ScrollToTopConsumed : TrendingHashtagsAction()
 }

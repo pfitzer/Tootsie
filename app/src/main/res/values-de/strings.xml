@@ -627,8 +627,9 @@
     <string name="filter_action_hide_description">Passende Beiträge werden gar nicht angezeigt.</string>
 
     <!-- Followed tags (#223) -->
-    <string name="followed_tags_sort">Sortieren</string>
-    <string name="followed_tags_sort_alphabetical">Alphabetisch</string>
-    <string name="followed_tags_sort_activity">Aktivste (7 Tage)</string>
+    <string name="sort">Sortieren</string>
+    <string name="sort_alphabetical">Alphabetisch</string>
+    <string name="sort_activity">Aktivste (7 Tage)</string>
+    <string name="sort_trending">Im Trend</string>
     <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
 </resources>

@@ -54,6 +54,7 @@ class PreferencesManager @Inject constructor(
         private val KEY_DEFAULT_VISIBILITY = stringPreferencesKey("default_visibility")
         private val KEY_TEXT_SIZE = stringPreferencesKey("text_size")
         private val KEY_FOLLOWED_TAGS_SORT = stringPreferencesKey("followed_tags_sort")
+        private val KEY_TRENDING_TAGS_SORT = stringPreferencesKey("trending_tags_sort")
         private val KEY_POST_LANGUAGE = stringPreferencesKey("post_language")
 
         // Queries are single-line, so a line break can separate them
@@ -314,6 +315,20 @@ class PreferencesManager @Inject constructor(
     suspend fun saveFollowedTagsSort(sort: String) {
         dataStore.edit { preferences ->
             preferences[KEY_FOLLOWED_TAGS_SORT] = sort
+        }
+    }
+
+    // ========== Trending Tags ==========
+
+    /**
+     * Sort order of the trending tags (name of a TrendingTagSort), null if never chosen.
+     */
+    suspend fun getTrendingTagsSort(): String? =
+        dataStore.data.map { preferences -> preferences[KEY_TRENDING_TAGS_SORT] }.first()
+
+    suspend fun saveTrendingTagsSort(sort: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_TRENDING_TAGS_SORT] = sort
         }
     }
 
