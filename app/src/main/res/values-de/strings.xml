@@ -682,6 +682,9 @@
     <string name="error_toggle_notify">Benachrichtigungen für dieses Konto konnten nicht geändert werden</string>
     <string name="error_save_note">Die Notiz konnte nicht gespeichert werden</string>
 
+    <!-- Read markers -->
+    <string name="cd_notification_unread">Neu</string>
+
     <!-- Translation -->
     <string name="translate">Übersetzen</string>
     <string name="translate_show_original">Original anzeigen</string>

@@ -681,6 +681,9 @@
     <string name="error_toggle_notify">Failed to change notifications for this account</string>
     <string name="error_save_note">Failed to save the note</string>
 
+    <!-- Read markers -->
+    <string name="cd_notification_unread">New</string>
+
     <!-- Translation -->
     <string name="translate">Translate</string>
     <string name="translate_show_original">Show original</string>

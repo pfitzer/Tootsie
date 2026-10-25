@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.presentation.screens.notifications
 
+import com.pfitzer.tootsie.domain.util.MastodonIds
+import com.pfitzer.tootsie.domain.repository.MarkerTimeline
+import com.pfitzer.tootsie.domain.repository.MarkerRepository
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import androidx.lifecycle.ViewModel
@@ -46,7 +49,8 @@ class NotificationsViewModel @Inject constructor(
     private val reblogStatusUseCase: ReblogStatusUseCase,
     private val unreblogStatusUseCase: UnreblogStatusUseCase,
     private val bookmarkStatusUseCase: BookmarkStatusUseCase,
-    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase
+    private val unbookmarkStatusUseCase: UnbookmarkStatusUseCase,
+    private val markerRepository: MarkerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationsUiState())
@@ -74,6 +78,35 @@ class NotificationsViewModel @Inject constructor(
 
     init {
         loadNotifications()
+        loadReadMarker()
+    }
+
+    /**
+     * Notifications newer than the server's marker are shown as unread while the screen is
+     * open; the marker moves forward when the screen is left.
+     */
+    private fun loadReadMarker() {
+        viewModelScope.launch {
+            val marker = (markerRepository.getMarker(MarkerTimeline.NOTIFICATIONS) as? Result.Success)?.data
+            _uiState.update { it.copy(lastReadId = marker, isReadMarkerLoaded = true) }
+        }
+    }
+
+    /**
+     * Mark everything up to [newestId] as read on the server (the shown highlights stay
+     * until the screen is opened again).
+     */
+    private fun markRead(newestId: String) {
+        val state = _uiState.value
+        if (!state.isReadMarkerLoaded) return
+        val saved = state.savedReadId ?: state.lastReadId
+        if (saved != null && !MastodonIds.isNewer(newestId, saved)) return
+        _uiState.update { it.copy(savedReadId = newestId) }
+        viewModelScope.launch {
+            if (markerRepository.saveMarker(MarkerTimeline.NOTIFICATIONS, newestId) is Result.Error) {
+                _uiState.update { it.copy(savedReadId = saved) }
+            }
+        }
     }
 
     private fun loadNotifications() {
@@ -90,6 +123,7 @@ class NotificationsViewModel @Inject constructor(
      */
     fun onAction(action: NotificationsAction) {
         when (action) {
+            is NotificationsAction.MarkRead -> markRead(action.newestId)
             is NotificationsAction.DismissNotification -> dismissNotification(action.notificationId)
             is NotificationsAction.ClearAll -> clearAllNotifications()
             is NotificationsAction.DismissError -> dismissError()
@@ -240,13 +274,24 @@ class NotificationsViewModel @Inject constructor(
  */
 data class NotificationsUiState(
     val isClearingAll: Boolean = false,
-    val errorMessage: UiText? = null
-)
+    val errorMessage: UiText? = null,
+    /** The server's read marker when the screen was opened; newer notifications are unread. */
+    val lastReadId: String? = null,
+    val isReadMarkerLoaded: Boolean = false,
+    /** Marker saved while the screen is open. */
+    val savedReadId: String? = null
+) {
+    /** Whether a notification arrived after the last visit (none without a marker). */
+    fun isUnread(notificationId: String): Boolean =
+        lastReadId != null && MastodonIds.isNewer(notificationId, lastReadId)
+}
 
 /**
  * User actions for Notifications Screen.
  */
 sealed class NotificationsAction {
+    /** Leaving the screen with [newestId] as the newest loaded notification. */
+    data class MarkRead(val newestId: String) : NotificationsAction()
     data class DismissNotification(val notificationId: String) : NotificationsAction()
     data object ClearAll : NotificationsAction()
     data object Refresh : NotificationsAction()
