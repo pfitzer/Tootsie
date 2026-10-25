@@ -267,6 +267,28 @@ class ComposeViewModelTest {
     }
 
     @Test
+    fun `media is sensitive by toggle or content warning, and kept in drafts`() = runTest {
+        val at = Instant.now().plus(Duration.ofHours(2))
+        coEvery { scheduledStatusRepository.scheduleStatus(any(), any()) } returns Result.Success(scheduled("1", at))
+        val viewModel = viewModel()
+
+        viewModel.onAction(ComposeAction.UpdateContent("Spoiler"))
+        assertFalse(viewModel.uiState.value.isMediaSensitive)
+        viewModel.onAction(ComposeAction.ToggleContentWarning)
+        viewModel.onAction(ComposeAction.UpdateContentWarning("Food"))
+        assertTrue(viewModel.uiState.value.isMediaSensitive)
+
+        viewModel.onAction(ComposeAction.UpdateContentWarning(""))
+        viewModel.onAction(ComposeAction.ToggleSensitive)
+        viewModel.onAction(ComposeAction.SaveDraftNow)
+        coVerify { draftRepository.saveDraft(match { it.sensitive }) }
+
+        viewModel.onAction(ComposeAction.SetSchedule(at))
+        viewModel.onAction(ComposeAction.Post)
+        coVerify { scheduledStatusRepository.scheduleStatus(match { it.sensitive }, at) }
+    }
+
+    @Test
     fun `alt text is saved on the server`() = runTest {
         coEvery { draftRepository.getDraft(7L) } returns Result.Success(
             DraftEntity(id = 7L, content = "", mediaIds = "[\"m1\"]", createdAt = 0L, updatedAt = 0L)

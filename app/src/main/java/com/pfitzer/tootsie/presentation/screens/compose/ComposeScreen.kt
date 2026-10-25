@@ -25,6 +25,8 @@ import androidx.compose.material.icons.outlined.Drafts
 import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Translate
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -389,6 +391,20 @@ fun ComposeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 200.dp)
+                    )
+                    FilterChip(
+                        selected = uiState.isMediaSensitive,
+                        // A content warning always hides the media
+                        enabled = uiState.contentWarning.isBlank(),
+                        onClick = { viewModel.onAction(ComposeAction.ToggleSensitive) },
+                        label = { Text(stringResource(R.string.compose_mark_sensitive)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (uiState.isMediaSensitive) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     )
                 }
 

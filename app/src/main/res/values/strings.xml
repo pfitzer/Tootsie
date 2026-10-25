@@ -650,6 +650,9 @@
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 
+    <!-- Sensitive media -->
+    <string name="compose_mark_sensitive">Mark media as sensitive</string>
+
     <!-- Follow lists -->
     <string name="empty_follow_list">Nobody here yet, or the account hides this list</string>
     <string name="follow_list_remote_hint">This account is on another server, so the list only shows the accounts this server knows about.</string>
