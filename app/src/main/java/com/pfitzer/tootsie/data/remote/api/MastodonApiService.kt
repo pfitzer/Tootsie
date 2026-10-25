@@ -414,6 +414,38 @@ interface MastodonApiService {
     ): StatusDto
 
     /**
+     * Get the plain text source of an own status, for editing.
+     *
+     * @param id Status ID
+     */
+    @GET("api/v1/statuses/{id}/source")
+    suspend fun getStatusSource(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.StatusSourceDto
+
+    /**
+     * Edit an own status. The form is built by StatusEditForm, as alt texts need an order
+     * of fields that @Field can't express.
+     *
+     * @param id Status ID
+     */
+    @PUT("api/v1/statuses/{id}")
+    suspend fun editStatus(
+        @Path("id") id: String,
+        @Body form: okhttp3.FormBody
+    ): StatusDto
+
+    /**
+     * Get the versions of an edited status, oldest first.
+     *
+     * @param id Status ID
+     */
+    @GET("api/v1/statuses/{id}/history")
+    suspend fun getStatusHistory(
+        @Path("id") id: String
+    ): List<com.pfitzer.tootsie.data.remote.dto.StatusEditDto>
+
+    /**
      * Schedule a status: same fields as [postStatus] plus the publication time.
      *
      * @param scheduledAt ISO 8601 time, at least 5 minutes ahead

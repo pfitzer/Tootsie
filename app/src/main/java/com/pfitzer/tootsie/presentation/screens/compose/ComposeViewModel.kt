@@ -14,7 +14,9 @@ import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.domain.repository.ScheduledStatusRepository
 import com.pfitzer.tootsie.domain.model.NewStatus
+import com.pfitzer.tootsie.domain.model.PollConfig
 import com.pfitzer.tootsie.domain.util.ScheduleTime
+import java.time.Duration
 import java.time.Instant
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Account
@@ -68,6 +70,7 @@ class ComposeViewModel @Inject constructor(
     private val draftId: String? = savedStateHandle["draftId"]
     private val quoteId: String? = savedStateHandle["quoteId"]
     private val scheduledId: String? = savedStateHandle["scheduledId"]
+    private val editId: String? = savedStateHandle["editId"]
 
     private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId, quoteId = quoteId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
@@ -85,8 +88,12 @@ class ComposeViewModel @Inject constructor(
         loadAccounts()
         loadLanguage()
 
+        // Load the own post being edited
+        if (editId != null) {
+            loadStatusForEdit(editId)
+        }
         // Load the scheduled post being edited
-        if (scheduledId != null) {
+        else if (scheduledId != null) {
             loadScheduledStatus(scheduledId)
         }
         // Load draft if resuming from drafts
@@ -101,6 +108,45 @@ class ComposeViewModel @Inject constructor(
         // Load the quoted status for the preview
         if (quoteId != null) {
             loadQuotedStatus(quoteId)
+        }
+    }
+
+    /**
+     * Load an own post to edit it: the text as written comes from its source, everything
+     * else from the status.
+     */
+    private fun loadStatusForEdit(id: String) {
+        viewModelScope.launch {
+            val statusResult = statusRepository.getStatus(id)
+            val sourceResult = statusRepository.getStatusSource(id)
+            if (statusResult !is Result.Success || sourceResult !is Result.Success) {
+                _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_load_post_for_edit)) }
+                return@launch
+            }
+            val status = statusResult.data
+            val source = sourceResult.data
+            _uiState.update {
+                it.copy(
+                    editingStatusId = status.id,
+                    content = source.text,
+                    contentWarning = source.spoilerText,
+                    showContentWarning = source.spoilerText.isNotEmpty(),
+                    visibility = StatusVisibility.entries.find { v -> v.name == status.visibility.name }
+                        ?: StatusVisibility.PUBLIC,
+                    language = status.language ?: it.language,
+                    replyToId = status.inReplyToId,
+                    sensitive = status.sensitive,
+                    mediaAttachments = status.mediaAttachments,
+                    pollConfig = status.poll?.let { poll ->
+                        PollConfig(
+                            options = poll.options.map { option -> option.title },
+                            expiresIn = remainingPollSeconds(poll.expiresAt),
+                            multiple = poll.multiple
+                        )
+                    }
+                )
+            }
+            status.inReplyToId?.let { loadReplyContext(it) }
         }
     }
 
@@ -432,6 +478,9 @@ class ComposeViewModel @Inject constructor(
                 }
             )
         }
+        // Attached media of an edited post can't be updated on its own; its alt text is sent
+        // with the edit
+        if (_uiState.value.isEditingStatus) return
         viewModelScope.launch {
             val result = statusRepository.updateMediaDescription(attachmentId, description)
             if (result is Result.Error) {
@@ -476,7 +525,15 @@ class ComposeViewModel @Inject constructor(
                 language = state.language
             )
 
-            val result = if (scheduledAt != null) {
+            val result = if (state.editingStatusId != null) {
+                statusRepository.editStatus(
+                    statusId = state.editingStatusId,
+                    status = newStatus,
+                    descriptions = state.mediaAttachments
+                        .mapNotNull { media -> media.description?.let { media.id to it } }
+                        .toMap()
+                )
+            } else if (scheduledAt != null) {
                 scheduledStatusRepository.scheduleStatus(newStatus, scheduledAt)
             } else {
                 postStatusUseCase(
@@ -513,7 +570,11 @@ class ComposeViewModel @Inject constructor(
                         it.copy(
                             isPosting = false,
                             errorMessage = UiText.of(
-                                if (scheduledAt != null) R.string.error_schedule_failed else R.string.error_post_failed,
+                                when {
+                                    state.isEditingStatus -> R.string.error_edit_failed
+                                    scheduledAt != null -> R.string.error_schedule_failed
+                                    else -> R.string.error_post_failed
+                                },
                                 result.message.orEmpty()
                             )
                         )
@@ -539,9 +600,9 @@ class ComposeViewModel @Inject constructor(
         // Cancel existing job
         autoSaveJob?.cancel()
 
-        // Only schedule auto-save if there's content to save; a scheduled post being
-        // edited is kept on the server, not as a draft
-        if (!_uiState.value.hasDraftContent || _uiState.value.isEditingScheduled) {
+        // Only schedule auto-save if there's content to save; a scheduled or published post
+        // being edited is kept on the server, not as a draft
+        if (!_uiState.value.hasDraftContent || _uiState.value.isEditingExisting) {
             return
         }
 
@@ -571,7 +632,7 @@ class ComposeViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             when {
-                state.isPosted || state.isEditingScheduled -> Unit
+                state.isPosted || state.isEditingExisting -> Unit
                 state.hasDraftContent -> saveDraft()
                 state.currentDraftId != null -> draftRepository.deleteDraft(state.currentDraftId)
             }
@@ -870,7 +931,9 @@ data class ComposeUiState(
     /** ID of the scheduled post being edited. */
     val editingScheduledId: String? = null,
     /** The user marked the media as sensitive. */
-    val sensitive: Boolean = false
+    val sensitive: Boolean = false,
+    /** ID of the own published post being edited. */
+    val editingStatusId: String? = null
 ) {
     /** Length as Mastodon counts it (URLs, mentions, content warning). */
     val characterCount: Int by lazy {
@@ -888,7 +951,14 @@ data class ComposeUiState(
     val isReply: Boolean get() = replyToId != null
     val isScheduled: Boolean get() = scheduledAt != null
     val isEditingScheduled: Boolean get() = editingScheduledId != null
-    val canSwitchAccount: Boolean get() = accounts.size > 1 && !isReply && quoteId == null && !isEditingScheduled
+    val isEditingStatus: Boolean get() = editingStatusId != null
+    /** A post that exists on the server is edited, so no draft is kept. */
+    val isEditingExisting: Boolean get() = isEditingScheduled || isEditingStatus
+    val canSwitchAccount: Boolean get() = accounts.size > 1 && !isReply && quoteId == null && !isEditingExisting
+    /** Mastodon can't change the visibility of a published post. */
+    val canChangeVisibility: Boolean get() = !isEditingStatus
+    /** A published post can't be scheduled. */
+    val canSchedule: Boolean get() = !isEditingStatus
     val isQuote: Boolean get() = quoteId != null
     val canAddMedia: Boolean get() = mediaAttachments.size < limits.maxMediaAttachments && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
@@ -969,5 +1039,16 @@ enum class StatusVisibility(val value: String, @StringRes val labelRes: Int) {
     DIRECT("direct", R.string.visibility_direct)
 }
 
+/**
+ * Seconds until a poll of an edited post ends, so editing keeps its end time; at least the
+ * 5 minutes Mastodon requires.
+ */
+internal fun remainingPollSeconds(expiresAt: String?, now: Instant = Instant.now()): Int {
+    val end = expiresAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return DEFAULT_POLL_SECONDS
+    return Duration.between(now, end).seconds.coerceIn(MIN_POLL_SECONDS.toLong(), Int.MAX_VALUE.toLong()).toInt()
+}
+
+private const val DEFAULT_POLL_SECONDS = 86400
+private const val MIN_POLL_SECONDS = 300
 private const val MAX_SUGGESTIONS = 5
 private const val AUTOCOMPLETE_DELAY_MS = 250L

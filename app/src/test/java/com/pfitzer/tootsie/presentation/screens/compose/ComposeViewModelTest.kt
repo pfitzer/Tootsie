@@ -9,6 +9,8 @@ import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.ScheduledStatus
+import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.StatusSource
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
 import java.time.Duration
@@ -302,6 +304,67 @@ class ComposeViewModelTest {
         coVerify { statusRepository.updateMediaDescription("m1", "A dog") }
         assertEquals("A dog", viewModel.uiState.value.mediaAttachments.single().description)
     }
+
+    @Test
+    fun `an own post is edited with its source text, alt texts and without drafts`() = runTest {
+        val original = ownStatus(media = listOf(media("m1", "Old alt")))
+        coEvery { statusRepository.getStatus("42") } returns Result.Success(original)
+        coEvery { statusRepository.getStatusSource("42") } returns
+            Result.Success(StatusSource(id = "42", text = "Plain @text", spoilerText = "CW"))
+        coEvery { statusRepository.editStatus(any(), any(), any()) } returns Result.Success(original)
+        val viewModel = viewModel(SavedStateHandle(mapOf("editId" to "42")))
+
+        val loaded = viewModel.uiState.value
+        assertEquals("Plain @text", loaded.content)
+        assertEquals("CW", loaded.contentWarning)
+        assertEquals(StatusVisibility.UNLISTED, loaded.visibility)
+        assertFalse(loaded.canChangeVisibility)
+        assertFalse(loaded.canSchedule)
+
+        viewModel.onAction(ComposeAction.UpdateMediaDescription("m1", "New alt"))
+        viewModel.onAction(ComposeAction.UpdateContent("Edited"))
+        viewModel.onAction(ComposeAction.Post)
+
+        // Attached media can't be updated on its own; the alt text goes with the edit
+        coVerify(exactly = 0) { statusRepository.updateMediaDescription(any(), any()) }
+        coVerify {
+            statusRepository.editStatus(
+                "42",
+                match { it.content == "Edited" && it.spoilerText == "CW" && it.mediaIds == listOf("m1") },
+                mapOf("m1" to "New alt")
+            )
+        }
+        assertTrue(viewModel.uiState.value.isPosted)
+
+        viewModel.onAction(ComposeAction.Exit)
+        coVerify(exactly = 0) { draftRepository.saveDraft(any()) }
+    }
+
+    @Test
+    fun `editing keeps the end time of a poll, at least 5 minutes`() {
+        val now = Instant.parse("2026-10-25T10:00:00Z")
+
+        assertEquals(7200, remainingPollSeconds("2026-10-25T12:00:00Z", now))
+        assertEquals(300, remainingPollSeconds("2026-10-25T09:00:00Z", now))
+        assertEquals(86400, remainingPollSeconds(null, now))
+    }
+
+    private fun ownStatus(media: List<MediaAttachment> = emptyList()) = Status(
+        id = "42",
+        uri = "https://example.social/statuses/42",
+        url = null,
+        account = account("own"),
+        content = "<p>Plain <a>@text</a></p>",
+        createdAt = "2026-10-25T09:00:00Z",
+        visibility = com.pfitzer.tootsie.domain.model.StatusVisibility.UNLISTED,
+        sensitive = false,
+        spoilerText = "CW",
+        mediaAttachments = media,
+        reblogsCount = 0,
+        favouritesCount = 0,
+        repliesCount = 0,
+        language = "en"
+    )
 
     private fun media(id: String, description: String?) = MediaAttachment(
         id = id,

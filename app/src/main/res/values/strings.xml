@@ -650,6 +650,16 @@
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 
+    <!-- Editing posts -->
+    <string name="compose_title_edit">Edit post</string>
+    <string name="status_edited">edited</string>
+    <string name="edit_history_title">Edit history</string>
+    <string name="edit_history_original">Original</string>
+    <string name="edit_history_current">Current</string>
+    <string name="error_load_post_for_edit">Failed to load the post for editing</string>
+    <string name="error_edit_failed">Failed to save the post: %1$s</string>
+    <string name="error_load_edit_history">Failed to load the edit history</string>
+
     <!-- Sensitive media -->
     <string name="compose_mark_sensitive">Mark media as sensitive</string>
 

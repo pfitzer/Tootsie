@@ -29,6 +29,7 @@ import com.pfitzer.tootsie.domain.model.Status
  * @param onReplyClick Callback when reply button is clicked
  * @param onBookmarkClick Callback when bookmark button is clicked
  * @param onPinClick Optional callback when pin button is clicked (only shown if provided)
+ * @param onEditClick Optional callback to edit the status (own posts)
  * @param onReportClick Optional callback when report is selected (only shown if provided, for non-own posts)
  * @param modifier Optional modifier
  */
@@ -42,6 +43,7 @@ fun StatusActions(
     onShareClick: () -> Unit,
     onPinClick: (() -> Unit)? = null,
     onReportClick: (() -> Unit)? = null,
+    onEditClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Servers with quote support (quote_approval present) offer boost or quote
@@ -112,8 +114,10 @@ fun StatusActions(
                 contentDescription = if (status.pinned) stringResource(R.string.cd_unpin) else stringResource(R.string.cd_pin),
                 activeColor = MaterialTheme.colorScheme.tertiary
             )
-        } else if (onReportClick != null) {
-            // More options menu (Share + Report) for non-own posts
+        }
+
+        if (onReportClick != null || onEditClick != null) {
+            // More options menu: Share, plus Edit for own posts or Report for others
             var expanded by remember { mutableStateOf(false) }
             Box {
                 IconButton(onClick = { expanded = true }) {
@@ -138,16 +142,30 @@ fun StatusActions(
                             onShareClick()
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.report_post)) },
-                        leadingIcon = {
-                            Icon(Icons.Default.Flag, contentDescription = null)
-                        },
-                        onClick = {
-                            expanded = false
-                            onReportClick()
-                        }
-                    )
+                    if (onEditClick != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.edit)) },
+                            leadingIcon = {
+                                Icon(Icons.Default.Edit, contentDescription = null)
+                            },
+                            onClick = {
+                                expanded = false
+                                onEditClick()
+                            }
+                        )
+                    }
+                    if (onReportClick != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.report_post)) },
+                            leadingIcon = {
+                                Icon(Icons.Default.Flag, contentDescription = null)
+                            },
+                            onClick = {
+                                expanded = false
+                                onReportClick()
+                            }
+                        )
+                    }
                 }
             }
         } else {

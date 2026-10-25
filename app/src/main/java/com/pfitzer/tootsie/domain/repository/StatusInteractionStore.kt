@@ -2,6 +2,7 @@ package com.pfitzer.tootsie.domain.repository
 
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.StatusInteraction
+import com.pfitzer.tootsie.domain.model.toEditedContent
 import com.pfitzer.tootsie.domain.model.toInteraction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,9 +12,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * In-memory store of interaction states (favourite, boost, bookmark, pin) confirmed by the
- * server during this session. Screens apply it to their already loaded statuses so an
- * interaction is reflected everywhere without reloading.
+ * In-memory store of interaction states (favourite, boost, bookmark, pin) and edits
+ * confirmed by the server during this session. Screens apply it to their already loaded
+ * statuses so an interaction or edit is reflected everywhere without reloading.
  */
 @Singleton
 class StatusInteractionStore @Inject constructor() {
@@ -27,7 +28,20 @@ class StatusInteractionStore @Inject constructor() {
      */
     fun update(status: Status) {
         val target = status.reblog ?: status
-        _interactions.update { it + (target.id to target.toInteraction()) }
+        _interactions.update {
+            // An edit made earlier in this session stays applied
+            val interaction = target.toInteraction().copy(editedContent = it[target.id]?.editedContent)
+            it + (target.id to interaction)
+        }
+    }
+
+    /**
+     * Record an own status after editing it.
+     */
+    fun updateEdited(status: Status) {
+        _interactions.update {
+            it + (status.id to status.toInteraction().copy(editedContent = status.toEditedContent()))
+        }
     }
 
     /**

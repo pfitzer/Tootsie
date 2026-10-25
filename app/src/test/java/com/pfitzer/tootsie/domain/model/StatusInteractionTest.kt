@@ -63,6 +63,23 @@ class StatusInteractionTest {
         assertTrue(store.interactions.value.isEmpty())
     }
 
+    @Test
+    fun `an edit is applied to the status and to boosts of it, and kept by later interactions`() {
+        val store = StatusInteractionStore()
+        val edited = status("1").copy(content = "<p>New</p>", editedAt = "2026-10-25T10:00:00Z")
+        store.updateEdited(edited)
+        // A later favourite response must not drop the edit
+        store.update(edited.copy(content = "<p>New</p>", favourited = true))
+
+        val boost = status("wrapper", reblog = status("1"))
+        val shown = boost.withInteractions(store.interactions.value).reblog!!
+
+        assertEquals("<p>New</p>", shown.content)
+        assertEquals("2026-10-25T10:00:00Z", shown.editedAt)
+        assertTrue(shown.favourited)
+        assertEquals("<p>New</p>", status("1").withInteractions(store.interactions.value).content)
+    }
+
     private fun status(id: String, reblog: Status? = null) = Status(
         id = id,
         uri = "https://example.social/statuses/$id",

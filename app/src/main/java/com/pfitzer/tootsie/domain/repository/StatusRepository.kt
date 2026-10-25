@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.domain.repository
 
+import com.pfitzer.tootsie.domain.model.NewStatus
+import com.pfitzer.tootsie.domain.model.StatusEditVersion
+import com.pfitzer.tootsie.domain.model.StatusSource
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.util.Result
@@ -135,6 +138,27 @@ interface StatusRepository {
         description: String? = null,
         focus: Pair<Float, Float>? = null
     ): Result<MediaAttachment>
+
+    /**
+     * Get the plain text source of an own status, for editing.
+     */
+    suspend fun getStatusSource(statusId: String): Result<StatusSource>
+
+    /**
+     * Edit an own status.
+     *
+     * @param descriptions Alt text per media ID; attachments without an entry keep theirs
+     */
+    suspend fun editStatus(
+        statusId: String,
+        status: NewStatus,
+        descriptions: Map<String, String>
+    ): Result<Status>
+
+    /**
+     * Get the versions of an edited status, newest first.
+     */
+    suspend fun getStatusHistory(statusId: String): Result<List<StatusEditVersion>>
 
     /**
      * Get an uploaded media attachment that is not attached to a status yet.

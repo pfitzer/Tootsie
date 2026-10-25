@@ -1,5 +1,9 @@
 package com.pfitzer.tootsie.data.repository
 
+import com.pfitzer.tootsie.data.remote.StatusEditForm
+import com.pfitzer.tootsie.domain.model.NewStatus
+import com.pfitzer.tootsie.domain.model.StatusEditVersion
+import com.pfitzer.tootsie.domain.model.StatusSource
 import com.pfitzer.tootsie.data.local.dao.StatusDao
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.mapper.toEntity
@@ -170,6 +174,50 @@ class StatusRepositoryImpl @Inject constructor(
             Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unpin status")
+        }
+    }
+
+    override suspend fun getStatusSource(statusId: String): Result<StatusSource> {
+        return try {
+            val source = mastodonApi.getStatusSource(statusId)
+            Result.Success(StatusSource(id = source.id, text = source.text, spoilerText = source.spoilerText))
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to load status source")
+        }
+    }
+
+    override suspend fun editStatus(
+        statusId: String,
+        status: NewStatus,
+        descriptions: Map<String, String>
+    ): Result<Status> {
+        return try {
+            val edited = mastodonApi.editStatus(statusId, StatusEditForm.build(status, descriptions)).toDomain()
+            // Shown in all lists right away; the timeline cache gets it with the next refresh
+            statusInteractionStore.updateEdited(edited)
+            Result.Success(edited)
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to edit status")
+        }
+    }
+
+    override suspend fun getStatusHistory(statusId: String): Result<List<StatusEditVersion>> {
+        return try {
+            val versions = mastodonApi.getStatusHistory(statusId).map { edit ->
+                StatusEditVersion(
+                    content = edit.content,
+                    spoilerText = edit.spoilerText,
+                    sensitive = edit.sensitive,
+                    createdAt = edit.createdAt,
+                    account = edit.account.toDomain(),
+                    pollOptions = edit.poll?.options.orEmpty().map { it.title },
+                    mediaAttachments = edit.mediaAttachments.map { it.toDomain() },
+                    emojis = edit.emojis.map { it.toDomain() }
+                )
+            }
+            Result.Success(versions.reversed())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to load edit history")
         }
     }
 

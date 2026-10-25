@@ -651,6 +651,16 @@
     <string name="sort_trending">Im Trend</string>
     <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
 
+    <!-- Editing posts -->
+    <string name="compose_title_edit">Beitrag bearbeiten</string>
+    <string name="status_edited">bearbeitet</string>
+    <string name="edit_history_title">Bearbeitungsverlauf</string>
+    <string name="edit_history_original">Original</string>
+    <string name="edit_history_current">Aktuell</string>
+    <string name="error_load_post_for_edit">Der Beitrag konnte nicht zum Bearbeiten geladen werden</string>
+    <string name="error_edit_failed">Beitrag konnte nicht gespeichert werden: %1$s</string>
+    <string name="error_load_edit_history">Der Bearbeitungsverlauf konnte nicht geladen werden</string>
+
     <!-- Sensitive media -->
     <string name="compose_mark_sensitive">Medien als sensibel markieren</string>
 
