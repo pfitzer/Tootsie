@@ -650,6 +650,10 @@
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 
+    <!-- Draft media -->
+    <string name="error_draft_media_missing">Some attachments of this draft are no longer available</string>
+    <string name="error_update_alt_text">Failed to save the alt text</string>
+
     <!-- Scheduled posts -->
     <string name="next">Next</string>
     <string name="scheduled_posts_title">Scheduled posts</string>

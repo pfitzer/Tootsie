@@ -137,6 +137,18 @@ interface StatusRepository {
     ): Result<MediaAttachment>
 
     /**
+     * Get an uploaded media attachment that is not attached to a status yet.
+     *
+     * @return The attachment, or null if it no longer exists on the server
+     */
+    suspend fun getMedia(id: String): Result<MediaAttachment?>
+
+    /**
+     * Set the alt text of an uploaded media attachment before it is posted.
+     */
+    suspend fun updateMediaDescription(id: String, description: String): Result<MediaAttachment>
+
+    /**
      * Get conversation context for a status.
      * Returns ancestors (posts before) and descendants (replies).
      *
