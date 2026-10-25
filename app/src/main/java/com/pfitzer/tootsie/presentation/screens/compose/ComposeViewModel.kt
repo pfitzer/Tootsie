@@ -11,6 +11,10 @@ import com.pfitzer.tootsie.data.local.entities.DraftEntity
 import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.repository.DraftRepository
+import com.pfitzer.tootsie.domain.repository.ScheduledStatusRepository
+import com.pfitzer.tootsie.domain.model.NewStatus
+import com.pfitzer.tootsie.domain.util.ScheduleTime
+import java.time.Instant
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.CustomEmoji
@@ -48,6 +52,7 @@ class ComposeViewModel @Inject constructor(
     private val uploadMediaUseCase: com.pfitzer.tootsie.domain.usecase.status.UploadMediaUseCase,
     private val statusRepository: com.pfitzer.tootsie.domain.repository.StatusRepository,
     private val draftRepository: DraftRepository,
+    private val scheduledStatusRepository: ScheduledStatusRepository,
     private val getCustomEmojisUseCase: com.pfitzer.tootsie.domain.usecase.emoji.GetCustomEmojisUseCase,
     private val getInstanceLimitsUseCase: GetInstanceLimitsUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
@@ -61,6 +66,7 @@ class ComposeViewModel @Inject constructor(
     private val replyToId: String? = savedStateHandle["replyToId"]
     private val draftId: String? = savedStateHandle["draftId"]
     private val quoteId: String? = savedStateHandle["quoteId"]
+    private val scheduledId: String? = savedStateHandle["scheduledId"]
 
     private val _uiState = MutableStateFlow(ComposeUiState(replyToId = replyToId, quoteId = quoteId))
     val uiState: StateFlow<ComposeUiState> = _uiState.asStateFlow()
@@ -78,8 +84,12 @@ class ComposeViewModel @Inject constructor(
         loadAccounts()
         loadLanguage()
 
+        // Load the scheduled post being edited
+        if (scheduledId != null) {
+            loadScheduledStatus(scheduledId)
+        }
         // Load draft if resuming from drafts
-        if (draftId != null) {
+        else if (draftId != null) {
             loadDraft(draftId.toLongOrNull() ?: 0L)
         }
         // Load reply context if replying to a status
@@ -90,6 +100,40 @@ class ComposeViewModel @Inject constructor(
         // Load the quoted status for the preview
         if (quoteId != null) {
             loadQuotedStatus(quoteId)
+        }
+    }
+
+    /**
+     * Load a scheduled post to edit it. It is replaced by a new one when posting, since
+     * Mastodon can only change the time of a scheduled post.
+     */
+    private fun loadScheduledStatus(id: String) {
+        viewModelScope.launch {
+            when (val result = scheduledStatusRepository.getScheduledStatus(id)) {
+                is Result.Success -> {
+                    val scheduled = result.data
+                    _uiState.update {
+                        it.copy(
+                            editingScheduledId = scheduled.id,
+                            scheduledAt = scheduled.scheduledAt,
+                            content = scheduled.text,
+                            contentWarning = scheduled.spoilerText.orEmpty(),
+                            showContentWarning = scheduled.spoilerText != null,
+                            visibility = StatusVisibility.entries.find { v -> v.value == scheduled.visibility }
+                                ?: StatusVisibility.PUBLIC,
+                            language = scheduled.language ?: it.language,
+                            replyToId = scheduled.inReplyToId,
+                            pollConfig = scheduled.poll,
+                            mediaAttachments = scheduled.mediaAttachments
+                        )
+                    }
+                    scheduled.inReplyToId?.let { loadReplyContext(it) }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_load_scheduled_post)) }
+                }
+                is Result.Loading -> Unit
+            }
         }
     }
 
@@ -273,6 +317,8 @@ class ComposeViewModel @Inject constructor(
             is ComposeAction.UpdatePollExpiry -> updatePollExpiry(action.expiresIn)
             ComposeAction.TogglePollMultipleChoice -> togglePollMultipleChoice()
             ComposeAction.TogglePollHideTotals -> togglePollHideTotals()
+            is ComposeAction.SetSchedule -> _uiState.update { it.copy(scheduledAt = action.scheduledAt) }
+            ComposeAction.ClearSchedule -> _uiState.update { it.copy(scheduledAt = null) }
         }
     }
 
@@ -394,26 +440,50 @@ class ComposeViewModel @Inject constructor(
             return
         }
 
+        val scheduledAt = _uiState.value.scheduledAt
+        if (scheduledAt != null && !ScheduleTime.isValid(scheduledAt, Instant.now())) {
+            _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_schedule_too_soon)) }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isPosting = true, errorMessage = null) }
 
-            val mediaIds = _uiState.value.mediaAttachments.map { it.id }
-
-            val result = postStatusUseCase(
+            val state = _uiState.value
+            val mediaIds = state.mediaAttachments.map { it.id }
+            val newStatus = NewStatus(
                 content = content,
-                visibility = _uiState.value.visibility.value,
-                inReplyToId = replyToId,
+                visibility = state.visibility.value,
+                inReplyToId = state.replyToId,
                 mediaIds = mediaIds.takeIf { it.isNotEmpty() },
-                spoilerText = _uiState.value.contentWarning.takeIf { it.isNotBlank() },
-                pollConfig = _uiState.value.pollConfig,
+                spoilerText = state.contentWarning.takeIf { it.isNotBlank() },
+                pollConfig = state.pollConfig,
                 quotedStatusId = quoteId,
-                language = _uiState.value.language
+                language = state.language
             )
+
+            val result = if (scheduledAt != null) {
+                scheduledStatusRepository.scheduleStatus(newStatus, scheduledAt)
+            } else {
+                postStatusUseCase(
+                    content = newStatus.content,
+                    visibility = newStatus.visibility,
+                    inReplyToId = newStatus.inReplyToId,
+                    mediaIds = newStatus.mediaIds,
+                    spoilerText = newStatus.spoilerText,
+                    pollConfig = newStatus.pollConfig,
+                    quotedStatusId = newStatus.quotedStatusId,
+                    language = newStatus.language
+                )
+            }
 
             when (result) {
                 is Result.Success -> {
+                    // The edited scheduled post is replaced by the new one; deleted only now,
+                    // so it isn't lost if posting fails
+                    state.editingScheduledId?.let { scheduledStatusRepository.deleteScheduledStatus(it) }
                     // Default for the next post
-                    _uiState.value.language?.let { preferencesManager.savePostLanguage(it) }
+                    state.language?.let { preferencesManager.savePostLanguage(it) }
                     _uiState.update {
                         it.copy(
                             isPosting = false,
@@ -427,7 +497,10 @@ class ComposeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isPosting = false,
-                            errorMessage = UiText.of(R.string.error_post_failed, result.message.orEmpty())
+                            errorMessage = UiText.of(
+                                if (scheduledAt != null) R.string.error_schedule_failed else R.string.error_post_failed,
+                                result.message.orEmpty()
+                            )
                         )
                     }
                 }
@@ -451,8 +524,9 @@ class ComposeViewModel @Inject constructor(
         // Cancel existing job
         autoSaveJob?.cancel()
 
-        // Only schedule auto-save if there's content to save
-        if (!_uiState.value.hasDraftContent) {
+        // Only schedule auto-save if there's content to save; a scheduled post being
+        // edited is kept on the server, not as a draft
+        if (!_uiState.value.hasDraftContent || _uiState.value.isEditingScheduled) {
             return
         }
 
@@ -482,7 +556,7 @@ class ComposeViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             when {
-                state.isPosted -> Unit
+                state.isPosted || state.isEditingScheduled -> Unit
                 state.hasDraftContent -> saveDraft()
                 state.currentDraftId != null -> draftRepository.deleteDraft(state.currentDraftId)
             }
@@ -743,7 +817,11 @@ data class ComposeUiState(
     val accounts: List<Account> = emptyList(),
     /** ISO 639-1 language of the post. */
     val language: String? = null,
-    val suggestions: List<ComposeSuggestion> = emptyList()
+    val suggestions: List<ComposeSuggestion> = emptyList(),
+    /** Publication time; null to post right away. */
+    val scheduledAt: Instant? = null,
+    /** ID of the scheduled post being edited. */
+    val editingScheduledId: String? = null
 ) {
     /** Length as Mastodon counts it (URLs, mentions, content warning). */
     val characterCount: Int by lazy {
@@ -759,7 +837,9 @@ data class ComposeUiState(
         return (hasContent || hasMedia || hasCompletePoll) && !isPosting && !isUploadingMedia && !isOverCharacterLimit
     }
     val isReply: Boolean get() = replyToId != null
-    val canSwitchAccount: Boolean get() = accounts.size > 1 && !isReply && quoteId == null
+    val isScheduled: Boolean get() = scheduledAt != null
+    val isEditingScheduled: Boolean get() = editingScheduledId != null
+    val canSwitchAccount: Boolean get() = accounts.size > 1 && !isReply && quoteId == null && !isEditingScheduled
     val isQuote: Boolean get() = quoteId != null
     val canAddMedia: Boolean get() = mediaAttachments.size < limits.maxMediaAttachments && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
@@ -798,6 +878,10 @@ sealed class ComposeAction {
     data class UpdatePollExpiry(val expiresIn: Int) : ComposeAction()
     data object TogglePollMultipleChoice : ComposeAction()
     data object TogglePollHideTotals : ComposeAction()
+
+    // Scheduling
+    data class SetSchedule(val scheduledAt: Instant) : ComposeAction()
+    data object ClearSchedule : ComposeAction()
 }
 
 /**

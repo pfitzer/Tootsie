@@ -412,6 +412,77 @@ interface MastodonApiService {
     ): StatusDto
 
     /**
+     * Schedule a status: same fields as [postStatus] plus the publication time.
+     *
+     * @param scheduledAt ISO 8601 time, at least 5 minutes ahead
+     */
+    @FormUrlEncoded
+    @POST("api/v1/statuses")
+    suspend fun scheduleStatus(
+        @Field("status") status: String,
+        @Field("in_reply_to_id") inReplyToId: String? = null,
+        @Field("media_ids[]") mediaIds: List<String>? = null,
+        @Field("sensitive") sensitive: Boolean = false,
+        @Field("spoiler_text") spoilerText: String? = null,
+        @Field("visibility") visibility: String = "public",
+        @Field("language") language: String? = null,
+        @Field("poll[options][]") pollOptions: List<String>? = null,
+        @Field("poll[expires_in]") pollExpiresIn: Int? = null,
+        @Field("poll[multiple]") pollMultiple: Boolean? = null,
+        @Field("poll[hide_totals]") pollHideTotals: Boolean? = null,
+        @Field("quoted_status_id") quotedStatusId: String? = null,
+        @Field("scheduled_at") scheduledAt: String
+    ): com.pfitzer.tootsie.data.remote.dto.ScheduledStatusDto
+
+    // ========== Scheduled Status Endpoints ==========
+
+    /**
+     * Get scheduled statuses.
+     * Returns Response to access Link header for pagination.
+     *
+     * @param maxId Return results older than this ID
+     * @param limit Maximum number of results (default 20, max 40)
+     */
+    @GET("api/v1/scheduled_statuses")
+    suspend fun getScheduledStatuses(
+        @Query("max_id") maxId: String? = null,
+        @Query("limit") limit: Int = 20
+    ): retrofit2.Response<List<com.pfitzer.tootsie.data.remote.dto.ScheduledStatusDto>>
+
+    /**
+     * Get a scheduled status.
+     *
+     * @param id Scheduled status ID
+     */
+    @GET("api/v1/scheduled_statuses/{id}")
+    suspend fun getScheduledStatus(
+        @Path("id") id: String
+    ): com.pfitzer.tootsie.data.remote.dto.ScheduledStatusDto
+
+    /**
+     * Move a scheduled status to another time.
+     *
+     * @param id Scheduled status ID
+     * @param scheduledAt ISO 8601 time, at least 5 minutes ahead
+     */
+    @FormUrlEncoded
+    @PUT("api/v1/scheduled_statuses/{id}")
+    suspend fun updateScheduledStatus(
+        @Path("id") id: String,
+        @Field("scheduled_at") scheduledAt: String
+    ): com.pfitzer.tootsie.data.remote.dto.ScheduledStatusDto
+
+    /**
+     * Delete a scheduled status, so it is not published.
+     *
+     * @param id Scheduled status ID
+     */
+    @DELETE("api/v1/scheduled_statuses/{id}")
+    suspend fun deleteScheduledStatus(
+        @Path("id") id: String
+    )
+
+    /**
      * Delete a status.
      *
      * @param id Status ID to delete

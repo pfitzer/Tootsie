@@ -649,4 +649,30 @@
     <string name="sort_activity">Most active (7 days)</string>
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
+
+    <!-- Scheduled posts -->
+    <string name="next">Next</string>
+    <string name="scheduled_posts_title">Scheduled posts</string>
+    <string name="empty_scheduled_posts">No scheduled posts</string>
+    <string name="compose_schedule">Schedule post</string>
+    <string name="compose_scheduled_for">Scheduled for %1$s</string>
+    <string name="compose_button_schedule">Schedule</string>
+    <string name="compose_title_edit_scheduled">Edit scheduled post</string>
+    <string name="cd_remove_schedule">Remove schedule</string>
+    <string name="schedule_pick_time">Pick a time</string>
+    <string name="scheduled_change_time">Change time</string>
+    <string name="scheduled_no_text">(no text)</string>
+    <string name="scheduled_delete_confirm_title">Delete scheduled post?</string>
+    <string name="scheduled_delete_confirm_message">It will not be published.</string>
+    <string name="toast_post_scheduled">Post scheduled for %1$s</string>
+    <string name="error_schedule_too_soon">Schedule the post at least 5 minutes ahead</string>
+    <string name="error_schedule_failed">Failed to schedule post: %1$s</string>
+    <string name="error_load_scheduled_posts">Failed to load scheduled posts</string>
+    <string name="error_load_scheduled_post">Failed to load the scheduled post</string>
+    <string name="error_reschedule_post">Failed to change the time</string>
+    <string name="error_delete_scheduled_post">Failed to delete the scheduled post</string>
+    <plurals name="scheduled_media_count">
+        <item quantity="one">1 attachment</item>
+        <item quantity="other">%d attachments</item>
+    </plurals>
 </resources>

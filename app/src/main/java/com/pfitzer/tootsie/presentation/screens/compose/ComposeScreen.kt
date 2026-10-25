@@ -17,11 +17,13 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Drafts
 import androidx.compose.material.icons.outlined.EmojiEmotions
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.*
@@ -55,6 +57,12 @@ import com.pfitzer.tootsie.presentation.components.compose.AltTextDialog
 import com.pfitzer.tootsie.presentation.components.compose.EmojiPickerDialog
 import com.pfitzer.tootsie.presentation.components.compose.MediaPreviewGrid
 import com.pfitzer.tootsie.presentation.components.compose.ComposePollComponent
+import com.pfitzer.tootsie.presentation.components.compose.ScheduleTimePickerDialog
+import com.pfitzer.tootsie.domain.util.ScheduleTime
+import com.pfitzer.tootsie.presentation.util.LocaleAwareDateFormatter
+import com.pfitzer.tootsie.presentation.util.UiText
+import android.widget.Toast
+import java.time.Instant
 import com.pfitzer.tootsie.util.toFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -73,6 +81,7 @@ import java.util.Locale
 fun ComposeScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDrafts: () -> Unit = {},
+    onNavigateToScheduledPosts: () -> Unit = {},
     viewModel: ComposeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,6 +122,7 @@ fun ComposeScreen(
     var selectedMediaForAltText by remember { mutableStateOf<MediaAttachment?>(null) }
     var showEmojiPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+    var showSchedulePicker by remember { mutableStateOf(false) }
 
     // Image picker launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -138,6 +148,11 @@ fun ComposeScreen(
 
     // Navigate back when the post is sent, or once the draft is saved after leaving
     LaunchedEffect(uiState.isPosted, uiState.isExited) {
+        val scheduledAt = uiState.scheduledAt
+        if (uiState.isPosted && scheduledAt != null) {
+            val time = LocaleAwareDateFormatter.formatAbsoluteTime(context, scheduledAt)
+            Toast.makeText(context, UiText.of(R.string.toast_post_scheduled, time).asString(context), Toast.LENGTH_SHORT).show()
+        }
         if (uiState.isPosted || uiState.isExited) {
             onNavigateBack()
         }
@@ -175,6 +190,17 @@ fun ComposeScreen(
         )
     }
 
+    if (showSchedulePicker) {
+        ScheduleTimePickerDialog(
+            initial = uiState.scheduledAt ?: ScheduleTime.suggestion(Instant.now()),
+            onConfirm = {
+                viewModel.onAction(ComposeAction.SetSchedule(it))
+                showSchedulePicker = false
+            },
+            onDismiss = { showSchedulePicker = false }
+        )
+    }
+
     if (showLanguagePicker) {
         LanguagePickerDialog(
             selected = uiState.language,
@@ -192,6 +218,7 @@ fun ComposeScreen(
                 title = {
                     Text(stringResource(
                         when {
+                            uiState.isEditingScheduled -> R.string.compose_title_edit_scheduled
                             uiState.isReply -> R.string.compose_title_reply
                             uiState.isQuote -> R.string.compose_title_quote
                             else -> R.string.compose
@@ -213,12 +240,18 @@ fun ComposeScreen(
                     ) {
                         Text(
                             stringResource(
-                                if (uiState.isPosting) R.string.compose_button_posting
-                                else R.string.compose_button_post
+                                when {
+                                    uiState.isPosting -> R.string.compose_button_posting
+                                    uiState.isScheduled -> R.string.compose_button_schedule
+                                    else -> R.string.compose_button_post
+                                }
                             )
                         )
                     }
-                    ComposeOverflowMenu(onNavigateToDrafts = onNavigateToDrafts)
+                    ComposeOverflowMenu(
+                        onNavigateToDrafts = onNavigateToDrafts,
+                        onNavigateToScheduledPosts = onNavigateToScheduledPosts
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -264,6 +297,36 @@ fun ComposeScreen(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
+                }
+
+                // Publication time (if scheduled)
+                uiState.scheduledAt?.let { scheduledAt ->
+                    InputChip(
+                        selected = true,
+                        onClick = { showSchedulePicker = true },
+                        label = {
+                            Text(
+                                stringResource(
+                                    R.string.compose_scheduled_for,
+                                    LocaleAwareDateFormatter.formatAbsoluteTime(context, scheduledAt)
+                                )
+                            )
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.Schedule, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = { viewModel.onAction(ComposeAction.ClearSchedule) },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.cd_remove_schedule),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
 
                 // Content warning (if enabled)
@@ -411,6 +474,7 @@ fun ComposeScreen(
                 onAddPoll = { viewModel.onAction(ComposeAction.AddPoll) },
                 onToggleContentWarning = { viewModel.onAction(ComposeAction.ToggleContentWarning) },
                 onEmoji = { showEmojiPicker = true },
+                onSchedule = { showSchedulePicker = true },
                 onLanguage = { showLanguagePicker = true }
             )
         }
@@ -421,7 +485,10 @@ fun ComposeScreen(
  * Overflow menu of the top bar.
  */
 @Composable
-private fun ComposeOverflowMenu(onNavigateToDrafts: () -> Unit) {
+private fun ComposeOverflowMenu(
+    onNavigateToDrafts: () -> Unit,
+    onNavigateToScheduledPosts: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
@@ -437,6 +504,14 @@ private fun ComposeOverflowMenu(onNavigateToDrafts: () -> Unit) {
                 onClick = {
                     expanded = false
                     onNavigateToDrafts()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.scheduled_posts_title)) },
+                leadingIcon = { Icon(Icons.Outlined.Schedule, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onNavigateToScheduledPosts()
                 }
             )
         }
@@ -586,6 +661,7 @@ private fun ComposeToolbar(
     onAddPoll: () -> Unit,
     onToggleContentWarning: () -> Unit,
     onEmoji: () -> Unit,
+    onSchedule: () -> Unit,
     onLanguage: () -> Unit
 ) {
     Row(
@@ -605,6 +681,9 @@ private fun ComposeToolbar(
         }
         IconButton(onClick = onEmoji) {
             Icon(Icons.Outlined.EmojiEmotions, contentDescription = stringResource(R.string.cd_custom_emoji))
+        }
+        IconToggleButton(checked = uiState.isScheduled, onCheckedChange = { onSchedule() }) {
+            Icon(Icons.Outlined.Schedule, contentDescription = stringResource(R.string.compose_schedule))
         }
         val languageName = uiState.language?.let { languageDisplayName(it) }.orEmpty()
         TextButton(onClick = onLanguage) {

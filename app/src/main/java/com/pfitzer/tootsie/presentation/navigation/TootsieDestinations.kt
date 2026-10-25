@@ -34,13 +34,22 @@ sealed class TootsieDestinations(val route: String) {
      * Compose screen - create new status/post.
      * Optionally takes replyToId parameter for replying to a status.
      * Optionally takes draftId parameter for resuming a draft.
+ * Optionally takes scheduledId parameter for editing a scheduled post.
      */
-    data object Compose : TootsieDestinations("compose?replyToId={replyToId}&draftId={draftId}&quoteId={quoteId}") {
-        fun createRoute(replyToId: String? = null, draftId: Long? = null, quoteId: String? = null): String {
+    data object Compose : TootsieDestinations(
+        "compose?replyToId={replyToId}&draftId={draftId}&quoteId={quoteId}&scheduledId={scheduledId}"
+    ) {
+        fun createRoute(
+            replyToId: String? = null,
+            draftId: Long? = null,
+            quoteId: String? = null,
+            scheduledId: String? = null
+        ): String {
             val params = buildList {
                 if (replyToId != null) add("replyToId=$replyToId")
                 if (draftId != null) add("draftId=$draftId")
                 if (quoteId != null) add("quoteId=$quoteId")
+                if (scheduledId != null) add("scheduledId=$scheduledId")
             }
             return if (params.isEmpty()) {
                 "compose"
@@ -51,6 +60,7 @@ sealed class TootsieDestinations(val route: String) {
         const val ARG_REPLY_TO_ID = "replyToId"
         const val ARG_DRAFT_ID = "draftId"
         const val ARG_QUOTE_ID = "quoteId"
+        const val ARG_SCHEDULED_ID = "scheduledId"
     }
 
     /**
@@ -96,6 +106,11 @@ sealed class TootsieDestinations(val route: String) {
      * Drafts screen - view and manage saved drafts.
      */
     data object Drafts : TootsieDestinations("drafts")
+
+    /**
+     * Scheduled Posts screen - view and manage scheduled posts.
+     */
+    data object ScheduledPosts : TootsieDestinations("scheduled_posts")
 
     /**
      * Settings screen - app settings and preferences.

@@ -25,6 +25,7 @@ Tootsie is a modern, high-performance, and privacy-respecting Mastodon client fo
 - **Organization**: Lists (create, edit, manage members), followed hashtags, bookmarks, favourites, drafts.
 - **Discovery**: Search for accounts, posts and hashtags; trending hashtags, posts and links; announcements.
 - **Account Management**: Profile editing, follow requests, muted and blocked accounts, blocked domains.
+- **Scheduled Posts**: Pick a publication time when composing; reschedule, edit or delete scheduled posts.
 - **Internationalized**: English and German.
 
 Some features depend on the server version: quote posts and fetching remote replies need Mastodon 4.5 or newer, decrypting push notifications needs Mastodon 4.4 or newer. On older servers Tootsie falls back to the previous behaviour (e.g. the boost button boosts directly).
