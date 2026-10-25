@@ -681,6 +681,13 @@
     <string name="error_toggle_notify">Failed to change notifications for this account</string>
     <string name="error_save_note">Failed to save the note</string>
 
+    <!-- Translation -->
+    <string name="translate">Translate</string>
+    <string name="translate_show_original">Show original</string>
+    <string name="translate_retry">Translation failed, try again</string>
+    <string name="translated_from">Translated from %1$s</string>
+    <string name="translated_from_with">Translated from %1$s using %2$s</string>
+
     <!-- Favourited / boosted by -->
     <string name="favourited_by_title">Favourited by</string>
     <string name="reblogged_by_title">Boosted by</string>

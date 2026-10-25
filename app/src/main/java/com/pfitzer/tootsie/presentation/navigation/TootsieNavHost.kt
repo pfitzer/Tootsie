@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.presentation.navigation
 
+import com.pfitzer.tootsie.presentation.components.status.StatusTranslations
+import com.pfitzer.tootsie.presentation.components.status.LocalStatusTranslations
+import com.pfitzer.tootsie.presentation.TranslationViewModel
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -69,6 +72,11 @@ fun TootsieNavHost(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val activeAccount by mainViewModel.activeAccount.collectAsState()
+
+    // Translations of statuses in every card
+    val translationViewModel: TranslationViewModel = hiltViewModel()
+    val translationStates by translationViewModel.translations.collectAsState()
+    val isServerTranslationAvailable by translationViewModel.isServerTranslationAvailable.collectAsState()
 
     // Deleting own statuses from any card; a redraft opens the compose screen
     val ownStatusActions: OwnStatusActionsViewModel = hiltViewModel()
@@ -156,7 +164,12 @@ fun TootsieNavHost(
             },
             LocalOnDeleteStatus provides { status: Status, redraft: Boolean ->
                 if (redraft) ownStatusActions.deleteAndRedraft(status) else ownStatusActions.delete(status)
-            }
+            },
+            LocalStatusTranslations provides StatusTranslations(
+                states = translationStates,
+                isServerTranslationAvailable = isServerTranslationAvailable,
+                onToggle = translationViewModel::toggle
+            )
         ) {
         NavHost(
             navController = navController,

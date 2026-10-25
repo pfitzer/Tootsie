@@ -453,6 +453,19 @@ interface MastodonApiService {
     ): StatusDto
 
     /**
+     * Translate a status with the server's translation service.
+     *
+     * @param id Status ID
+     * @param lang ISO 639 language to translate into
+     */
+    @FormUrlEncoded
+    @POST("api/v1/statuses/{id}/translate")
+    suspend fun translateStatus(
+        @Path("id") id: String,
+        @Field("lang") lang: String
+    ): com.pfitzer.tootsie.data.remote.dto.TranslationDto
+
+    /**
      * Get the plain text source of an own status, for editing.
      *
      * @param id Status ID
@@ -785,6 +798,12 @@ interface MastodonApiService {
      */
     @GET("api/v1/instance")
     suspend fun getInstance(): InstanceDto
+
+    /**
+     * Get instance information (v2, Mastodon >= 4.0), here for the translation support.
+     */
+    @GET("api/v2/instance")
+    suspend fun getInstanceV2(): com.pfitzer.tootsie.data.remote.dto.InstanceV2Dto
 
     // ========== Search Endpoints ==========
 

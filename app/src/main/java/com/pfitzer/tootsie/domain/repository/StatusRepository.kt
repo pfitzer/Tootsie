@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.domain.repository
 
+import com.pfitzer.tootsie.domain.model.Translation
 import com.pfitzer.tootsie.domain.model.DeletedStatus
 import com.pfitzer.tootsie.domain.model.NewStatus
 import com.pfitzer.tootsie.domain.model.StatusEditVersion
@@ -140,6 +141,13 @@ interface StatusRepository {
         description: String? = null,
         focus: Pair<Float, Float>? = null
     ): Result<MediaAttachment>
+
+    /**
+     * Translate a status with the server's translation service.
+     *
+     * @param language ISO 639 language to translate into
+     */
+    suspend fun translateStatus(statusId: String, language: String): Result<Translation>
 
     /**
      * Get the plain text source of an own status, for editing.
