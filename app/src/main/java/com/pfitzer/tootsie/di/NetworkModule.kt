@@ -1,6 +1,6 @@
 package com.pfitzer.tootsie.di
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.pfitzer.tootsie.BuildConfig
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.remote.api.AuthApiService
