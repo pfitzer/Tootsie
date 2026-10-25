@@ -720,8 +720,8 @@
         <item quantity="other">%d boosts</item>
     </plurals>
     <plurals name="status_favourites_count">
-        <item quantity="one">%d favourite</item>
-        <item quantity="other">%d favourites</item>
+        <item quantity="one">%d favorite</item>
+        <item quantity="other">%d favorites</item>
     </plurals>
 
     <!-- Follow lists -->
