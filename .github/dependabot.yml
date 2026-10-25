@@ -26,6 +26,11 @@ updates:
     # Ignore JitPack packages as Dependabot has limited support for them
     ignore:
       - dependency-name: "com.github.*"
+    # All updates in one pull request, so CI runs once per week instead of per dependency
+    groups:
+      gradle-dependencies:
+        patterns:
+          - "*"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -38,3 +43,7 @@ updates:
       - "github-actions"
     commit-message:
       prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

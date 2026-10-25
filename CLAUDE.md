@@ -4,8 +4,19 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Project Status
 
-**Version**: 1.2.3-alpha
+**Version**: 1.3.0
 **Project State**: Full-featured Mastodon client with keyword filters and complete internationalization support
+
+---
+
+## Releases
+
+1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`, add the version to `CHANGELOG.md`
+2. Merge, then tag `main` with `vX.Y.Z` and push the tag
+3. The **Build APK** workflow builds the signed APK and App Bundle; with the signing secrets (`TOOTSIE_KEYSTORE_BASE64`, `TOOTSIE_KEYSTORE_PASSWORD`, `TOOTSIE_KEY_ALIAS`, `TOOTSIE_KEY_PASSWORD`) it creates the GitHub release with the changelog section and the APK. The App Bundle (artifact) goes to the Play Console
+4. Local signed builds read `keystore.properties` in the project root (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`; not in git)
+
+**CI minutes**: tests run only for (non-draft) pull requests with relevant changes, release builds only for tags; Dependabot updates come as one grouped PR per week. Lint runs locally (`./gradlew lintDebug`).
 
 ---
 
