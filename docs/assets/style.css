@@ -115,6 +115,7 @@ a { color: var(--primary); }
 }
 .button.primary { background: var(--primary); color: var(--on-primary); }
 .button.secondary { color: var(--primary); background: transparent; }
+.button.disabled { opacity: 0.6; cursor: default; }
 
 /* Abschnitte */
 section { padding: 56px 0; }
