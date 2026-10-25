@@ -73,6 +73,16 @@ sealed class TootsieDestinations(val route: String) {
     }
 
     /**
+     * Followers or following list of an account.
+     */
+    data object FollowList : TootsieDestinations("follow_list/{accountId}/{type}") {
+        fun createRoute(accountId: String, type: com.pfitzer.tootsie.domain.model.FollowListType): String =
+            "follow_list/$accountId/${type.name}"
+        const val ARG_ACCOUNT_ID = "accountId"
+        const val ARG_TYPE = "type"
+    }
+
+    /**
      * Status detail screen - view a single status with replies.
      */
     data object StatusDetail : TootsieDestinations("status/{statusId}") {

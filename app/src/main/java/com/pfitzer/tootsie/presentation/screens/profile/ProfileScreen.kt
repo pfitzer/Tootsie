@@ -1,6 +1,7 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -27,6 +28,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.FollowListType
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.remoteDomain
@@ -69,6 +72,7 @@ fun ProfileScreen(
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToEditProfile: () -> Unit = {},
+    onNavigateToFollowList: (accountId: String, type: FollowListType) -> Unit = { _, _ -> },
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -340,7 +344,10 @@ fun ProfileScreen(
                                 onLinkClick = { url ->
                                     context.openInBrowser(url)
                                 },
-                                onEditProfileClick = onNavigateToEditProfile
+                                onEditProfileClick = onNavigateToEditProfile,
+                                onFollowListClick = { type ->
+                                    onNavigateToFollowList(uiState.account!!.id, type)
+                                }
                             )
                         }
                     }
@@ -503,6 +510,7 @@ private fun ProfileHeader(
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
+    onFollowListClick: (FollowListType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -685,11 +693,13 @@ private fun ProfileHeader(
             )
             ProfileStat(
                 count = account.followingCount,
-                label = stringResource(R.string.profile_following)
+                label = stringResource(R.string.profile_following),
+                onClick = { onFollowListClick(FollowListType.FOLLOWING) }
             )
             ProfileStat(
                 count = account.followersCount,
-                label = stringResource(R.string.profile_followers)
+                label = stringResource(R.string.profile_followers),
+                onClick = { onFollowListClick(FollowListType.FOLLOWERS) }
             )
         }
 
@@ -774,10 +784,21 @@ private fun DomainBlockMenu(
 private fun ProfileStat(
     count: Int,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .then(
+                if (onClick != null) {
+                    Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClickLabel = label, role = Role.Button, onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
+            .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

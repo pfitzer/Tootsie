@@ -6,14 +6,18 @@ import androidx.paging.PagingData
 import com.pfitzer.tootsie.data.mapper.toDomain
 import com.pfitzer.tootsie.data.paging.AccountStatusesPagingSource
 import com.pfitzer.tootsie.data.paging.BlockedAccountsPagingSource
+import com.pfitzer.tootsie.data.paging.FollowListPagingSource
 import com.pfitzer.tootsie.data.paging.MutedAccountsPagingSource
 import com.pfitzer.tootsie.data.remote.api.MastodonApiService
+import com.pfitzer.tootsie.data.remote.dto.AccountDto
 import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.FollowListEntry
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.util.Result
 import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -188,14 +192,25 @@ class AccountRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getFollowers(accountId: String): Flow<PagingData<Account>> {
-        // TODO: Implement followers paging source (Phase 2c or later)
-        throw NotImplementedError("Followers list not yet implemented")
-    }
+    override fun getFollowers(accountId: String): Flow<PagingData<FollowListEntry>> =
+        followList { maxId, limit -> mastodonApi.getFollowers(id = accountId, maxId = maxId, limit = limit) }
 
-    override fun getFollowing(accountId: String): Flow<PagingData<Account>> {
-        // TODO: Implement following paging source (Phase 2c or later)
-        throw NotImplementedError("Following list not yet implemented")
+    override fun getFollowing(accountId: String): Flow<PagingData<FollowListEntry>> =
+        followList { maxId, limit -> mastodonApi.getFollowing(id = accountId, maxId = maxId, limit = limit) }
+
+    private fun followList(
+        fetchPage: suspend (maxId: String?, limit: Int) -> Response<List<AccountDto>>
+    ): Flow<PagingData<FollowListEntry>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 40,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = {
+                FollowListPagingSource(mastodonApi, fetchPage)
+            }
+        ).flow
     }
 
     override suspend fun updateProfile(displayName: String?, note: String?): Result<Account> {

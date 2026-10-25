@@ -72,7 +72,7 @@ gh pr checks
 - Advanced timeline filters (hide boosts, hide replies, show only media)
 - Search (accounts, posts, hashtags)
 - Notifications with actions
-- User profiles with follow/unfollow
+- User profiles with follow/unfollow, followers and following lists
 - Content warnings and visibility controls
 - HTML rendering with clickable links and hashtags
 - Bookmarks screen with pagination
