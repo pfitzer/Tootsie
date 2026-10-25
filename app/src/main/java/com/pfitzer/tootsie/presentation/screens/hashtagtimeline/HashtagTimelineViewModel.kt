@@ -88,7 +88,7 @@ class HashtagTimelineViewModel @Inject constructor(
      */
     val hashtagTimelinePagingData: Flow<PagingData<Status>> = getHashtagTimelineUseCase(hashtag)
         .cachedIn(viewModelScope)
-        .applyInteractions(statusInteractionStore)
+        .applyInteractions(statusInteractionStore, viewModelScope)
 
     /**
      * Handle user actions.

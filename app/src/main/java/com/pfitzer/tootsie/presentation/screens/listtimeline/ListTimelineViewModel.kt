@@ -51,7 +51,7 @@ class ListTimelineViewModel @Inject constructor(
      */
     val listTimelinePagingData: Flow<PagingData<Status>> = getListTimelineUseCase(listId)
         .cachedIn(viewModelScope)
-        .applyInteractions(statusInteractionStore)
+        .applyInteractions(statusInteractionStore, viewModelScope)
 
     /**
      * Handle user actions.

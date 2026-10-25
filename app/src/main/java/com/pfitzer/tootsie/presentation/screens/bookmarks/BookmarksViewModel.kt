@@ -46,7 +46,7 @@ class BookmarksViewModel @Inject constructor(
      */
     val bookmarksPagingData: Flow<PagingData<Status>> = getBookmarksUseCase()
         .cachedIn(viewModelScope)
-        .applyInteractions(statusInteractionStore)
+        .applyInteractions(statusInteractionStore, viewModelScope)
 
     /**
      * Handle user actions.

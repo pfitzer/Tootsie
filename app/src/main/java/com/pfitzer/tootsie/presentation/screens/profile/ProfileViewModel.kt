@@ -98,7 +98,7 @@ class ProfileViewModel @Inject constructor(
                         pinned = true
                     )
                 }.cachedIn(viewModelScope)
-                    .applyInteractions(statusInteractionStore)
+                    .applyInteractions(statusInteractionStore, viewModelScope)
             }
         }.stateIn(
             scope = viewModelScope,

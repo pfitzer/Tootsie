@@ -46,7 +46,7 @@ class FavoritesViewModel @Inject constructor(
      */
     val favoritesPagingData: Flow<PagingData<Status>> = getFavoritesUseCase()
         .cachedIn(viewModelScope)
-        .applyInteractions(statusInteractionStore)
+        .applyInteractions(statusInteractionStore, viewModelScope)
 
     /**
      * Handle user actions.
