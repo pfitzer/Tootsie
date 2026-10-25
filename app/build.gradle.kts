@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.serialization)
@@ -15,8 +17,8 @@ android {
         applicationId = "com.pfitzer.tootsie"
         minSdk = 31
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.2.3-alpha"
+        versionCode = 4
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -25,8 +27,30 @@ android {
         }
     }
 
+    // Release signing from keystore.properties (local, not in git) or environment variables
+    // (CI secrets). Without a keystore the release build stays unsigned.
+    val keystoreProperties = Properties().apply {
+        val file = rootProject.file("keystore.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+    fun signingValue(property: String, env: String): String? =
+        keystoreProperties.getProperty(property) ?: System.getenv(env)?.takeIf { it.isNotBlank() }
+    val releaseStoreFile = signingValue("storeFile", "TOOTSIE_KEYSTORE_FILE")
+
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "TOOTSIE_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "TOOTSIE_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "TOOTSIE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
