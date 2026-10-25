@@ -161,6 +161,24 @@
     <string name="error_block_account">Fehler beim Blockieren des Kontos</string>
     <string name="error_unblock_account">Fehler beim Aufheben der Blockierung</string>
 
+    <!-- Domain blocks -->
+    <string name="blocked_domains_title">Blockierte Domains</string>
+    <string name="empty_blocked_domains">Keine blockierten Domains</string>
+    <string name="settings_blocked_domains_description">Server, deren Beiträge und Benachrichtigungen du nicht siehst</string>
+    <string name="block_domain">Domain blockieren</string>
+    <string name="block_domain_named">%1$s blockieren</string>
+    <string name="unblock_domain_named">Blockierung von %1$s aufheben</string>
+    <string name="block_domain_confirm_title">%1$s blockieren?</string>
+    <string name="block_domain_confirm_message">Du siehst keine Beiträge und Benachrichtigungen mehr von diesem Server, und deine Follower von dort werden entfernt.</string>
+    <string name="domain_name">Domain</string>
+    <string name="profile_domain_blocked">Domain blockiert</string>
+    <string name="cd_server">Server</string>
+    <string name="error_invalid_domain">Keine gültige Domain</string>
+    <string name="error_block_domain">Fehler beim Blockieren der Domain</string>
+    <string name="error_unblock_domain">Fehler beim Aufheben der Domain-Blockierung</string>
+    <string name="success_block_domain">%1$s blockiert</string>
+    <string name="success_unblock_domain">Blockierung von %1$s aufgehoben</string>
+
     <!-- Lists -->
     <string name="lists_title">Listen</string>
     <string name="lists_empty_state">Noch keine Listen\nTippe auf +, um eine zu erstellen</string>

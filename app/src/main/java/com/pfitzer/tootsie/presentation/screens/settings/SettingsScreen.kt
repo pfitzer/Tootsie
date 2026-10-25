@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.DomainDisabled
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -51,7 +52,8 @@ private const val SOURCE_CODE_URL = "https://github.com/pfitzer/Tootsie"
  * Settings screen.
  * Sections:
  * - Accounts: switch, remove and add accounts
- * - Active account: profile, push, follow requests, filters, muted and blocked accounts
+ * - Active account: profile, push, follow requests, filters, muted and blocked accounts,
+ *   blocked domains
  * - Appearance: theme and text size
  * - Storage: how long cached timelines are kept
  * - About: version and source code
@@ -65,6 +67,7 @@ fun SettingsScreen(
     onNavigateToFollowRequests: () -> Unit = {},
     onNavigateToMutedAccounts: () -> Unit = {},
     onNavigateToBlockedAccounts: () -> Unit = {},
+    onNavigateToBlockedDomains: () -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {},
     onNavigateToFilters: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
@@ -116,7 +119,8 @@ fun SettingsScreen(
                             onFollowRequests = onNavigateToFollowRequests,
                             onFilters = onNavigateToFilters,
                             onMutedAccounts = onNavigateToMutedAccounts,
-                            onBlockedAccounts = onNavigateToBlockedAccounts
+                            onBlockedAccounts = onNavigateToBlockedAccounts,
+                            onBlockedDomains = onNavigateToBlockedDomains
                         )
                     )
                 }
@@ -146,7 +150,8 @@ private class SettingsNavigation(
     val onFollowRequests: () -> Unit,
     val onFilters: () -> Unit,
     val onMutedAccounts: () -> Unit,
-    val onBlockedAccounts: () -> Unit
+    val onBlockedAccounts: () -> Unit,
+    val onBlockedDomains: () -> Unit
 )
 
 /**
@@ -264,6 +269,15 @@ private fun SuccessContent(
                     description = stringResource(R.string.settings_blocked_description),
                     enabled = isEnabled,
                     onClick = navigation.onBlockedAccounts
+                )
+            }
+            item {
+                NavigationItem(
+                    icon = Icons.Default.DomainDisabled,
+                    title = stringResource(R.string.blocked_domains_title),
+                    description = stringResource(R.string.settings_blocked_domains_description),
+                    enabled = isEnabled,
+                    onClick = navigation.onBlockedDomains
                 )
             }
 

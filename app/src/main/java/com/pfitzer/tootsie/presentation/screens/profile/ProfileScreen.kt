@@ -10,6 +10,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DomainDisabled
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +40,7 @@ import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.remoteDomain
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 import com.pfitzer.tootsie.presentation.components.report.ReportDialog
@@ -78,6 +82,7 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     var showReportAccountDialog by remember { mutableStateOf(false) }
     var showReportStatusDialog by remember { mutableStateOf<Status?>(null) }
+    var showBlockDomainDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     showShareMenu?.let { status ->
@@ -109,6 +114,32 @@ fun ProfileScreen(
         )
     }
 
+    if (showBlockDomainDialog) {
+        uiState.account?.remoteDomain?.let { domain ->
+            AlertDialog(
+                onDismissRequest = { showBlockDomainDialog = false },
+                icon = { Icon(Icons.Default.DomainDisabled, contentDescription = null) },
+                title = { Text(stringResource(R.string.block_domain_confirm_title, domain)) },
+                text = { Text(stringResource(R.string.block_domain_confirm_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showBlockDomainDialog = false
+                            viewModel.onAction(ProfileAction.BlockDomain)
+                        }
+                    ) {
+                        Text(stringResource(R.string.block))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBlockDomainDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+    }
+
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { message ->
             snackbarHostState.showSnackbar(message.asString(context))
@@ -138,6 +169,16 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
+                    val domain = uiState.account?.remoteDomain
+                    if (!uiState.isOwnProfile && domain != null) {
+                        DomainBlockMenu(
+                            domain = domain,
+                            isBlocked = uiState.relationship?.domainBlocking == true,
+                            enabled = !uiState.isProcessingDomainBlock,
+                            onBlock = { showBlockDomainDialog = true },
+                            onUnblock = { viewModel.onAction(ProfileAction.UnblockDomain) }
+                        )
+                    }
                     if (!uiState.isOwnProfile) {
                         activeAccount?.let { account ->
                             IconButton(onClick = { onNavigateToProfile(account.id) }) {
@@ -599,6 +640,25 @@ private fun ProfileHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
+        // Server of remote accounts
+        account.remoteDomain?.let { domain ->
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Language,
+                    contentDescription = stringResource(R.string.cd_server),
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = domain,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
         // Bio (note) - render with HTML parsing
         if (account.note.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -657,7 +717,52 @@ private fun ProfileHeader(
                         label = { Text(stringResource(R.string.profile_muted)) }
                     )
                 }
+                if (relationship.domainBlocking) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(stringResource(R.string.profile_domain_blocked)) }
+                    )
+                }
             }
+        }
+    }
+}
+
+/**
+ * Overflow menu of a remote profile to block or unblock its server.
+ */
+@Composable
+private fun DomainBlockMenu(
+    domain: String,
+    isBlocked: Boolean,
+    enabled: Boolean,
+    onBlock: () -> Unit,
+    onUnblock: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }, enabled = enabled) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.cd_more_options)
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        stringResource(
+                            if (isBlocked) R.string.unblock_domain_named else R.string.block_domain_named,
+                            domain
+                        )
+                    )
+                },
+                leadingIcon = { Icon(Icons.Default.DomainDisabled, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    if (isBlocked) onUnblock() else onBlock()
+                }
+            )
         }
     }
 }

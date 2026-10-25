@@ -87,6 +87,7 @@ gh pr checks
 - Keyword filters (create, delete, filter by context)
 - Text size customization (small, medium, large, extra large)
 - Profile editing
+- Domain blocking (block a remote user's server from the profile, manage blocked domains in settings)
 
 ### Planned
 See open GitHub issues for planned features: `gh issue list --label enhancement`

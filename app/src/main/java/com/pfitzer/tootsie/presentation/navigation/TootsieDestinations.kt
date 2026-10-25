@@ -246,4 +246,9 @@ sealed class TootsieDestinations(val route: String) {
      * Blocked Accounts screen - view and manage blocked accounts.
      */
     data object BlockedAccounts : TootsieDestinations("blocked_accounts")
+
+    /**
+     * Blocked Domains screen - view and manage blocked domains (instances).
+     */
+    data object BlockedDomains : TootsieDestinations("blocked_domains")
 }

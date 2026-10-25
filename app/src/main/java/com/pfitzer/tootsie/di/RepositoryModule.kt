@@ -230,4 +230,13 @@ abstract class RepositoryModule {
     abstract fun bindInstanceRepository(
         instanceRepositoryImpl: InstanceRepositoryImpl
     ): InstanceRepository
+
+    /**
+     * Binds DomainBlockRepositoryImpl to DomainBlockRepository interface.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindDomainBlockRepository(
+        domainBlockRepositoryImpl: DomainBlockRepositoryImpl
+    ): DomainBlockRepository
 }

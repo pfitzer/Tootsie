@@ -33,6 +33,13 @@ data class CustomEmoji(
 )
 
 /**
+ * Server of a remote account (the part after the @ of [Account.acct]), null for accounts
+ * of the own server.
+ */
+val Account.remoteDomain: String?
+    get() = acct.substringAfter('@', "").takeIf { it.isNotEmpty() }
+
+/**
  * Profile metadata field (key-value pair).
  */
 data class Field(
