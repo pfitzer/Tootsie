@@ -650,6 +650,12 @@
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 
+    <!-- Follow lists -->
+    <string name="empty_follow_list">Nobody here yet, or the account hides this list</string>
+    <string name="follow_list_remote_hint">This account is on another server, so the list only shows the accounts this server knows about.</string>
+    <string name="follow_requested">Requested</string>
+    <string name="error_load_follow_list">Failed to load the list</string>
+
     <!-- Draft media -->
     <string name="error_draft_media_missing">Some attachments of this draft are no longer available</string>
     <string name="error_update_alt_text">Failed to save the alt text</string>

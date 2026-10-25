@@ -651,6 +651,12 @@
     <string name="sort_trending">Im Trend</string>
     <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
 
+    <!-- Follow lists -->
+    <string name="empty_follow_list">Noch niemand hier, oder das Konto verbirgt diese Liste</string>
+    <string name="follow_list_remote_hint">Dieses Konto ist auf einem anderen Server, daher zeigt die Liste nur die Konten, die dieser Server kennt.</string>
+    <string name="follow_requested">Angefragt</string>
+    <string name="error_load_follow_list">Die Liste konnte nicht geladen werden</string>
+
     <!-- Draft media -->
     <string name="error_draft_media_missing">Einige Anhänge dieses Entwurfs sind nicht mehr verfügbar</string>
     <string name="error_update_alt_text">Der Alt-Text konnte nicht gespeichert werden</string>

@@ -2,6 +2,7 @@ package com.pfitzer.tootsie.domain.repository
 
 import androidx.paging.PagingData
 import com.pfitzer.tootsie.domain.model.Account
+import com.pfitzer.tootsie.domain.model.FollowListEntry
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.util.Result
@@ -145,7 +146,7 @@ interface AccountRepository {
      * @param accountId Account ID
      * @return Flow of paged accounts
      */
-    fun getFollowers(accountId: String): Flow<PagingData<Account>>
+    fun getFollowers(accountId: String): Flow<PagingData<FollowListEntry>>
 
     /**
      * Get accounts this account is following (following).
@@ -153,7 +154,7 @@ interface AccountRepository {
      * @param accountId Account ID
      * @return Flow of paged accounts
      */
-    fun getFollowing(accountId: String): Flow<PagingData<Account>>
+    fun getFollowing(accountId: String): Flow<PagingData<FollowListEntry>>
 
     /**
      * Update account profile.

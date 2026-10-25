@@ -293,6 +293,27 @@ fun TootsieNavHost(
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(TootsieDestinations.EditProfile.route)
+                },
+                onNavigateToFollowList = { followAccountId, type ->
+                    navController.navigate(TootsieDestinations.FollowList.createRoute(followAccountId, type))
+                }
+            )
+        }
+
+        // Followers / following list of an account
+        composable(
+            route = TootsieDestinations.FollowList.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.FollowList.ARG_ACCOUNT_ID) { type = NavType.StringType },
+                navArgument(TootsieDestinations.FollowList.ARG_TYPE) { type = NavType.StringType }
+            )
+        ) {
+            com.pfitzer.tootsie.presentation.screens.followlist.FollowListScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProfile = { accountId ->
+                    navController.navigate(TootsieDestinations.Profile.createRoute(accountId))
                 }
             )
         }
@@ -329,6 +350,9 @@ fun TootsieNavHost(
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(TootsieDestinations.EditProfile.route)
+                },
+                onNavigateToFollowList = { followAccountId, type ->
+                    navController.navigate(TootsieDestinations.FollowList.createRoute(followAccountId, type))
                 }
             )
         }

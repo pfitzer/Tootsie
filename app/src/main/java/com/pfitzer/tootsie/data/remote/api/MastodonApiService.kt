@@ -92,6 +92,7 @@ interface MastodonApiService {
 
     /**
      * Get accounts following the given account.
+     * Returns Response to access Link header for pagination.
      *
      * @param id Account ID
      * @param maxId Return results older than this ID
@@ -104,10 +105,11 @@ interface MastodonApiService {
         @Query("max_id") maxId: String? = null,
         @Query("since_id") sinceId: String? = null,
         @Query("limit") limit: Int = 40
-    ): List<AccountDto>
+    ): retrofit2.Response<List<AccountDto>>
 
     /**
      * Get accounts that the given account is following.
+     * Returns Response to access Link header for pagination.
      *
      * @param id Account ID
      * @param maxId Return results older than this ID
@@ -120,7 +122,7 @@ interface MastodonApiService {
         @Query("max_id") maxId: String? = null,
         @Query("since_id") sinceId: String? = null,
         @Query("limit") limit: Int = 40
-    ): List<AccountDto>
+    ): retrofit2.Response<List<AccountDto>>
 
     // ========== Relationship Endpoints ==========
 
