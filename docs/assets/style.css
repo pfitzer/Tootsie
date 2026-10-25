@@ -1,0 +1,177 @@
+/* Tootsie-Webseite: keine externen Schriften, Skripte oder Tracker */
+
+:root {
+  --bg: #fbf8ff;
+  --surface: #ffffff;
+  --surface-alt: #eef0fa;
+  --text: #1a1b21;
+  --muted: #44474f;
+  --primary: #415f91;
+  --primary-container: #d8e2ff;
+  --on-primary: #ffffff;
+  --border: #c4c6d0;
+  --radius: 16px;
+  --max: 1080px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121318;
+    --surface: #1a1b21;
+    --surface-alt: #22242b;
+    --text: #e3e2e9;
+    --muted: #c4c6d0;
+    --primary: #aac7ff;
+    --primary-container: #284777;
+    --on-primary: #0a305f;
+    --border: #44474f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+a { color: var(--primary); }
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Kopfzeile */
+.site-header { background: var(--primary-container); }
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-height: 64px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand img { width: 40px; height: 40px; }
+.site-header nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.site-header nav a { color: var(--text); text-decoration: none; font-weight: 500; }
+.site-header nav a:hover { color: var(--primary); }
+
+/* Einstieg */
+.hero {
+  background: var(--primary-container);
+  padding: 40px 0 64px;
+}
+.hero .wrap {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 50px);
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+.hero p.lead {
+  font-size: 20px;
+  color: var(--muted);
+  margin: 0 0 28px;
+  max-width: 34em;
+}
+.hero-shot {
+  justify-self: center;
+  width: min(300px, 80vw);
+  border-radius: 28px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--primary);
+}
+.button.primary { background: var(--primary); color: var(--on-primary); }
+.button.secondary { color: var(--primary); background: transparent; }
+.button.disabled { opacity: 0.6; cursor: default; }
+
+/* Abschnitte */
+section { padding: 56px 0; }
+section h2 { font-size: 30px; margin: 0 0 24px; }
+section.alt { background: var(--surface-alt); }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.feature h3 { margin: 0 0 6px; font-size: 18px; }
+.feature p { margin: 0; color: var(--muted); font-size: 16px; }
+
+.gallery {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+}
+.gallery img {
+  width: 220px;
+  flex: 0 0 auto;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  scroll-snap-align: start;
+}
+
+.privacy-points { padding-left: 20px; }
+.privacy-points li { margin-bottom: 8px; }
+
+/* Rechtstexte */
+.legal { max-width: 46em; padding: 40px 0 56px; }
+.legal h1 { font-size: 34px; margin: 0 0 8px; }
+.legal h2 { font-size: 23px; margin-top: 40px; }
+.legal .updated { color: var(--muted); margin-top: 0; }
+
+/* Fußzeile */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 0 40px;
+  color: var(--muted);
+  font-size: 15px;
+}
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 16px; }
+
+@media (max-width: 760px) {
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero { padding-top: 28px; }
+  .site-header nav { gap: 14px; font-size: 15px; }
+}
