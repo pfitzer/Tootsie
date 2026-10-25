@@ -77,12 +77,13 @@ sealed class TootsieDestinations(val route: String) {
     }
 
     /**
-     * Followers or following list of an account.
+     * Account list: followers or following of an account, or who favourited or boosted a
+     * status ([id] is then the status ID).
      */
-    data object FollowList : TootsieDestinations("follow_list/{accountId}/{type}") {
-        fun createRoute(accountId: String, type: com.pfitzer.tootsie.domain.model.FollowListType): String =
-            "follow_list/$accountId/${type.name}"
-        const val ARG_ACCOUNT_ID = "accountId"
+    data object FollowList : TootsieDestinations("follow_list/{id}/{type}") {
+        fun createRoute(id: String, type: com.pfitzer.tootsie.domain.model.AccountListType): String =
+            "follow_list/$id/${type.name}"
+        const val ARG_ID = "id"
         const val ARG_TYPE = "type"
     }
 

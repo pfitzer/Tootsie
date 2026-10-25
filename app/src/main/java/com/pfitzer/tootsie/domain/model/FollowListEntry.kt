@@ -1,19 +1,27 @@
 package com.pfitzer.tootsie.domain.model
 
 /**
- * Which accounts a follow list shows.
+ * Which accounts an account list shows.
+ *
+ * @param ofStatus The list belongs to a status (its ID is given), otherwise to an account
  */
-enum class FollowListType {
+enum class AccountListType(val ofStatus: Boolean) {
     /** Accounts that follow the account. */
-    FOLLOWERS,
+    FOLLOWERS(ofStatus = false),
 
     /** Accounts the account follows. */
-    FOLLOWING
+    FOLLOWING(ofStatus = false),
+
+    /** Accounts that favourited the status. */
+    FAVOURITED_BY(ofStatus = true),
+
+    /** Accounts that boosted the status. */
+    REBLOGGED_BY(ofStatus = true)
 }
 
 /**
- * Account in a followers or following list, with the logged-in user's relationship to it
- * (null if it couldn't be loaded).
+ * Account in an account list (followers, following, favourited/boosted by), with the
+ * logged-in user's relationship to it (null if it couldn't be loaded).
  */
 data class FollowListEntry(
     val account: Account,

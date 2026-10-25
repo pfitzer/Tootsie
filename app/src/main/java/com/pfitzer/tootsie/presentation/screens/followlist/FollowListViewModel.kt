@@ -10,7 +10,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.pfitzer.tootsie.domain.model.Account
 import com.pfitzer.tootsie.domain.model.FollowListEntry
-import com.pfitzer.tootsie.domain.model.FollowListType
+import com.pfitzer.tootsie.domain.model.AccountListType
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.repository.AccountRepository
 import com.pfitzer.tootsie.domain.usecase.account.FollowAccountUseCase
@@ -30,8 +30,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel for the followers and following lists of an account.
- * Each entry can be followed or unfollowed.
+ * ViewModel for account lists: followers and following of an account, and the accounts
+ * that favourited or boosted a status. Each entry can be followed or unfollowed.
  */
 @HiltViewModel
 class FollowListViewModel @Inject constructor(
@@ -43,8 +43,9 @@ class FollowListViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val accountId: String = checkNotNull(savedStateHandle["accountId"])
-    val type: FollowListType = FollowListType.valueOf(checkNotNull(savedStateHandle["type"]))
+    /** Account ID, or status ID for lists of a status ([AccountListType.ofStatus]). */
+    private val id: String = checkNotNull(savedStateHandle["id"])
+    val type: AccountListType = AccountListType.valueOf(checkNotNull(savedStateHandle["type"]))
 
     private val _uiState = MutableStateFlow(FollowListUiState())
     val uiState: StateFlow<FollowListUiState> = _uiState.asStateFlow()
@@ -60,8 +61,10 @@ class FollowListViewModel @Inject constructor(
      */
     val entries: Flow<PagingData<FollowListEntry>> =
         when (type) {
-            FollowListType.FOLLOWERS -> accountRepository.getFollowers(accountId)
-            FollowListType.FOLLOWING -> accountRepository.getFollowing(accountId)
+            AccountListType.FOLLOWERS -> accountRepository.getFollowers(id)
+            AccountListType.FOLLOWING -> accountRepository.getFollowing(id)
+            AccountListType.FAVOURITED_BY -> accountRepository.getFavouritedBy(id)
+            AccountListType.REBLOGGED_BY -> accountRepository.getRebloggedBy(id)
         }
             .cachedIn(viewModelScope)
             .combine(changedRelationships) { pagingData, changed ->
@@ -75,10 +78,12 @@ class FollowListViewModel @Inject constructor(
             val ownAccountId = observeActiveAccountUseCase().first()?.id
             _uiState.update { it.copy(ownAccountId = ownAccountId) }
         }
-        viewModelScope.launch {
-            // For the title and the hint about lists of other servers
-            (getAccountUseCase(accountId) as? Result.Success)?.let { result ->
-                _uiState.update { it.copy(account = result.data) }
+        if (!type.ofStatus) {
+            viewModelScope.launch {
+                // For the title and the hint about lists of other servers
+                (getAccountUseCase(id) as? Result.Success)?.let { result ->
+                    _uiState.update { it.copy(account = result.data) }
+                }
             }
         }
     }

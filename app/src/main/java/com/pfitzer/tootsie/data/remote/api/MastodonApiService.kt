@@ -124,6 +124,32 @@ interface MastodonApiService {
         @Query("limit") limit: Int = 40
     ): retrofit2.Response<List<AccountDto>>
 
+    /**
+     * Get the accounts that favourited a status.
+     * Returns Response to access Link header for pagination.
+     *
+     * @param id Status ID
+     */
+    @GET("api/v1/statuses/{id}/favourited_by")
+    suspend fun getFavouritedBy(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): retrofit2.Response<List<AccountDto>>
+
+    /**
+     * Get the accounts that boosted a status.
+     * Returns Response to access Link header for pagination.
+     *
+     * @param id Status ID
+     */
+    @GET("api/v1/statuses/{id}/reblogged_by")
+    suspend fun getRebloggedBy(
+        @Path("id") id: String,
+        @Query("max_id") maxId: String? = null,
+        @Query("limit") limit: Int = 40
+    ): retrofit2.Response<List<AccountDto>>
+
     // ========== Relationship Endpoints ==========
 
     /**

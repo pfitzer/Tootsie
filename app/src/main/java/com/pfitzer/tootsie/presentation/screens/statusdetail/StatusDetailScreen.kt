@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.statusdetail
 
+import com.pfitzer.tootsie.domain.model.AccountListType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,6 +51,7 @@ fun StatusDetailScreen(
     onNavigateToHashtag: (String) -> Unit = {},
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
+    onNavigateToAccountList: (statusId: String, type: AccountListType) -> Unit = { _, _ -> },
     viewModel: StatusDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -128,6 +130,7 @@ fun StatusDetailScreen(
                         },
                         onImageClick = onNavigateToImageViewer,
                         onVideoClick = onNavigateToVideoPlayer,
+                        onAccountListClick = onNavigateToAccountList,
                         onReplyClick = { status ->
                             onNavigateToCompose(status.id)
                         },
@@ -189,6 +192,7 @@ private fun ConversationThread(
     onLinkClick: (String) -> Unit,
     onImageClick: (String, String?) -> Unit,
     onVideoClick: (String, String?) -> Unit,
+    onAccountListClick: (statusId: String, type: AccountListType) -> Unit,
     onReplyClick: (Status) -> Unit,
     onFavoriteClick: (Status) -> Unit,
     onBoostClick: (Status) -> Unit,
@@ -250,6 +254,10 @@ private fun ConversationThread(
                     onBookmarkClick = onBookmarkClick,
                     onShareClick = onShareClick,
                     onVoteClick = onVoteClick
+                )
+                InteractionCounts(
+                    status = mainStatus.reblog ?: mainStatus,
+                    onClick = onAccountListClick
                 )
             }
         }
@@ -387,3 +395,28 @@ private fun ReplyItem(
 private fun Modifier.alpha(alpha: Float): Modifier = this.then(
     Modifier.graphicsLayer(alpha = alpha)
 )
+
+/**
+ * Boost and favourite counts of the main status; each opens the list of the accounts.
+ */
+@Composable
+private fun InteractionCounts(
+    status: Status,
+    onClick: (statusId: String, type: AccountListType) -> Unit
+) {
+    if (status.reblogsCount == 0 && status.favouritesCount == 0) return
+    Row(
+        modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 4.dp)
+    ) {
+        if (status.reblogsCount > 0) {
+            TextButton(onClick = { onClick(status.id, AccountListType.REBLOGGED_BY) }) {
+                Text(pluralStringResource(R.plurals.status_boosts_count, status.reblogsCount, status.reblogsCount))
+            }
+        }
+        if (status.favouritesCount > 0) {
+            TextButton(onClick = { onClick(status.id, AccountListType.FAVOURITED_BY) }) {
+                Text(pluralStringResource(R.plurals.status_favourites_count, status.favouritesCount, status.favouritesCount))
+            }
+        }
+    }
+}

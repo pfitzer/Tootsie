@@ -40,7 +40,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Account
-import com.pfitzer.tootsie.domain.model.FollowListType
+import com.pfitzer.tootsie.domain.model.AccountListType
 import com.pfitzer.tootsie.domain.model.Relationship
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.domain.model.remoteDomain
@@ -72,7 +72,7 @@ fun ProfileScreen(
     onNavigateToImageViewer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToVideoPlayer: (String, String?) -> Unit = { _, _ -> },
     onNavigateToEditProfile: () -> Unit = {},
-    onNavigateToFollowList: (accountId: String, type: FollowListType) -> Unit = { _, _ -> },
+    onNavigateToFollowList: (accountId: String, type: AccountListType) -> Unit = { _, _ -> },
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -510,7 +510,7 @@ private fun ProfileHeader(
     onHashtagClick: (String) -> Unit,
     onLinkClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
-    onFollowListClick: (FollowListType) -> Unit,
+    onFollowListClick: (AccountListType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -694,12 +694,12 @@ private fun ProfileHeader(
             ProfileStat(
                 count = account.followingCount,
                 label = stringResource(R.string.profile_following),
-                onClick = { onFollowListClick(FollowListType.FOLLOWING) }
+                onClick = { onFollowListClick(AccountListType.FOLLOWING) }
             )
             ProfileStat(
                 count = account.followersCount,
                 label = stringResource(R.string.profile_followers),
-                onClick = { onFollowListClick(FollowListType.FOLLOWERS) }
+                onClick = { onFollowListClick(AccountListType.FOLLOWERS) }
             )
         }
 

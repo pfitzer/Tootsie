@@ -23,13 +23,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.FollowListEntry
-import com.pfitzer.tootsie.domain.model.FollowListType
+import com.pfitzer.tootsie.domain.model.AccountListType
 import com.pfitzer.tootsie.presentation.components.common.AvatarImage
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
 
 /**
- * Followers or following list of an account.
+ * Account list: followers or following of an account, or who favourited or boosted a status.
  *
  * @param onNavigateBack Callback to navigate back
  * @param onNavigateToProfile Callback to open a profile
@@ -53,8 +53,10 @@ fun FollowListScreen(
                         Text(
                             stringResource(
                                 when (viewModel.type) {
-                                    FollowListType.FOLLOWERS -> R.string.profile_followers
-                                    FollowListType.FOLLOWING -> R.string.profile_following
+                                    AccountListType.FOLLOWERS -> R.string.profile_followers
+                                    AccountListType.FOLLOWING -> R.string.profile_following
+                                    AccountListType.FAVOURITED_BY -> R.string.favourited_by_title
+                                    AccountListType.REBLOGGED_BY -> R.string.reblogged_by_title
                                 }
                             )
                         )
@@ -127,7 +129,9 @@ fun FollowListScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = stringResource(R.string.empty_follow_list),
+                            text = stringResource(
+                                if (viewModel.type.ofStatus) R.string.empty_status_account_list else R.string.empty_follow_list
+                            ),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
