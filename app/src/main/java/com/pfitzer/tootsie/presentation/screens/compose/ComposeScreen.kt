@@ -92,9 +92,11 @@ fun ComposeScreen(
 
     // Text with cursor position; the ViewModel only keeps the text
     var contentValue by remember { mutableStateOf(TextFieldValue(uiState.content)) }
-    // Content set by the ViewModel (e.g. a loaded draft) replaces the field, cursor at the end
-    LaunchedEffect(uiState.content) {
-        if (uiState.content != contentValue.text) {
+    // Content set by the ViewModel (e.g. a loaded draft) replaces the field, cursor at the end.
+    // Keyed on the revision, not the text: the text also changes with every keystroke, and
+    // resetting the field to a state that is a few keystrokes old dropped characters
+    LaunchedEffect(uiState.contentRevision) {
+        if (uiState.contentRevision > 0 && uiState.content != contentValue.text) {
             contentValue = TextFieldValue(uiState.content, TextRange(uiState.content.length))
         }
     }
