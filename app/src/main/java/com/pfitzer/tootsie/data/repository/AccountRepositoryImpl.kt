@@ -131,6 +131,14 @@ class AccountRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun setNote(accountId: String, note: String): Result<Relationship> {
+        return try {
+            Result.Success(mastodonApi.setAccountNote(accountId, note).toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to save note")
+        }
+    }
+
     override suspend fun unblockAccount(accountId: String): Result<Relationship> {
         return try {
             val relationship = mastodonApi.unblockAccount(accountId)

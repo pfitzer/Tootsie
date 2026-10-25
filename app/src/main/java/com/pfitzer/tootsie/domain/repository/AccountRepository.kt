@@ -100,6 +100,14 @@ interface AccountRepository {
     suspend fun blockAccount(accountId: String): Result<Relationship>
 
     /**
+     * Set the private note about an account, only visible to the user.
+     *
+     * @param note Note text; empty removes it
+     * @return Updated relationship status
+     */
+    suspend fun setNote(accountId: String, note: String): Result<Relationship>
+
+    /**
      * Unblock an account.
      *
      * @param accountId Account ID to unblock

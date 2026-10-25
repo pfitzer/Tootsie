@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import com.pfitzer.tootsie.domain.usecase.account.SetAccountNoteUseCase
 import com.pfitzer.tootsie.domain.model.remoteDomain
 import com.pfitzer.tootsie.domain.usecase.domainblock.BlockDomainUseCase
 import com.pfitzer.tootsie.domain.usecase.domainblock.UnblockDomainUseCase
@@ -42,6 +43,7 @@ class ProfileViewModel @Inject constructor(
     private val unblockAccountUseCase: UnblockAccountUseCase,
     private val blockDomainUseCase: BlockDomainUseCase,
     private val unblockDomainUseCase: UnblockDomainUseCase,
+    private val setAccountNoteUseCase: SetAccountNoteUseCase,
     private val getAccountStatusesUseCase: GetAccountStatusesUseCase,
     private val observeActiveAccountUseCase: ObserveActiveAccountUseCase,
     private val favoriteStatusUseCase: FavoriteStatusUseCase,
@@ -192,6 +194,8 @@ class ProfileViewModel @Inject constructor(
             is ProfileAction.UnblockAccount -> unblockAccount()
             is ProfileAction.BlockDomain -> setDomainBlocked(true)
             is ProfileAction.UnblockDomain -> setDomainBlocked(false)
+            is ProfileAction.ToggleNotify -> toggleNotify()
+            is ProfileAction.SaveNote -> saveNote(action.note)
             is ProfileAction.Refresh -> loadProfile()
             is ProfileAction.DismissError -> dismissError()
             is ProfileAction.FavoriteStatus -> favoriteStatus(action.status)
@@ -537,6 +541,53 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
+     * Turn notifications for new posts of a followed account on or off. Mastodon sets this
+     * by following again with `notify`, keeping whether boosts are shown.
+     */
+    private fun toggleNotify() {
+        val currentAccountId = accountId ?: return
+        val relationship = _uiState.value.relationship?.takeIf { it.following } ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessingNotify = true) }
+            val result = followAccountUseCase(
+                accountId = currentAccountId,
+                notify = !relationship.notifying,
+                showReblogs = relationship.showingReblogs
+            )
+            when (result) {
+                is Result.Success -> _uiState.update {
+                    it.copy(relationship = result.data, isProcessingNotify = false)
+                }
+                is Result.Error -> _uiState.update {
+                    it.copy(isProcessingNotify = false, errorMessage = UiText.of(R.string.error_toggle_notify))
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
+     * Save the private note about the account (empty removes it).
+     */
+    private fun saveNote(note: String) {
+        val currentAccountId = accountId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingNote = true) }
+            when (val result = setAccountNoteUseCase(currentAccountId, note.trim())) {
+                is Result.Success -> _uiState.update {
+                    it.copy(relationship = result.data, isSavingNote = false)
+                }
+                is Result.Error -> _uiState.update {
+                    it.copy(isSavingNote = false, errorMessage = UiText.of(R.string.error_save_note))
+                }
+                is Result.Loading -> Unit
+            }
+        }
+    }
+
+    /**
      * Block or unblock the server of the (remote) account.
      */
     private fun setDomainBlocked(blocked: Boolean) {
@@ -638,6 +689,8 @@ data class ProfileUiState(
     val isProcessingMute: Boolean = false,
     val isProcessingBlock: Boolean = false,
     val isProcessingDomainBlock: Boolean = false,
+    val isProcessingNotify: Boolean = false,
+    val isSavingNote: Boolean = false,
     val errorMessage: UiText? = null,
     val successMessage: UiText? = null
 )
@@ -654,6 +707,9 @@ sealed class ProfileAction {
     data object UnblockAccount : ProfileAction()
     data object BlockDomain : ProfileAction()
     data object UnblockDomain : ProfileAction()
+    /** Notifications for new posts of the (followed) account on or off. */
+    data object ToggleNotify : ProfileAction()
+    data class SaveNote(val note: String) : ProfileAction()
     data object Refresh : ProfileAction()
     data object DismissError : ProfileAction()
     data class FavoriteStatus(val status: Status) : ProfileAction()

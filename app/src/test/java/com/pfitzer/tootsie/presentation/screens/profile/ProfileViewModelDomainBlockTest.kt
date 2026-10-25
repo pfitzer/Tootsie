@@ -100,6 +100,7 @@ class ProfileViewModelDomainBlockTest {
         unblockAccountUseCase = mockk(relaxed = true),
         blockDomainUseCase = blockDomainUseCase,
         unblockDomainUseCase = unblockDomainUseCase,
+        setAccountNoteUseCase = mockk(relaxed = true),
         getAccountStatusesUseCase = mockk(relaxed = true),
         observeActiveAccountUseCase = observeActiveAccountUseCase,
         favoriteStatusUseCase = mockk(relaxed = true),

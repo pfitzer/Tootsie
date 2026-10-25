@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.presentation.screens.profile
 
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.filled.NotificationsActive
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -87,6 +90,18 @@ fun ProfileScreen(
     var showReportAccountDialog by remember { mutableStateOf(false) }
     var showReportStatusDialog by remember { mutableStateOf<Status?>(null) }
     var showBlockDomainDialog by remember { mutableStateOf(false) }
+    var showNoteDialog by remember { mutableStateOf(false) }
+
+    if (showNoteDialog) {
+        NoteDialog(
+            initial = uiState.relationship?.note.orEmpty(),
+            onSave = {
+                viewModel.onAction(ProfileAction.SaveNote(it))
+                showNoteDialog = false
+            },
+            onDismiss = { showNoteDialog = false }
+        )
+    }
     val snackbarHostState = remember { SnackbarHostState() }
 
     showShareMenu?.let { status ->
@@ -315,6 +330,9 @@ fun ProfileScreen(
                                 relationship = uiState.relationship,
                                 isOwnProfile = uiState.isOwnProfile,
                                 isProcessingFollow = uiState.isProcessingFollow,
+                                isProcessingNotify = uiState.isProcessingNotify,
+                                onToggleNotify = { viewModel.onAction(ProfileAction.ToggleNotify) },
+                                onEditNote = { showNoteDialog = true },
                                 isProcessingMute = uiState.isProcessingMute,
                                 isProcessingBlock = uiState.isProcessingBlock,
                                 onFollowClick = {
@@ -502,6 +520,9 @@ private fun ProfileHeader(
     isProcessingFollow: Boolean,
     isProcessingMute: Boolean,
     isProcessingBlock: Boolean,
+    isProcessingNotify: Boolean,
+    onToggleNotify: () -> Unit,
+    onEditNote: () -> Unit,
     onFollowClick: () -> Unit,
     onMuteClick: () -> Unit,
     onBlockClick: () -> Unit,
@@ -539,6 +560,22 @@ private fun ProfileHeader(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Notifications for new posts, only for followed accounts
+                    if (relationship?.following == true) {
+                        FilledTonalIconToggleButton(
+                            checked = relationship.notifying,
+                            onCheckedChange = { onToggleNotify() },
+                            enabled = !isProcessingNotify
+                        ) {
+                            Icon(
+                                imageVector = if (relationship.notifying) Icons.Default.NotificationsActive else Icons.Outlined.NotificationsNone,
+                                contentDescription = stringResource(
+                                    if (relationship.notifying) R.string.cd_notify_off else R.string.cd_notify_on
+                                )
+                            )
+                        }
+                    }
+
                     // Follow button
                     Button(
                         onClick = onFollowClick,
@@ -549,7 +586,7 @@ private fun ProfileHeader(
                             text = when {
                                 isProcessingFollow -> "..."
                                 relationship?.following == true -> stringResource(R.string.unfollow)
-                                relationship?.requested == true -> stringResource(R.string.notification_requested_follow)
+                                relationship?.requested == true -> stringResource(R.string.follow_requested)
                                 else -> stringResource(R.string.follow)
                             }
                         )
@@ -734,8 +771,68 @@ private fun ProfileHeader(
                     )
                 }
             }
+
+            // Private note, only visible to the user
+            Spacer(modifier = Modifier.height(8.dp))
+            if (relationship.note.isNotBlank()) {
+                OutlinedCard(
+                    onClick = onEditNote,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = stringResource(R.string.profile_note_label),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = relationship.note, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            } else {
+                TextButton(onClick = onEditNote, contentPadding = PaddingValues(horizontal = 0.dp)) {
+                    Icon(Icons.Outlined.EditNote, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.profile_add_note))
+                }
+            }
         }
     }
+}
+
+/**
+ * Dialog to edit the private note about an account.
+ */
+@Composable
+private fun NoteDialog(
+    initial: String,
+    onSave: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var note by remember { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.profile_note_label)) },
+        text = {
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                placeholder = { Text(stringResource(R.string.profile_note_placeholder)) },
+                minLines = 3,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(note) }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 /**
