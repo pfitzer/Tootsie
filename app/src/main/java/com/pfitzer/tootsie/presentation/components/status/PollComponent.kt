@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import com.pfitzer.tootsie.domain.model.CustomEmoji
 import androidx.compose.foundation.background
@@ -60,6 +62,7 @@ fun PollComponent(
                 isVoted = poll.ownVotes.contains(index) || (hasVotedLocally && selectedOptions.contains(index)),
                 isSelected = selectedOptions.contains(index),
                 canVote = canVote,
+                multiple = poll.multiple,
                 onOptionClick = {
                     if (canVote) {
                         selectedOptions = if (poll.multiple) {
@@ -143,6 +146,7 @@ private fun PollOptionItem(
     isVoted: Boolean,
     isSelected: Boolean,
     canVote: Boolean,
+    multiple: Boolean,
     onOptionClick: () -> Unit
 ) {
     val percentage = if (totalVotes > 0) {
@@ -164,7 +168,12 @@ private fun PollOptionItem(
                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .clickable { onOptionClick() }
+                        // Announced as checkbox or radio button with its state
+                        .selectable(
+                            selected = isSelected,
+                            role = if (multiple) Role.Checkbox else Role.RadioButton,
+                            onClick = onOptionClick
+                        )
                 } else {
                     Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 }

@@ -682,6 +682,26 @@
     <string name="error_toggle_notify">Benachrichtigungen für dieses Konto konnten nicht geändert werden</string>
     <string name="error_save_note">Die Notiz konnte nicht gespeichert werden</string>
 
+    <!-- Accessibility -->
+    <string name="cd_open_post">Beitrag öffnen</string>
+    <string name="cd_profile_of">Profil von %1$s</string>
+    <string name="cd_open_image">Bild öffnen</string>
+    <string name="cd_bold">Fett</string>
+    <string name="cd_italic">Kursiv</string>
+    <string name="cd_insert_link">Link einfügen</string>
+    <plurals name="cd_replies_count">
+        <item quantity="one">%d Antwort</item>
+        <item quantity="other">%d Antworten</item>
+    </plurals>
+    <plurals name="cd_boosts_count">
+        <item quantity="one">%d Boost</item>
+        <item quantity="other">%d Boosts</item>
+    </plurals>
+    <plurals name="cd_favourites_count">
+        <item quantity="one">%d Favorit</item>
+        <item quantity="other">%d Favoriten</item>
+    </plurals>
+
     <!-- Read markers -->
     <string name="cd_notification_unread">Neu</string>
 

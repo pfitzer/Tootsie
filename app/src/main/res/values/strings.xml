@@ -681,6 +681,26 @@
     <string name="error_toggle_notify">Failed to change notifications for this account</string>
     <string name="error_save_note">Failed to save the note</string>
 
+    <!-- Accessibility -->
+    <string name="cd_open_post">Open post</string>
+    <string name="cd_profile_of">Profile of %1$s</string>
+    <string name="cd_open_image">Open image</string>
+    <string name="cd_bold">Bold</string>
+    <string name="cd_italic">Italic</string>
+    <string name="cd_insert_link">Insert link</string>
+    <plurals name="cd_replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
+    </plurals>
+    <plurals name="cd_boosts_count">
+        <item quantity="one">%d boost</item>
+        <item quantity="other">%d boosts</item>
+    </plurals>
+    <plurals name="cd_favourites_count">
+        <item quantity="one">%d favorite</item>
+        <item quantity="other">%d favorites</item>
+    </plurals>
+
     <!-- Read markers -->
     <string name="cd_notification_unread">New</string>
 

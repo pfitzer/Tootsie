@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.components.common
 
+import com.pfitzer.tootsie.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,19 +52,19 @@ fun RichTextEditor(
                     onClick = {
                         onValueChange(applyStyle(value, SpanStyle(fontWeight = FontWeight.Bold)))
                     },
-                    contentDescription = "Bold"
+                    contentDescription = stringResource(R.string.cd_bold)
                 )
                 ToolbarButton(
                     icon = Icons.Default.FormatItalic,
                     onClick = {
                         onValueChange(applyStyle(value, SpanStyle(fontStyle = FontStyle.Italic)))
                     },
-                    contentDescription = "Italic"
+                    contentDescription = stringResource(R.string.cd_italic)
                 )
                 ToolbarButton(
                     icon = Icons.Default.Link,
                     onClick = { showLinkDialog = true },
-                    contentDescription = "Link"
+                    contentDescription = stringResource(R.string.cd_insert_link)
                 )
             }
         }

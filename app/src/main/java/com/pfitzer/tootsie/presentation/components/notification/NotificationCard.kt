@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.notification
 
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
@@ -94,11 +95,14 @@ fun NotificationCard(
                 ) {
                     AsyncImage(
                         model = notification.account.avatar,
-                        contentDescription = stringResource(R.string.cd_avatar),
+                        contentDescription = stringResource(
+                            R.string.cd_profile_of,
+                            notification.account.displayName.ifBlank { notification.account.username }
+                        ),
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .clickable { onAvatarClick(notification.account.id) },
+                            .clickable(role = Role.Button) { onAvatarClick(notification.account.id) },
                         contentScale = ContentScale.Crop
                     )
 
