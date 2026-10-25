@@ -125,6 +125,7 @@ class ComposeViewModel @Inject constructor(
                             language = scheduled.language ?: it.language,
                             replyToId = scheduled.inReplyToId,
                             pollConfig = scheduled.poll,
+                            sensitive = scheduled.sensitive,
                             mediaAttachments = scheduled.mediaAttachments
                         )
                     }
@@ -320,6 +321,10 @@ class ComposeViewModel @Inject constructor(
             ComposeAction.TogglePollHideTotals -> togglePollHideTotals()
             is ComposeAction.SetSchedule -> _uiState.update { it.copy(scheduledAt = action.scheduledAt) }
             ComposeAction.ClearSchedule -> _uiState.update { it.copy(scheduledAt = null) }
+            ComposeAction.ToggleSensitive -> {
+                _uiState.update { it.copy(sensitive = !it.sensitive) }
+                scheduleAutoSave()
+            }
         }
     }
 
@@ -464,6 +469,7 @@ class ComposeViewModel @Inject constructor(
                 visibility = state.visibility.value,
                 inReplyToId = state.replyToId,
                 mediaIds = mediaIds.takeIf { it.isNotEmpty() },
+                sensitive = state.isMediaSensitive,
                 spoilerText = state.contentWarning.takeIf { it.isNotBlank() },
                 pollConfig = state.pollConfig,
                 quotedStatusId = quoteId,
@@ -478,6 +484,7 @@ class ComposeViewModel @Inject constructor(
                     visibility = newStatus.visibility,
                     inReplyToId = newStatus.inReplyToId,
                     mediaIds = newStatus.mediaIds,
+                    sensitive = newStatus.sensitive,
                     spoilerText = newStatus.spoilerText,
                     pollConfig = newStatus.pollConfig,
                     quotedStatusId = newStatus.quotedStatusId,
@@ -597,7 +604,7 @@ class ComposeViewModel @Inject constructor(
             content = state.content,
             mediaIds = mediaIdsJson,
             visibility = state.visibility.value,
-            sensitive = false, // TODO: Add sensitive toggle to UI
+            sensitive = state.sensitive,
             spoilerText = state.contentWarning.takeIf { it.isNotBlank() },
             inReplyToId = state.replyToId,
             createdAt = state.currentDraftId?.let { state.lastDraftSavedAt } ?: System.currentTimeMillis(),
@@ -654,6 +661,7 @@ class ComposeViewModel @Inject constructor(
                             contentWarning = draft.spoilerText ?: "",
                             showContentWarning = draft.spoilerText != null,
                             pollConfig = poll,
+                            sensitive = draft.sensitive,
                             language = draft.language ?: it.language,
                             currentDraftId = draft.id,
                             lastDraftSavedAt = draft.updatedAt
@@ -860,7 +868,9 @@ data class ComposeUiState(
     /** Publication time; null to post right away. */
     val scheduledAt: Instant? = null,
     /** ID of the scheduled post being edited. */
-    val editingScheduledId: String? = null
+    val editingScheduledId: String? = null,
+    /** The user marked the media as sensitive. */
+    val sensitive: Boolean = false
 ) {
     /** Length as Mastodon counts it (URLs, mentions, content warning). */
     val characterCount: Int by lazy {
@@ -883,6 +893,9 @@ data class ComposeUiState(
     val canAddMedia: Boolean get() = mediaAttachments.size < limits.maxMediaAttachments && !isUploadingMedia && !hasPoll
     val canAddPoll: Boolean get() = !hasPoll && !hasMedia
     val hasDraftContent: Boolean get() = content.isNotBlank() || hasMedia || contentWarning.isNotBlank() || hasPoll
+
+    /** Media is marked sensitive by the toggle, and always with a content warning (as Mastodon does). */
+    val isMediaSensitive: Boolean get() = sensitive || contentWarning.isNotBlank()
 }
 
 /**
@@ -921,6 +934,9 @@ sealed class ComposeAction {
     // Scheduling
     data class SetSchedule(val scheduledAt: Instant) : ComposeAction()
     data object ClearSchedule : ComposeAction()
+
+    /** Mark the media as sensitive or not. */
+    data object ToggleSensitive : ComposeAction()
 }
 
 /**
