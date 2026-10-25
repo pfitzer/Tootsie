@@ -20,7 +20,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.domain.model.TrendingTagSort
 import com.pfitzer.tootsie.presentation.components.common.ErrorMessage
+import com.pfitzer.tootsie.presentation.components.common.SortMenu
 import com.pfitzer.tootsie.presentation.components.status.ShareBottomSheet
 import com.pfitzer.tootsie.presentation.components.status.StatusCard
 import com.pfitzer.tootsie.presentation.screens.trending.components.TrendingHashtagCard
@@ -57,6 +59,7 @@ fun TrendingScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var showShareMenu by remember { mutableStateOf<Status?>(null) }
+    val hashtagsUiState by hashtagsViewModel.uiState.collectAsStateWithLifecycle()
 
     showShareMenu?.let { status ->
         ShareBottomSheet(
@@ -75,6 +78,23 @@ fun TrendingScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.cd_back)
+                            )
+                        }
+                    },
+                    actions = {
+                        // Only the hashtags can be sorted
+                        if (tabs[pagerState.currentPage] == TrendingTab.HASHTAGS) {
+                            SortMenu(
+                                options = TrendingTagSort.entries,
+                                selected = hashtagsUiState.sort,
+                                label = { sort ->
+                                    when (sort) {
+                                        TrendingTagSort.TRENDING -> R.string.sort_trending
+                                        TrendingTagSort.ALPHABETICAL -> R.string.sort_alphabetical
+                                        TrendingTagSort.ACTIVITY -> R.string.sort_activity
+                                    }
+                                },
+                                onSelect = { hashtagsViewModel.onAction(TrendingHashtagsAction.SelectSort(it)) }
                             )
                         }
                     },
@@ -250,6 +270,14 @@ private fun TrendingHashtagsContent(
         }
     }
 
+    // Scroll to top after the sort order changed
+    LaunchedEffect(uiState.scrollToTop) {
+        if (uiState.scrollToTop) {
+            listState.scrollToItem(0)
+            viewModel.onAction(TrendingHashtagsAction.ScrollToTopConsumed)
+        }
+    }
+
     PullToRefreshBox(
         isRefreshing = uiState.isLoading,
         onRefresh = { viewModel.onAction(TrendingHashtagsAction.Refresh) },
@@ -268,7 +296,7 @@ private fun TrendingHashtagsContent(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(items = uiState.trendingTags) { tag ->
+                items(items = uiState.sortedTags) { tag ->
                     TrendingHashtagCard(
                         trendingTag = tag,
                         onClick = { onNavigateToHashtag(tag.name) }

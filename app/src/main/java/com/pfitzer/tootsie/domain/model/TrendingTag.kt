@@ -5,14 +5,14 @@ package com.pfitzer.tootsie.domain.model
  * Represents a hashtag that is being used more frequently than usual.
  */
 data class TrendingTag(
-    val name: String,  // Tag name without # prefix
+    override val name: String,  // Tag name without # prefix
     val url: String,  // URL to the tag page
     val history: List<TagHistory>  // Usage statistics over time
-) {
+) : HashtagWithHistory {
     /**
      * Calculate total uses across all history.
      */
-    val totalUses: Int
+    override val totalUses: Int
         get() = history.sumOf { it.uses }
 
     /**

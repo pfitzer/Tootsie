@@ -5,15 +5,15 @@ package com.pfitzer.tootsie.domain.model
  * Represents a tag that can be followed by the user.
  */
 data class FollowedTag(
-    val name: String,
+    override val name: String,
     val url: String,
     val history: List<TagHistory>,
     val following: Boolean
-) {
+) : HashtagWithHistory {
     /**
      * Total number of times this tag has been used across all history.
      */
-    val totalUses: Int
+    override val totalUses: Int
         get() = history.sumOf { it.uses }
 
     /**
