@@ -4,7 +4,7 @@ A modern, high-performance Mastodon client for Android built with Jetpack Compos
 
 ## Project Status
 
-**Version**: 1.3.0
+**Version**: 1.3.1
 **Project State**: Full-featured Mastodon client with keyword filters and complete internationalization support
 
 ---
