@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.domain.repository
 
+import com.pfitzer.tootsie.domain.model.DeletedStatus
 import com.pfitzer.tootsie.domain.model.NewStatus
 import com.pfitzer.tootsie.domain.model.StatusEditVersion
 import com.pfitzer.tootsie.domain.model.StatusSource
@@ -54,11 +55,12 @@ interface StatusRepository {
     ): Result<Status>
 
     /**
-     * Delete a status.
+     * Delete an own status. It disappears from all lists right away.
      *
      * @param statusId Status ID to delete
+     * @param deleteMedia Delete the media right away; false keeps it for a redraft
      */
-    suspend fun deleteStatus(statusId: String): Result<Status>
+    suspend fun deleteStatus(statusId: String, deleteMedia: Boolean): Result<DeletedStatus>
 
     /**
      * Favorite (like) a status.

@@ -17,6 +17,12 @@ val LocalActiveAccountId = compositionLocalOf<String?> { null }
 val LocalOnEditStatus = staticCompositionLocalOf<((Status) -> Unit)?> { null }
 
 /**
+ * Deletes an own status (after confirmation in the card); `redraft` opens it as a draft
+ * afterwards. Provided by the nav host. Null: deleting not available.
+ */
+val LocalOnDeleteStatus = staticCompositionLocalOf<((status: Status, redraft: Boolean) -> Unit)?> { null }
+
+/**
  * Opens the edit history of a status. Null: history not available.
  */
 val LocalOnShowEditHistory = staticCompositionLocalOf<((Status) -> Unit)?> { null }

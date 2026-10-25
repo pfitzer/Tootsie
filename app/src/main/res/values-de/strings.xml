@@ -651,6 +651,15 @@
     <string name="sort_trending">Im Trend</string>
     <string name="followed_tags_empty_hint">Beiträge mit Hashtags, denen du folgst, erscheinen in deiner Home-Timeline.</string>
 
+    <!-- Deleting posts -->
+    <string name="delete_and_redraft">Löschen &amp; neu verfassen</string>
+    <string name="delete_post_confirm_title">Beitrag löschen?</string>
+    <string name="delete_post_confirm_message">Der Beitrag wird für alle gelöscht. Antworten bleiben, Boosts und Favoriten gehen verloren.</string>
+    <string name="delete_redraft_confirm_title">Löschen &amp; neu verfassen?</string>
+    <string name="delete_redraft_confirm_message">Der Beitrag wird gelöscht und als Entwurf geöffnet. Boosts und Favoriten gehen verloren, und Antworten hängen nicht am neuen Beitrag.</string>
+    <string name="error_delete_post">Der Beitrag konnte nicht gelöscht werden</string>
+    <string name="error_redraft">Der Beitrag wurde gelöscht, aber der Entwurf konnte nicht gespeichert werden</string>
+
     <!-- Editing posts -->
     <string name="compose_title_edit">Beitrag bearbeiten</string>
     <string name="status_edited">bearbeitet</string>

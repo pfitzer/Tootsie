@@ -30,6 +30,7 @@ import com.pfitzer.tootsie.domain.model.Status
  * @param onBookmarkClick Callback when bookmark button is clicked
  * @param onPinClick Optional callback when pin button is clicked (only shown if provided)
  * @param onEditClick Optional callback to edit the status (own posts)
+ * @param onDeleteClick Optional callback to delete the status (own posts), after confirmation
  * @param onReportClick Optional callback when report is selected (only shown if provided, for non-own posts)
  * @param modifier Optional modifier
  */
@@ -44,8 +45,39 @@ fun StatusActions(
     onPinClick: (() -> Unit)? = null,
     onReportClick: (() -> Unit)? = null,
     onEditClick: (() -> Unit)? = null,
+    onDeleteClick: ((redraft: Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    // Deleting asks first: "delete" or "delete & redraft"
+    var confirmDelete by remember { mutableStateOf<Boolean?>(null) }
+    confirmDelete?.let { redraft ->
+        AlertDialog(
+            onDismissRequest = { confirmDelete = null },
+            title = {
+                Text(stringResource(if (redraft) R.string.delete_redraft_confirm_title else R.string.delete_post_confirm_title))
+            },
+            text = {
+                Text(stringResource(if (redraft) R.string.delete_redraft_confirm_message else R.string.delete_post_confirm_message))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = null
+                    onDeleteClick?.invoke(redraft)
+                }) {
+                    Text(
+                        stringResource(if (redraft) R.string.delete_and_redraft else R.string.delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     // Servers with quote support (quote_approval present) offer boost or quote
     val onQuote = LocalOnQuoteStatus.current
     val offerQuote = onQuote != null && status.quotePermission != null
@@ -116,7 +148,7 @@ fun StatusActions(
             )
         }
 
-        if (onReportClick != null || onEditClick != null) {
+        if (onReportClick != null || onEditClick != null || onDeleteClick != null) {
             // More options menu: Share, plus Edit for own posts or Report for others
             var expanded by remember { mutableStateOf(false) }
             Box {
@@ -151,6 +183,28 @@ fun StatusActions(
                             onClick = {
                                 expanded = false
                                 onEditClick()
+                            }
+                        )
+                    }
+                    if (onDeleteClick != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.delete_and_redraft)) },
+                            leadingIcon = {
+                                Icon(Icons.Default.EditNote, contentDescription = null)
+                            },
+                            onClick = {
+                                expanded = false
+                                confirmDelete = true
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = {
+                                Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                            },
+                            onClick = {
+                                expanded = false
+                                confirmDelete = false
                             }
                         )
                     }

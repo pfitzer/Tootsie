@@ -71,8 +71,10 @@ fun StatusCard(
     val activeAccountId = LocalActiveAccountId.current
     val onEdit = LocalOnEditStatus.current
     val onShowEditHistory = LocalOnShowEditHistory.current
+    val onDelete = LocalOnDeleteStatus.current
     // If this is a boost/reblog, show the boosted status
     val displayStatus = status.reblog ?: status
+    val isOwn = activeAccountId != null && displayStatus.account.id == activeAccountId
     val isReblog = status.reblog != null
 
     // Track if user has clicked to show filtered content
@@ -194,8 +196,8 @@ fun StatusCard(
                     onShareClick = { onShareClick(displayStatus) },
                     onPinClick = onPinClick?.let { { it(displayStatus) } },
                     onReportClick = onReportClick?.let { { it(displayStatus) } },
-                    onEditClick = onEdit?.takeIf { displayStatus.account.id == activeAccountId }
-                        ?.let { { it(displayStatus) } }
+                    onEditClick = onEdit?.takeIf { isOwn }?.let { { it(displayStatus) } },
+                    onDeleteClick = onDelete?.takeIf { isOwn }?.let { { redraft -> it(displayStatus, redraft) } }
                 )
             }
         }

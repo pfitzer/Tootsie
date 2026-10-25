@@ -36,6 +36,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.CompositionLocalProvider
 import com.pfitzer.tootsie.domain.model.Status
 import com.pfitzer.tootsie.presentation.components.status.LocalActiveAccountId
+import com.pfitzer.tootsie.presentation.components.status.LocalOnDeleteStatus
+import com.pfitzer.tootsie.presentation.OwnStatusActionsViewModel
+import com.pfitzer.tootsie.presentation.OwnStatusEvent
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import com.pfitzer.tootsie.presentation.components.status.LocalOnEditStatus
 import com.pfitzer.tootsie.presentation.components.status.LocalOnQuoteStatus
 import com.pfitzer.tootsie.presentation.components.status.LocalOnShowEditHistory
@@ -63,6 +69,20 @@ fun TootsieNavHost(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val activeAccount by mainViewModel.activeAccount.collectAsState()
+
+    // Deleting own statuses from any card; a redraft opens the compose screen
+    val ownStatusActions: OwnStatusActionsViewModel = hiltViewModel()
+    val context = LocalContext.current
+    LaunchedEffect(ownStatusActions) {
+        ownStatusActions.events.collect { event ->
+            when (event) {
+                is OwnStatusEvent.Redraft ->
+                    navController.navigate(TootsieDestinations.Compose.createRoute(draftId = event.draftId))
+                is OwnStatusEvent.Error ->
+                    Toast.makeText(context, event.message.asString(context), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     // Determine if we should show bottom navigation
     val showBottomBar = when {
@@ -133,6 +153,9 @@ fun TootsieNavHost(
             },
             LocalOnShowEditHistory provides { status: Status ->
                 navController.navigate(TootsieDestinations.EditHistory.createRoute(status.id))
+            },
+            LocalOnDeleteStatus provides { status: Status, redraft: Boolean ->
+                if (redraft) ownStatusActions.deleteAndRedraft(status) else ownStatusActions.delete(status)
             }
         ) {
         NavHost(

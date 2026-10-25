@@ -22,6 +22,11 @@ class StatusInteractionStore @Inject constructor() {
     private val _interactions = MutableStateFlow<Map<String, StatusInteraction>>(emptyMap())
     val interactions: StateFlow<Map<String, StatusInteraction>> = _interactions.asStateFlow()
 
+    private val _deletedIds = MutableStateFlow<Set<String>>(emptySet())
+
+    /** Own statuses deleted during this session; lists leave them (and boosts of them) out. */
+    val deletedIds: StateFlow<Set<String>> = _deletedIds.asStateFlow()
+
     /**
      * Record the state of a status returned by an interaction endpoint.
      * Boost responses wrap the original status, whose state is what the UI shows.
@@ -45,9 +50,17 @@ class StatusInteractionStore @Inject constructor() {
     }
 
     /**
+     * Record a deleted own status.
+     */
+    fun markDeleted(statusId: String) {
+        _deletedIds.update { it + statusId }
+    }
+
+    /**
      * Forget all overrides, e.g. when switching accounts.
      */
     fun clear() {
         _interactions.value = emptyMap()
+        _deletedIds.value = emptySet()
     }
 }

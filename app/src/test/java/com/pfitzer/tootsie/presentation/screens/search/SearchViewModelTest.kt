@@ -15,7 +15,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -36,14 +35,13 @@ class SearchViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val searchUseCase = mockk<SearchUseCase>()
     private val preferencesManager = mockk<PreferencesManager>(relaxed = true)
-    private val interactionStore = mockk<StatusInteractionStore>()
+    private val interactionStore = StatusInteractionStore()
     private val observeActiveAccountUseCase = mockk<ObserveActiveAccountUseCase>()
     private val getTrendingHashtagsUseCase = mockk<GetTrendingHashtagsUseCase>()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { interactionStore.interactions } returns MutableStateFlow(emptyMap())
         every { observeActiveAccountUseCase() } returns flowOf(account("own"))
         coEvery { getTrendingHashtagsUseCase(any(), any()) } returns Result.Success(emptyList())
         coEvery { preferencesManager.getRecentSearches("own") } returns listOf("older")

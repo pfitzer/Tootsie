@@ -517,12 +517,16 @@ interface MastodonApiService {
     )
 
     /**
-     * Delete a status.
+     * Delete a status. The response includes the plain text source (`text`).
      *
      * @param id Status ID to delete
+     * @param deleteMedia Delete the media right away; false keeps it for a redraft
      */
     @DELETE("api/v1/statuses/{id}")
-    suspend fun deleteStatus(@Path("id") id: String): StatusDto
+    suspend fun deleteStatus(
+        @Path("id") id: String,
+        @Query("delete_media") deleteMedia: Boolean
+    ): StatusDto
 
     /**
      * Favorite (like) a status.

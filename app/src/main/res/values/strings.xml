@@ -650,6 +650,15 @@
     <string name="sort_trending">Trending</string>
     <string name="followed_tags_empty_hint">Posts with hashtags you follow appear in your home timeline.</string>
 
+    <!-- Deleting posts -->
+    <string name="delete_and_redraft">Delete &amp; redraft</string>
+    <string name="delete_post_confirm_title">Delete post?</string>
+    <string name="delete_post_confirm_message">The post is deleted for everyone. Replies stay, but boosts and favourites are lost.</string>
+    <string name="delete_redraft_confirm_title">Delete &amp; redraft?</string>
+    <string name="delete_redraft_confirm_message">The post is deleted and opened as a draft. Boosts and favourites are lost, and replies won\'t be attached to the new post.</string>
+    <string name="error_delete_post">Failed to delete the post</string>
+    <string name="error_redraft">The post was deleted, but the draft could not be saved</string>
+
     <!-- Editing posts -->
     <string name="compose_title_edit">Edit post</string>
     <string name="status_edited">edited</string>

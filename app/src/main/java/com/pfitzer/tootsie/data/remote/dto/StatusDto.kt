@@ -18,6 +18,8 @@ data class StatusDto(
     @SerialName("visibility") val visibility: String,
     @SerialName("sensitive") val sensitive: Boolean,
     @SerialName("spoiler_text") val spoilerText: String,
+    /** Plain text source; only returned when deleting, for "delete & redraft". */
+    @SerialName("text") val text: String? = null,
     @SerialName("media_attachments") val mediaAttachments: List<MediaAttachmentDto> = emptyList(),
     @SerialName("mentions") val mentions: List<MentionDto> = emptyList(),
     @SerialName("tags") val tags: List<TagDto> = emptyList(),

@@ -80,6 +80,19 @@ class StatusInteractionTest {
         assertEquals("<p>New</p>", status("1").withInteractions(store.interactions.value).content)
     }
 
+    @Test
+    fun `deleted statuses and boosts of them are recognized, until the store is cleared`() {
+        val store = StatusInteractionStore()
+        store.markDeleted("1")
+
+        assertTrue(status("1").isDeletedIn(store.deletedIds.value))
+        assertTrue(status("boost", reblog = status("1")).isDeletedIn(store.deletedIds.value))
+        assertFalse(status("2").isDeletedIn(store.deletedIds.value))
+
+        store.clear()
+        assertTrue(store.deletedIds.value.isEmpty())
+    }
+
     private fun status(id: String, reblog: Status? = null) = Status(
         id = id,
         uri = "https://example.social/statuses/$id",

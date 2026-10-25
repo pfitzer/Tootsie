@@ -10,6 +10,15 @@ data class StatusSource(
 )
 
 /**
+ * A deleted own status, with its plain text source for redrafting (null if the server
+ * didn't return it).
+ */
+data class DeletedStatus(
+    val status: Status,
+    val text: String?
+)
+
+/**
  * One version of an edited status, from its edit history.
  */
 data class StatusEditVersion(

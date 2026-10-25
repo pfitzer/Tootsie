@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.domain.model.isDeletedIn
 import com.pfitzer.tootsie.domain.model.withInteractions
 
 /**
@@ -50,8 +51,8 @@ class SearchViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> =
-        combine(_uiState, statusInteractionStore.interactions) { state, interactions ->
-            state.copy(statuses = state.statuses.map { it.withInteractions(interactions) })
+        combine(_uiState, statusInteractionStore.interactions, statusInteractionStore.deletedIds) { state, interactions, deletedIds ->
+            state.copy(statuses = state.statuses.filterNot { it.isDeletedIn(deletedIds) }.map { it.withInteractions(interactions) })
         }.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
 
     /**
