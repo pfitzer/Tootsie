@@ -4,6 +4,16 @@
 
 Tootsie is a modern, high-performance, and privacy-respecting Mastodon client for Android. Built from the ground up with Jetpack Compose and Kotlin, it follows Clean Architecture principles to provide a smooth experience for the Fediverse.
 
+## 🧪 Testers wanted
+
+Google requires a closed test with at least 12 testers for 14 days before Tootsie can be published on Google Play. You can help:
+
+1. Join the Google group [tootsie-testing](https://groups.google.com/g/tootsie-testing/) (with the Google account of your Play Store)
+2. Opt in as a tester: <https://play.google.com/apps/testing/com.pfitzer.tootsie>
+3. Install Tootsie from the Play Store and keep it installed for at least 14 days
+
+Bugs and ideas are welcome as [issues](https://github.com/pfitzer/Tootsie/issues). Without the Play Store, install the APK from the [latest release](https://github.com/pfitzer/Tootsie/releases/latest).
+
 ## 📱 Screenshots
 
 <p align="center">
