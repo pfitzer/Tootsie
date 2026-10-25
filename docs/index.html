@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tootsie – Mastodon-Client für Android</title>
+  <meta name="description" content="Tootsie ist ein moderner, datenschutzfreundlicher Mastodon-Client für Android: kein Tracking, keine Google-Dienste, Push-Benachrichtigungen über UnifiedPush.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/icon.png" alt="">Tootsie</a>
+      <nav aria-label="Hauptnavigation">
+        <a href="#funktionen">Funktionen</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="#datenschutz">Datenschutz</a>
+        <a href="https://github.com/pfitzer/Tootsie">Quellcode</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Ein moderner Mastodon-Client für Android</h1>
+          <p class="lead">Schnell, übersichtlich und datenschutzfreundlich. Freie Software, ohne Tracking und ohne Google-Dienste.</p>
+          <div class="buttons">
+            <a class="button primary" href="https://play.google.com/store/apps/details?id=com.pfitzer.tootsie">Bei Google Play laden</a>
+            <a class="button secondary" href="https://github.com/pfitzer/Tootsie/releases/latest">APK herunterladen</a>
+          </div>
+        </div>
+        <img class="hero-shot" src="screenshots/light/01_home.png" alt="Startseite von Tootsie mit der Home-Timeline">
+      </div>
+    </div>
+
+    <section id="funktionen">
+      <div class="wrap">
+        <h2>Funktionen</h2>
+        <div class="features">
+          <div class="feature">
+            <h3>Timelines auch offline</h3>
+            <p>Home, lokal und föderiert werden auf dem Gerät zwischengespeichert und lassen sich auch ohne Verbindung durchscrollen. Die Lesestelle wird mit dem Web und anderen Apps abgeglichen.</p>
+          </div>
+          <div class="feature">
+            <h3>Schreiben, wie du willst</h3>
+            <p>Umfragen, Inhaltswarnungen, Bildbeschreibungen, sensible Medien, eigene Emojis und Autovervollständigung. Entwürfe werden automatisch gespeichert.</p>
+          </div>
+          <div class="feature">
+            <h3>Geplante Beiträge</h3>
+            <p>Wähle einen Veröffentlichungszeitpunkt und verschiebe, bearbeite oder lösche geplante Beiträge später.</p>
+          </div>
+          <div class="feature">
+            <h3>Bearbeiten, löschen, neu verfassen</h3>
+            <p>Korrigiere veröffentlichte Beiträge, sieh dir den Bearbeitungsverlauf an oder lösche einen Beitrag und öffne ihn erneut als Entwurf.</p>
+          </div>
+          <div class="feature">
+            <h3>Beiträge übersetzen</h3>
+            <p>Über den Übersetzungsdienst deines Servers oder mit der Übersetzer-App deiner Wahl.</p>
+          </div>
+          <div class="feature">
+            <h3>Mehrere Konten</h3>
+            <p>Wechsle sofort zwischen Konten auf verschiedenen Servern und poste von jedem aus.</p>
+          </div>
+          <div class="feature">
+            <h3>Entdecken</h3>
+            <p>Suche nach Konten, Beiträgen und Hashtags, folge Hashtags, stöbere in Trends, Listen, Lesezeichen und Favoriten. Zitat-Beiträge ab Mastodon 4.5.</p>
+          </div>
+          <div class="feature">
+            <h3>Alles unter Kontrolle</h3>
+            <p>Schlagwortfilter, stummschalten, blockieren, ganze Domains blockieren, melden. Follower-Listen, Benachrichtigungen bei neuen Beiträgen und private Notizen.</p>
+          </div>
+          <div class="feature">
+            <h3>Barrierearm</h3>
+            <p>TalkBack-Aktionen an jedem Beitrag, beschriftete Knöpfe und Medien, einstellbare Schriftgröße, helles und dunkles Design. Deutsch und Englisch.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screenshots" class="alt">
+      <div class="wrap">
+        <h2>Screenshots</h2>
+        <div class="gallery">
+          <img src="screenshots/light/01_home.png" alt="Home-Timeline" loading="lazy">
+          <img src="screenshots/light/02_thread.png" alt="Thread mit Boosts und Favoriten" loading="lazy">
+          <img src="screenshots/light/03_profile.png" alt="Profil" loading="lazy">
+          <img src="screenshots/light/04_compose.png" alt="Beitrag verfassen mit Umfrage" loading="lazy">
+          <img src="screenshots/dark/01_home.png" alt="Home-Timeline im dunklen Design" loading="lazy">
+          <img src="screenshots/light/05_search.png" alt="Suche" loading="lazy">
+          <img src="screenshots/light/07_trending.png" alt="Trend-Hashtags" loading="lazy">
+          <img src="screenshots/dark/03_profile.png" alt="Profil im dunklen Design" loading="lazy">
+          <img src="screenshots/light/08_settings.png" alt="Einstellungen" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <section id="datenschutz">
+      <div class="wrap">
+        <h2>Datenschutz zuerst</h2>
+        <ul class="privacy-points">
+          <li><strong>Kein Tracking, keine Analyse, keine Werbung.</strong> Tootsie hat keinen eigenen Server und sammelt nichts.</li>
+          <li><strong>Keine Google-Dienste.</strong> Push-Benachrichtigungen laufen über <a href="https://unifiedpush.org/">UnifiedPush</a> mit einem Verteiler deiner Wahl; die Nachrichten sind verschlüsselt und werden erst auf deinem Gerät entschlüsselt.</li>
+          <li><strong>Deine Daten bleiben bei dir und deinem Server.</strong> Zugangsdaten werden mit einem Schlüssel verschlüsselt, der dein Gerät nie verlässt, und landen in keinem Backup.</li>
+          <li><strong>Offener Quellcode</strong> unter der MIT-Lizenz, damit jede und jeder nachprüfen kann, was die App tut.</li>
+        </ul>
+        <p>Alle Details: <a href="datenschutz.html">Datenschutzerklärung</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Tootsie · MIT-Lizenz</span>
+      <nav aria-label="Fußzeile">
+        <a href="datenschutz.html">Datenschutzerklärung</a>
+        <a href="https://github.com/pfitzer/Tootsie">Quellcode</a>
+        <a href="https://github.com/pfitzer/Tootsie/issues">Fehler melden</a>
+        <a href="https://github.com/pfitzer/Tootsie/blob/main/CHANGELOG.md">Änderungen</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenschutzerklärung – Tootsie</title>
+  <meta name="description" content="Datenschutzerklärung der Android-App Tootsie: welche Daten auf dem Gerät gespeichert und welche an deinen Mastodon-Server übertragen werden.">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/icon.png" alt="">Tootsie</a>
+      <nav aria-label="Hauptnavigation">
+        <a href="./#funktionen">Funktionen</a>
+        <a href="./#screenshots">Screenshots</a>
+        <a href="https://github.com/pfitzer/Tootsie">Quellcode</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="legal">
+      <h1>Datenschutzerklärung</h1>
+      <p class="updated">Stand: 25. Oktober 2026, gilt für Tootsie ab Version 1.3.0</p>
+
+      <h2>Kurz gesagt</h2>
+      <p>Tootsie ist ein Client für Mastodon. Die App hat keinen eigenen Server, enthält keine Analyse- oder Werbedienste und keine Google-Dienste. Der Entwickler erhält keinerlei Daten von dir. Deine Daten gehen nur an den Mastodon-Server, bei dem du dich anmeldest, und – wenn du es so einrichtest – an die Dienste, die du selbst auswählst.</p>
+
+      <h2>Verantwortlich</h2>
+      <p>Michael Pfister, Entwickler von Tootsie. Kontakt über <a href="https://github.com/pfitzer/Tootsie/issues">GitHub</a>; vertrauliche Anliegen über die <a href="https://github.com/pfitzer/Tootsie/security/advisories/new">private Meldung auf GitHub</a>.</p>
+      <p>Für die Daten auf deinem Mastodon-Server ist dessen Betreiber verantwortlich; es gilt die Datenschutzerklärung deines Servers.</p>
+
+      <h2>Daten auf deinem Gerät</h2>
+      <p>Tootsie speichert auf deinem Gerät:</p>
+      <ul>
+        <li>die angemeldeten Konten (Name, Profilbild, Server) und deren Zugangsschlüssel (OAuth-Token),</li>
+        <li>zwischengespeicherte Timelines, damit sie auch offline lesbar sind,</li>
+        <li>Entwürfe sowie deine Einstellungen,</li>
+        <li>für Push-Benachrichtigungen die Schlüssel zum Entschlüsseln der Nachrichten.</li>
+      </ul>
+      <p>Die Zugangsschlüssel werden mit einem Schlüssel aus dem Android Keystore verschlüsselt, der das Gerät nicht verlassen kann. Die Datenbank und die Einstellungen mit diesen Schlüsseln sind von Android-Backups und der Übertragung auf ein neues Gerät ausgeschlossen.</p>
+
+      <h2>Übertragung an deinen Mastodon-Server</h2>
+      <p>Alles, was du in der App tust – Timelines laden, posten, favorisieren, suchen, Profile ansehen, Medien hochladen, Einstellungen deines Kontos ändern –, wird als Anfrage an den Mastodon-Server gesendet, bei dem du angemeldet bist. Dazu gehören auch deine Lesestelle (zuletzt gelesener Beitrag und gelesene Benachrichtigungen), damit sie mit anderen Apps abgeglichen wird. Bilder und Profilbilder anderer Server werden in der Regel über deinen Server geladen. Die Verbindung ist verschlüsselt (HTTPS).</p>
+
+      <h2>Push-Benachrichtigungen</h2>
+      <p>Wenn du Push-Benachrichtigungen einschaltest, verwendet Tootsie <a href="https://unifiedpush.org/">UnifiedPush</a> mit einer Verteiler-App deiner Wahl (zum Beispiel ntfy). Dein Mastodon-Server sendet die Benachrichtigungen verschlüsselt über diesen Verteiler; entschlüsselt werden sie erst auf deinem Gerät. Ist kein Verteiler eingerichtet, fragt Tootsie stattdessen etwa alle 15 Minuten selbst bei deinem Server nach neuen Benachrichtigungen. Für die Anzeige von Benachrichtigungen fragt die App nach der entsprechenden Berechtigung; du kannst sie jederzeit entziehen.</p>
+
+      <h2>Übersetzungen</h2>
+      <p>Übersetzt du einen Beitrag, sendet Tootsie die Anfrage an deinen Mastodon-Server, der den Übersetzungsdienst verwendet, den sein Betreiber eingerichtet hat (zum Beispiel DeepL oder LibreTranslate). Bietet dein Server keine Übersetzung an, übergibt Tootsie den Text an eine Übersetzer-App auf deinem Gerät, die du auswählst; für diese gilt deren Datenschutzerklärung.</p>
+
+      <h2>Links</h2>
+      <p>Links in Beiträgen öffnet Tootsie in deinem Browser. Für die aufgerufenen Webseiten gelten deren Datenschutzerklärungen.</p>
+
+      <h2>Berechtigungen</h2>
+      <ul>
+        <li><strong>Internet und Netzwerkstatus</strong> – um mit deinem Mastodon-Server zu kommunizieren.</li>
+        <li><strong>Benachrichtigungen</strong> (ab Android 13, optional) – um Benachrichtigungen anzuzeigen.</li>
+      </ul>
+      <p>Bilder und Videos zum Hochladen wählst du über die Bildauswahl von Android aus; Tootsie erhält nur Zugriff auf die Dateien, die du auswählst.</p>
+
+      <h2>Google Play</h2>
+      <p>Wenn du Tootsie über Google Play installierst, verarbeitet Google Daten zu Installation und Updates nach seinen eigenen Bestimmungen. Die App selbst verwendet keine Google-Play-Dienste.</p>
+
+      <h2>Löschen</h2>
+      <p>Entfernst du ein Konto in den Einstellungen von Tootsie, werden das Konto und sein Zugangsschlüssel vom Gerät gelöscht. Zwischengespeicherte Inhalte dieses Kontos (Timelines, Entwürfe, Filter) bleiben derzeit bis zur Deinstallation auf dem Gerät; das wird in einer kommenden Version geändert. Deinstallierst du die App oder löschst du in den Android-Einstellungen ihre Daten, entfernt Android alle Daten der App. Daten auf deinem Mastodon-Server – etwa dein Konto und deine Beiträge – verwaltest und löschst du bei deinem Server.</p>
+
+      <h2>Kinder</h2>
+      <p>Tootsie richtet sich nicht gezielt an Kinder. Ob und ab welchem Alter du Mastodon nutzen darfst, regeln die Bedingungen deines Servers.</p>
+
+      <h2>Änderungen</h2>
+      <p>Ändert sich, wie Tootsie mit Daten umgeht, wird diese Erklärung angepasst. Die jeweils aktuelle Fassung steht auf dieser Seite; frühere Fassungen sind im <a href="https://github.com/pfitzer/Tootsie/commits/main/docs/datenschutz.html">Verlauf auf GitHub</a> einsehbar.</p>
+    </article>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Tootsie · MIT-Lizenz</span>
+      <nav aria-label="Fußzeile">
+        <a href="./">Startseite</a>
+        <a href="https://github.com/pfitzer/Tootsie">Quellcode</a>
+        <a href="https://github.com/pfitzer/Tootsie/issues">Fehler melden</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
