@@ -76,7 +76,7 @@ class FollowListViewModelTest {
         followAccountUseCase = followAccountUseCase,
         unfollowAccountUseCase = unfollowAccountUseCase,
         observeActiveAccountUseCase = observeActiveAccountUseCase,
-        savedStateHandle = SavedStateHandle(mapOf("accountId" to "remote", "type" to "FOLLOWERS"))
+        savedStateHandle = SavedStateHandle(mapOf("id" to "remote", "type" to "FOLLOWERS"))
     )
 
     @Test
@@ -123,6 +123,32 @@ class FollowListViewModelTest {
 
         assertTrue(viewModel.uiState.value.isRemoteAccount)
         assertEquals("own", viewModel.uiState.value.ownAccountId)
+    }
+
+    @Test
+    fun `lists of a status load their accounts without an account title`() = runTest {
+        every { accountRepository.getFavouritedBy("status-1") } returns flowOf(
+            PagingData.from(
+                listOf(friend),
+                sourceLoadStates = LoadStates(
+                    refresh = LoadState.NotLoading(endOfPaginationReached = true),
+                    prepend = LoadState.NotLoading(endOfPaginationReached = true),
+                    append = LoadState.NotLoading(endOfPaginationReached = true)
+                )
+            )
+        )
+        val viewModel = FollowListViewModel(
+            accountRepository = accountRepository,
+            getAccountUseCase = getAccountUseCase,
+            followAccountUseCase = followAccountUseCase,
+            unfollowAccountUseCase = unfollowAccountUseCase,
+            observeActiveAccountUseCase = observeActiveAccountUseCase,
+            savedStateHandle = SavedStateHandle(mapOf("id" to "status-1", "type" to "FAVOURITED_BY"))
+        )
+
+        assertEquals(listOf("friend"), viewModel.entries.asSnapshot().map { it.account.id })
+        assertEquals(null, viewModel.uiState.value.account)
+        coVerify(exactly = 0) { getAccountUseCase(any()) }
     }
 
     private fun account(id: String, acct: String = id) = Account(

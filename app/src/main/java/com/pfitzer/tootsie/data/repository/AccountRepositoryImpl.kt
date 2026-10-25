@@ -198,6 +198,12 @@ class AccountRepositoryImpl @Inject constructor(
     override fun getFollowing(accountId: String): Flow<PagingData<FollowListEntry>> =
         followList { maxId, limit -> mastodonApi.getFollowing(id = accountId, maxId = maxId, limit = limit) }
 
+    override fun getFavouritedBy(statusId: String): Flow<PagingData<FollowListEntry>> =
+        followList { maxId, limit -> mastodonApi.getFavouritedBy(id = statusId, maxId = maxId, limit = limit) }
+
+    override fun getRebloggedBy(statusId: String): Flow<PagingData<FollowListEntry>> =
+        followList { maxId, limit -> mastodonApi.getRebloggedBy(id = statusId, maxId = maxId, limit = limit) }
+
     private fun followList(
         fetchPage: suspend (maxId: String?, limit: Int) -> Response<List<AccountDto>>
     ): Flow<PagingData<FollowListEntry>> {

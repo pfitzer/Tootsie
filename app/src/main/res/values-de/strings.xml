@@ -673,6 +673,19 @@
     <!-- Sensitive media -->
     <string name="compose_mark_sensitive">Medien als sensibel markieren</string>
 
+    <!-- Favourited / boosted by -->
+    <string name="favourited_by_title">Favorisiert von</string>
+    <string name="reblogged_by_title">Geboostet von</string>
+    <string name="empty_status_account_list">Noch niemand</string>
+    <plurals name="status_boosts_count">
+        <item quantity="one">%d Boost</item>
+        <item quantity="other">%d Boosts</item>
+    </plurals>
+    <plurals name="status_favourites_count">
+        <item quantity="one">%d Favorit</item>
+        <item quantity="other">%d Favoriten</item>
+    </plurals>
+
     <!-- Follow lists -->
     <string name="empty_follow_list">Noch niemand hier, oder das Konto verbirgt diese Liste</string>
     <string name="follow_list_remote_hint">Dieses Konto ist auf einem anderen Server, daher zeigt die Liste nur die Konten, die dieser Server kennt.</string>

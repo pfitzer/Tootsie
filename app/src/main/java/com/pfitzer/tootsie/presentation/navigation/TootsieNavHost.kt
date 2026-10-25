@@ -342,7 +342,7 @@ fun TootsieNavHost(
         composable(
             route = TootsieDestinations.FollowList.route,
             arguments = listOf(
-                navArgument(TootsieDestinations.FollowList.ARG_ACCOUNT_ID) { type = NavType.StringType },
+                navArgument(TootsieDestinations.FollowList.ARG_ID) { type = NavType.StringType },
                 navArgument(TootsieDestinations.FollowList.ARG_TYPE) { type = NavType.StringType }
             )
         ) {
@@ -426,6 +426,9 @@ fun TootsieNavHost(
             com.pfitzer.tootsie.presentation.screens.statusdetail.StatusDetailScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToAccountList = { statusId, type ->
+                    navController.navigate(TootsieDestinations.FollowList.createRoute(statusId, type))
                 },
                 onNavigateToStatus = { statusId ->
                     navController.navigate(TootsieDestinations.StatusDetail.createRoute(statusId))

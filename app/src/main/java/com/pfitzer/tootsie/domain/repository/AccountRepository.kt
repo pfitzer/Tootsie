@@ -157,6 +157,16 @@ interface AccountRepository {
     fun getFollowing(accountId: String): Flow<PagingData<FollowListEntry>>
 
     /**
+     * Get the accounts that favourited a status.
+     */
+    fun getFavouritedBy(statusId: String): Flow<PagingData<FollowListEntry>>
+
+    /**
+     * Get the accounts that boosted a status.
+     */
+    fun getRebloggedBy(statusId: String): Flow<PagingData<FollowListEntry>>
+
+    /**
      * Update account profile.
      *
      * @param displayName New display name
