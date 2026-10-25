@@ -63,6 +63,12 @@ fun Status.toInteraction() = StatusInteraction(
 )
 
 /**
+ * Whether this status, or the status it boosts, is in [deletedIds].
+ */
+fun Status.isDeletedIn(deletedIds: Set<String>): Boolean =
+    id in deletedIds || (reblog != null && reblog.id in deletedIds)
+
+/**
  * Apply known interaction overrides to this status and its boosted status.
  */
 fun Status.withInteractions(overrides: Map<String, StatusInteraction>): Status {

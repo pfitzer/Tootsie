@@ -55,6 +55,11 @@ fun StatusDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showShareMenu by remember { mutableStateOf<Status?>(null) }
+
+    // The status was deleted from its menu
+    LaunchedEffect(uiState.isDeleted) {
+        if (uiState.isDeleted) onNavigateBack()
+    }
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Hint after replies from other instances were added to the thread

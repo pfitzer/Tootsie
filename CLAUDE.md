@@ -88,6 +88,7 @@ gh pr checks
 - Text size customization (small, medium, large, extra large)
 - Profile editing
 - Editing own posts (text, content warning, media and alt texts, poll), edit history of edited posts
+- Deleting own posts, delete & redraft (opens the post as a draft, media kept)
 - Domain blocking (block a remote user's server from the profile, manage blocked domains in settings)
 - Scheduled posts (schedule from the compose screen, reschedule, edit or delete them)
 

@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.repository
 
+import com.pfitzer.tootsie.domain.model.DeletedStatus
 import com.pfitzer.tootsie.data.remote.StatusEditForm
 import com.pfitzer.tootsie.domain.model.NewStatus
 import com.pfitzer.tootsie.domain.model.StatusEditVersion
@@ -94,12 +95,13 @@ class StatusRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteStatus(statusId: String): Result<Status> {
+    override suspend fun deleteStatus(statusId: String, deleteMedia: Boolean): Result<DeletedStatus> {
         return try {
-            val statusDto = mastodonApi.deleteStatus(statusId)
-            // Remove from local cache
+            val statusDto = mastodonApi.deleteStatus(statusId, deleteMedia)
+            // Remove from the timeline cache and from the lists loaded from the network
             statusDao.deleteStatusById(statusId)
-            Result.Success(statusDto.toDomain())
+            statusInteractionStore.markDeleted(statusId)
+            Result.Success(DeletedStatus(status = statusDto.toDomain(), text = statusDto.text))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to delete status")
         }

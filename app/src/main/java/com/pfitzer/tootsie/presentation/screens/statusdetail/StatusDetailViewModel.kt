@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.pfitzer.tootsie.domain.repository.StatusInteractionStore
+import com.pfitzer.tootsie.domain.model.isDeletedIn
 import com.pfitzer.tootsie.domain.model.withInteractions
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,11 +50,12 @@ class StatusDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(StatusDetailUiState())
     val uiState: StateFlow<StatusDetailUiState> =
-        combine(_uiState, statusInteractionStore.interactions) { state, interactions ->
+        combine(_uiState, statusInteractionStore.interactions, statusInteractionStore.deletedIds) { state, interactions, deletedIds ->
             state.copy(
                 status = state.status?.withInteractions(interactions),
-                ancestors = state.ancestors.map { it.withInteractions(interactions) },
-                descendants = state.descendants.map { it.withInteractions(interactions) }
+                ancestors = state.ancestors.filterNot { it.isDeletedIn(deletedIds) }.map { it.withInteractions(interactions) },
+                descendants = state.descendants.filterNot { it.isDeletedIn(deletedIds) }.map { it.withInteractions(interactions) },
+                isDeleted = statusId in deletedIds
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
 
@@ -304,7 +306,9 @@ data class StatusDetailUiState(
     /** The server is fetching replies from other instances */
     val isFetchingRemoteReplies: Boolean = false,
     /** Replies added by the last remote fetch, shown once as a hint */
-    val newRepliesCount: Int = 0
+    val newRepliesCount: Int = 0,
+    /** The status was deleted, so the screen closes */
+    val isDeleted: Boolean = false
 )
 
 /**
