@@ -111,8 +111,9 @@ class AccountManagementRepositoryImpl @Inject constructor(
         val isActive = accountToRemove.isActive
         if (isActive) statusInteractionStore.clear()
 
-        // Delete the account from database
-        accountDao.deleteAccount(accountToRemove)
+        // Delete the account with its cached data, then its preferences
+        accountDao.deleteAccountWithData(accountToRemove)
+        preferencesManager.deleteAccountData(accountId)
 
         // If we removed the active account, switch to another or logout
         if (isActive) {

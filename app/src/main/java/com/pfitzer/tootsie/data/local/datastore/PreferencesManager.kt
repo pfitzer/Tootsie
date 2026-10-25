@@ -520,6 +520,18 @@ class PreferencesManager @Inject constructor(
     }
 
     /**
+     * Delete everything stored for an account: push configuration and keys, the last shown
+     * notification and recent searches.
+     */
+    suspend fun deleteAccountData(accountId: String) {
+        deletePushConfig(accountId)
+        dataStore.edit { preferences ->
+            preferences.remove(lastNotificationIdKey(accountId))
+            preferences.remove(recentSearchesKey(accountId))
+        }
+    }
+
+    /**
      * Get active account ID as one-time read (suspend function).
      */
     suspend fun getActiveAccountId(): String? {
