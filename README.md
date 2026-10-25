@@ -163,9 +163,13 @@ When contributing to Tootsie, please adhere to these architectural guardrails (d
 
 Planned features and known issues are tracked in [GitHub Issues](https://github.com/pfitzer/Tootsie/issues), for example:
 
-- Accessibility: manual TalkBack pass and keyboard focus order ([#2](https://github.com/pfitzer/Tootsie/issues/2))
-- Optional own DeepL API key for translations ([#257](https://github.com/pfitzer/Tootsie/issues/257))
-- Project website with GitHub Pages ([#266](https://github.com/pfitzer/Tootsie/issues/266))
+- Accessibility: manual TalkBack pass and keyboard focus order ([#1](https://github.com/pfitzer/Tootsie/issues/1))
+- Optional own DeepL API key for translations ([#3](https://github.com/pfitzer/Tootsie/issues/3))
+- Project website with GitHub Pages ([#5](https://github.com/pfitzer/Tootsie/issues/5))
+
+## 🔒 Security
+
+Please report vulnerabilities privately, see [SECURITY.md](SECURITY.md).
 
 ## 📄 License
 
