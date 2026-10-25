@@ -100,6 +100,14 @@ configurations.configureEach {
     }
 }
 
+// The lint tool classpath has the same vulnerable transitive dependencies as the build
+// classpath (see the root build file); raise them there as well
+configurations.matching { it.name == "androidLintTool" }.configureEach {
+    listOf(libs.build.commons.lang3, libs.build.httpclient, libs.build.jdom2, libs.build.jose4j).forEach { floor ->
+        dependencyConstraints.add(project.dependencies.constraints.create(floor.get()))
+    }
+}
+
 dependencies {
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
