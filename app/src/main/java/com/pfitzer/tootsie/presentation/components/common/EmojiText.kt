@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.em
 import coil.compose.AsyncImage
 import com.pfitzer.tootsie.domain.model.CustomEmoji
+import com.pfitzer.tootsie.presentation.util.withoutLineSeparators
 
 private val SHORTCODE = Regex(":([a-zA-Z0-9_]+):")
 
@@ -37,12 +38,14 @@ fun EmojiText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip
 ) {
+    // Line separators would be drawn as empty boxes
+    val shownText = text.withoutLineSeparators()
     if (emojis.isEmpty()) {
-        Text(text = text, modifier = modifier, style = style, color = color, fontWeight = fontWeight, maxLines = maxLines, overflow = overflow)
+        Text(text = shownText, modifier = modifier, style = style, color = color, fontWeight = fontWeight, maxLines = maxLines, overflow = overflow)
         return
     }
 
-    val (annotated, inlineContent) = remember(text, emojis) { buildEmojiText(text, emojis) }
+    val (annotated, inlineContent) = remember(shownText, emojis) { buildEmojiText(shownText, emojis) }
     Text(
         text = annotated,
         inlineContent = inlineContent,

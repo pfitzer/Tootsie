@@ -7,6 +7,16 @@ import com.pfitzer.tootsie.domain.model.Mention
 import com.pfitzer.tootsie.domain.model.Tag
 
 /**
+ * Replaces the Unicode line and paragraph separators (U+2028, U+2029) with spaces.
+ * Some posts and bios contain them; browsers show nothing, but Android's fonts have no
+ * glyph and draw an empty box. Line breaks in Mastodon HTML come from <br> and <p>.
+ * The length stays the same, so text positions are not shifted.
+ */
+fun String.withoutLineSeparators(): String =
+    if (indexOf('\u2028') < 0 && indexOf('\u2029') < 0) this
+    else replace('\u2028', ' ').replace('\u2029', ' ')
+
+/**
  * Converts HTML content to plain text.
  * Mastodon posts contain HTML formatting that needs to be rendered.
  *
@@ -15,7 +25,7 @@ import com.pfitzer.tootsie.domain.model.Tag
  */
 fun htmlToPlainText(html: String): String {
     if (html.isBlank()) return ""
-    return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString().trim()
+    return Html.fromHtml(html.withoutLineSeparators(), Html.FROM_HTML_MODE_COMPACT).toString().trim()
 }
 
 /**
@@ -52,7 +62,7 @@ data class ParsedHtmlContent(
 fun htmlToAnnotatedString(html: String): androidx.compose.ui.text.AnnotatedString {
     if (html.isBlank()) return androidx.compose.ui.text.AnnotatedString("")
 
-    val spanned = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+    val spanned = Html.fromHtml(html.withoutLineSeparators(), Html.FROM_HTML_MODE_COMPACT)
     val builder = androidx.compose.ui.text.AnnotatedString.Builder()
     builder.append(spanned.toString())
 
@@ -176,7 +186,7 @@ fun parseHtmlContent(
     }
 
     // Convert HTML to Spanned to get URLSpan annotations
-    val spanned = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+    val spanned = Html.fromHtml(html.withoutLineSeparators(), Html.FROM_HTML_MODE_COMPACT)
     val plainText = spanned.toString().trim()
 
     // Extract all URLSpan elements
