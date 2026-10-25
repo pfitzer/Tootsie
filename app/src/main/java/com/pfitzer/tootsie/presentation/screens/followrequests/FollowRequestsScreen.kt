@@ -188,7 +188,7 @@ private fun FollowRequestCard(
             // Avatar
             AvatarImage(
                 url = account.avatar,
-                contentDescription = "${account.displayName} avatar",
+                contentDescription = stringResource(R.string.cd_profile_of, account.displayName.ifBlank { account.username }),
                 modifier = Modifier.size(48.dp)
             )
 

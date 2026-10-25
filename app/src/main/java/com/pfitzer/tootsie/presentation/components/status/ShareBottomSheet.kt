@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,7 @@ fun ShareBottomSheet(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.share_status)) },
                 leadingContent = { Icon(Icons.Default.Share, contentDescription = null) },
-                modifier = Modifier.clickable {
+                modifier = Modifier.clickable(role = Role.Button) {
                     ShareUtils.shareStatus(context, status.url, status.content)
                     onDismissRequest()
                 }
@@ -46,7 +47,7 @@ fun ShareBottomSheet(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.share_copy_link)) },
                 leadingContent = { Icon(Icons.Default.Link, contentDescription = null) },
-                modifier = Modifier.clickable {
+                modifier = Modifier.clickable(role = Role.Button) {
                     ShareUtils.copyLinkToClipboard(context, status.url)
                     onDismissRequest()
                 }
@@ -54,7 +55,7 @@ fun ShareBottomSheet(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.share_copy_text)) },
                 leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
-                modifier = Modifier.clickable {
+                modifier = Modifier.clickable(role = Role.Button) {
                     ShareUtils.copyTextToClipboard(context, status.content)
                     onDismissRequest()
                 }

@@ -1,5 +1,9 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import com.pfitzer.tootsie.presentation.TranslationState
 import com.pfitzer.tootsie.domain.model.withTranslation
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
@@ -104,11 +108,29 @@ fun StatusCard(
             modifier = modifier
         )
     } else {
+        // TalkBack reads the post as one item; its main actions are available on it directly,
+        // so users don't have to move through every button of every post
+        val openPostLabel = stringResource(R.string.cd_open_post)
+        val replyLabel = stringResource(R.string.cd_reply)
+        val boostLabel = stringResource(if (displayStatus.reblogged) R.string.cd_unboost else R.string.cd_boost)
+        val favouriteLabel = stringResource(if (displayStatus.favourited) R.string.cd_unfavorite else R.string.cd_favorite)
+        val bookmarkLabel = stringResource(if (displayStatus.bookmarked) R.string.cd_remove_bookmark else R.string.cd_bookmark)
+        val profileLabel = stringResource(R.string.cd_profile_of, displayStatus.account.displayName.ifBlank { displayStatus.account.username })
+
         // Show normal status content
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .clickable { onStatusClick(displayStatus.id) },
+                .clickable(onClickLabel = openPostLabel) { onStatusClick(displayStatus.id) }
+                .semantics {
+                    customActions = listOf(
+                        CustomAccessibilityAction(replyLabel) { onReplyClick(displayStatus); true },
+                        CustomAccessibilityAction(boostLabel) { onBoostClick(displayStatus); true },
+                        CustomAccessibilityAction(favouriteLabel) { onFavoriteClick(displayStatus); true },
+                        CustomAccessibilityAction(bookmarkLabel) { onBookmarkClick(displayStatus); true },
+                        CustomAccessibilityAction(profileLabel) { onAvatarClick(displayStatus.account.id); true }
+                    )
+                },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             )
@@ -267,10 +289,10 @@ private fun StatusHeader(
     ) {
         AvatarImage(
             url = account.avatar,
-            contentDescription = "${account.displayName}'s avatar",
+            contentDescription = stringResource(R.string.cd_profile_of, account.displayName.ifBlank { account.username }),
             modifier = Modifier
                 .size(48.dp)
-                .clickable { onAvatarClick() }
+                .clickable(role = Role.Button) { onAvatarClick() }
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -431,7 +453,7 @@ private fun MediaAttachmentGrid(
                 modifier = Modifier
                     .matchParentSize()
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                    .clickable { revealed = true },
+                    .clickable(role = Role.Button) { revealed = true },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -461,12 +483,12 @@ private fun SingleMediaAttachment(
             .then(
                 when (attachment.type) {
                     MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                        Modifier.clickable {
+                        Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                             onImageClick(attachment.url, attachment.description)
                         }
                     }
                     MediaType.VIDEO -> {
-                        Modifier.clickable {
+                        Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                             onVideoClick(attachment.url, attachment.description)
                         }
                     }
@@ -478,7 +500,7 @@ private fun SingleMediaAttachment(
             MediaType.IMAGE, MediaType.GIFV -> {
                 AsyncImage(
                     model = attachment.previewUrl ?: attachment.url,
-                    contentDescription = attachment.description ?: stringResource(R.string.cd_image),
+                    contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -525,7 +547,7 @@ private fun SingleMediaAttachment(
                 // media proxy, so try to load it and fall back to a placeholder
                 SubcomposeAsyncImage(
                     model = attachment.previewUrl ?: attachment.url,
-                    contentDescription = attachment.description ?: stringResource(R.string.cd_image),
+                    contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                     error = {
@@ -571,12 +593,12 @@ private fun TwoMediaGrid(
                     .then(
                         when (attachment.type) {
                             MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                                Modifier.clickable {
+                                Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                                     onImageClick(attachment.url, attachment.description)
                                 }
                             }
                             MediaType.VIDEO -> {
-                                Modifier.clickable {
+                                Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                                     onVideoClick(attachment.url, attachment.description)
                                 }
                             }
@@ -586,7 +608,7 @@ private fun TwoMediaGrid(
             ) {
                 AsyncImage(
                     model = attachment.previewUrl ?: attachment.url,
-                    contentDescription = attachment.description,
+                    contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -628,12 +650,12 @@ private fun ThreeMediaGrid(
                 .then(
                     when (attachments[0].type) {
                         MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                            Modifier.clickable {
+                            Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                                 onImageClick(attachments[0].url, attachments[0].description)
                             }
                         }
                         MediaType.VIDEO -> {
-                            Modifier.clickable {
+                            Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                                 onVideoClick(attachments[0].url, attachments[0].description)
                             }
                         }
@@ -643,7 +665,7 @@ private fun ThreeMediaGrid(
         ) {
             AsyncImage(
                 model = attachments[0].previewUrl ?: attachments[0].url,
-                contentDescription = attachments[0].description,
+                contentDescription = attachments[0].description ?: stringResource(if (attachments[0].type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -660,12 +682,12 @@ private fun ThreeMediaGrid(
                         .then(
                             when (attachment.type) {
                                 MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                                         onImageClick(attachment.url, attachment.description)
                                     }
                                 }
                                 MediaType.VIDEO -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                                         onVideoClick(attachment.url, attachment.description)
                                     }
                                 }
@@ -675,7 +697,7 @@ private fun ThreeMediaGrid(
                 ) {
                     AsyncImage(
                         model = attachment.previewUrl ?: attachment.url,
-                        contentDescription = attachment.description,
+                        contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -713,12 +735,12 @@ private fun FourPlusMediaGrid(
                         .then(
                             when (attachment.type) {
                                 MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                                         onImageClick(attachment.url, attachment.description)
                                     }
                                 }
                                 MediaType.VIDEO -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                                         onVideoClick(attachment.url, attachment.description)
                                     }
                                 }
@@ -728,7 +750,7 @@ private fun FourPlusMediaGrid(
                 ) {
                     AsyncImage(
                         model = attachment.previewUrl ?: attachment.url,
-                        contentDescription = attachment.description,
+                        contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -747,12 +769,12 @@ private fun FourPlusMediaGrid(
                         .then(
                             when (attachment.type) {
                                 MediaType.IMAGE, MediaType.GIFV, MediaType.UNKNOWN -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_open_image)) {
                                         onImageClick(attachment.url, attachment.description)
                                     }
                                 }
                                 MediaType.VIDEO -> {
-                                    Modifier.clickable {
+                                    Modifier.clickable(onClickLabel = stringResource(R.string.cd_play_video)) {
                                         onVideoClick(attachment.url, attachment.description)
                                     }
                                 }
@@ -762,7 +784,7 @@ private fun FourPlusMediaGrid(
                 ) {
                     AsyncImage(
                         model = attachment.previewUrl ?: attachment.url,
-                        contentDescription = attachment.description,
+                        contentDescription = attachment.description ?: stringResource(if (attachment.type == MediaType.VIDEO) R.string.cd_video_thumbnail else R.string.cd_image),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )

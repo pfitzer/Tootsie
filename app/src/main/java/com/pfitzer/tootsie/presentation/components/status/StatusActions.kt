@@ -1,5 +1,8 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.res.pluralStringResource
+import androidx.annotation.PluralsRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
@@ -103,7 +106,8 @@ fun StatusActions(
             count = status.repliesCount,
             isActive = false,
             onClick = onReplyClick,
-            contentDescription = stringResource(R.string.cd_reply)
+            contentDescription = stringResource(R.string.cd_reply),
+            countDescription = countDescription(R.plurals.cd_replies_count, status.repliesCount)
         )
 
         // Boost
@@ -113,6 +117,7 @@ fun StatusActions(
             isActive = status.reblogged,
             onClick = { if (offerQuote) showBoostOrQuote = true else onBoostClick() },
             contentDescription = if (status.reblogged) stringResource(R.string.cd_unboost) else stringResource(R.string.cd_boost),
+            countDescription = countDescription(R.plurals.cd_boosts_count, status.reblogsCount),
             activeColor = MaterialTheme.colorScheme.tertiary
         )
 
@@ -123,6 +128,7 @@ fun StatusActions(
             isActive = status.favourited,
             onClick = onFavoriteClick,
             contentDescription = if (status.favourited) stringResource(R.string.cd_unfavorite) else stringResource(R.string.cd_favorite),
+            countDescription = countDescription(R.plurals.cd_favourites_count, status.favouritesCount),
             activeColor = MaterialTheme.colorScheme.primary
         )
 
@@ -245,6 +251,7 @@ private fun ActionButton(
     isActive: Boolean,
     onClick: () -> Unit,
     contentDescription: String,
+    countDescription: String? = null,
     activeColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier
 ) {
@@ -262,7 +269,8 @@ private fun ActionButton(
         IconButton(onClick = onClick) {
             Icon(
                 imageVector = icon,
-                contentDescription = contentDescription,
+                // The count is read with the button ("Favorite, 12 favorites"), not on its own
+                contentDescription = listOfNotNull(contentDescription, countDescription).joinToString(", "),
                 tint = color,
                 modifier = Modifier.size(20.dp)
             )
@@ -272,11 +280,19 @@ private fun ActionButton(
             Text(
                 text = formatCount(count),
                 style = MaterialTheme.typography.bodySmall,
-                color = color
+                color = color,
+                modifier = Modifier.clearAndSetSemantics { }
             )
         }
     }
 }
+
+/**
+ * Spoken count of an action button ("12 favorites"), null for none.
+ */
+@Composable
+private fun countDescription(@PluralsRes id: Int, count: Int): String? =
+    if (count > 0) pluralStringResource(id, count, count) else null
 
 /**
  * Formats interaction counts for display.
