@@ -125,6 +125,19 @@ interface MastodonApiService {
     ): retrofit2.Response<List<AccountDto>>
 
     /**
+     * Set the private note about an account, only visible to the user.
+     *
+     * @param id Account ID
+     * @param comment Note text; empty removes it
+     */
+    @FormUrlEncoded
+    @POST("api/v1/accounts/{id}/note")
+    suspend fun setAccountNote(
+        @Path("id") id: String,
+        @Field("comment") comment: String
+    ): com.pfitzer.tootsie.data.remote.dto.RelationshipDto
+
+    /**
      * Get the accounts that favourited a status.
      * Returns Response to access Link header for pagination.
      *

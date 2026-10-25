@@ -673,6 +673,15 @@
     <!-- Sensitive media -->
     <string name="compose_mark_sensitive">Medien als sensibel markieren</string>
 
+    <!-- Profile: notify and note -->
+    <string name="cd_notify_on">Über neue Beiträge benachrichtigen</string>
+    <string name="cd_notify_off">Nicht mehr über neue Beiträge benachrichtigen</string>
+    <string name="profile_note_label">Notiz (nur für dich sichtbar)</string>
+    <string name="profile_add_note">Notiz hinzufügen</string>
+    <string name="profile_note_placeholder">Schreib etwas über dieses Konto</string>
+    <string name="error_toggle_notify">Benachrichtigungen für dieses Konto konnten nicht geändert werden</string>
+    <string name="error_save_note">Die Notiz konnte nicht gespeichert werden</string>
+
     <!-- Favourited / boosted by -->
     <string name="favourited_by_title">Favorisiert von</string>
     <string name="reblogged_by_title">Geboostet von</string>
