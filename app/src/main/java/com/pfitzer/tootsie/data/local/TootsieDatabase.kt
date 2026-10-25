@@ -24,7 +24,7 @@ import com.pfitzer.tootsie.data.local.entities.StatusEntity
         DraftEntity::class,
         FilterEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class TootsieDatabase : RoomDatabase() {
@@ -207,9 +207,20 @@ abstract class TootsieDatabase : RoomDatabase() {
         }
 
         /**
+         * Migration from database version 6 to 7.
+         * Drafts keep their poll and language.
+         */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE drafts ADD COLUMN pollJson TEXT")
+                db.execSQL("ALTER TABLE drafts ADD COLUMN language TEXT")
+            }
+        }
+
+        /**
          * All manual migrations, in order. Schema version 1 was never released and is
          * handled by a destructive fallback instead (see DatabaseModule).
          */
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
     }
 }

@@ -173,6 +173,28 @@ class StatusRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getMedia(id: String): Result<MediaAttachment?> {
+        return try {
+            val response = mastodonApi.getMedia(id)
+            when {
+                response.isSuccessful -> Result.Success(response.body()?.toDomain())
+                // Cleaned up by the server, or attached to a status meanwhile
+                response.code() == 404 -> Result.Success(null)
+                else -> Result.Error("HTTP ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to load media")
+        }
+    }
+
+    override suspend fun updateMediaDescription(id: String, description: String): Result<MediaAttachment> {
+        return try {
+            Result.Success(mastodonApi.updateMedia(id, description).toDomain())
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to update media")
+        }
+    }
+
     override suspend fun uploadMedia(
         file: File,
         description: String?,

@@ -630,6 +630,30 @@ interface MastodonApiService {
         @Part("focus") focus: RequestBody? = null
     ): MediaAttachmentDto
 
+    /**
+     * Get an uploaded media attachment that is not attached to a status yet.
+     * Returns Response: 404 once the media is gone or attached.
+     *
+     * @param id Media attachment ID
+     */
+    @GET("api/v1/media/{id}")
+    suspend fun getMedia(
+        @Path("id") id: String
+    ): retrofit2.Response<MediaAttachmentDto>
+
+    /**
+     * Update an uploaded media attachment that is not attached to a status yet.
+     *
+     * @param id Media attachment ID
+     * @param description Alt text
+     */
+    @FormUrlEncoded
+    @PUT("api/v1/media/{id}")
+    suspend fun updateMedia(
+        @Path("id") id: String,
+        @Field("description") description: String
+    ): MediaAttachmentDto
+
     // ========== Notification Endpoints ==========
 
     /**

@@ -4,6 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.repository.DraftRepository
 import com.pfitzer.tootsie.domain.repository.ScheduledStatusRepository
+import com.pfitzer.tootsie.domain.repository.StatusRepository
+import com.pfitzer.tootsie.data.local.entities.DraftEntity
+import com.pfitzer.tootsie.domain.model.MediaAttachment
+import com.pfitzer.tootsie.domain.model.MediaType
 import com.pfitzer.tootsie.domain.model.ScheduledStatus
 import com.pfitzer.tootsie.R
 import com.pfitzer.tootsie.presentation.util.UiText
@@ -44,6 +48,7 @@ class ComposeViewModelTest {
 
     private val draftRepository = mockk<DraftRepository>()
     private val scheduledStatusRepository = mockk<ScheduledStatusRepository>()
+    private val statusRepository = mockk<StatusRepository>()
     private val getCustomEmojisUseCase = mockk<GetCustomEmojisUseCase>()
     private val getInstanceLimitsUseCase = mockk<GetInstanceLimitsUseCase>()
     private val observeActiveAccountUseCase = mockk<ObserveActiveAccountUseCase>()
@@ -71,7 +76,7 @@ class ComposeViewModelTest {
     private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = ComposeViewModel(
         postStatusUseCase = mockk(),
         uploadMediaUseCase = mockk(),
-        statusRepository = mockk(),
+        statusRepository = statusRepository,
         draftRepository = draftRepository,
         scheduledStatusRepository = scheduledStatusRepository,
         getCustomEmojisUseCase = getCustomEmojisUseCase,
@@ -232,6 +237,58 @@ class ComposeViewModelTest {
         coVerify(exactly = 0) { scheduledStatusRepository.deleteScheduledStatus(any()) }
         assertFalse(viewModel.uiState.value.isPosted)
     }
+
+    @Test
+    fun `a resumed draft gets its media, poll and language back`() = runTest {
+        coEvery { draftRepository.getDraft(7L) } returns Result.Success(
+            DraftEntity(
+                id = 7L,
+                content = "With pictures",
+                mediaIds = "[\"m1\",\"gone\"]",
+                createdAt = 0L,
+                updatedAt = 0L,
+                pollJson = "{\"options\":[\"A\",\"B\"],\"expiresIn\":3600}",
+                language = "fr"
+            )
+        )
+        coEvery { statusRepository.getMedia("m1") } returns Result.Success(media("m1", "A cat"))
+        coEvery { statusRepository.getMedia("gone") } returns Result.Success(null)
+
+        val viewModel = viewModel(SavedStateHandle(mapOf("draftId" to "7")))
+
+        val state = viewModel.uiState.value
+        assertEquals("With pictures", state.content)
+        assertEquals(listOf("m1"), state.mediaAttachments.map { it.id })
+        assertEquals("A cat", state.mediaAttachments.single().description)
+        assertEquals(listOf("A", "B"), state.pollConfig?.options)
+        assertEquals("fr", state.language)
+        assertEquals(UiText.of(R.string.error_draft_media_missing), state.errorMessage)
+        assertFalse(state.isUploadingMedia)
+    }
+
+    @Test
+    fun `alt text is saved on the server`() = runTest {
+        coEvery { draftRepository.getDraft(7L) } returns Result.Success(
+            DraftEntity(id = 7L, content = "", mediaIds = "[\"m1\"]", createdAt = 0L, updatedAt = 0L)
+        )
+        coEvery { statusRepository.getMedia("m1") } returns Result.Success(media("m1", null))
+        coEvery { statusRepository.updateMediaDescription("m1", "A dog") } returns Result.Success(media("m1", "A dog"))
+        val viewModel = viewModel(SavedStateHandle(mapOf("draftId" to "7")))
+
+        viewModel.onAction(ComposeAction.UpdateMediaDescription("m1", "A dog"))
+
+        coVerify { statusRepository.updateMediaDescription("m1", "A dog") }
+        assertEquals("A dog", viewModel.uiState.value.mediaAttachments.single().description)
+    }
+
+    private fun media(id: String, description: String?) = MediaAttachment(
+        id = id,
+        type = MediaType.IMAGE,
+        url = "https://example.social/$id.png",
+        previewUrl = null,
+        description = description,
+        blurhash = null
+    )
 
     private fun scheduled(id: String, at: Instant, text: String = "") = ScheduledStatus(
         id = id,

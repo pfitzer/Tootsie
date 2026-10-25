@@ -129,6 +129,29 @@ class TootsieDatabaseMigrationTest {
     }
 
     @Test
+    fun migrate6To7_keepsDraftsAndAddsPollAndLanguage() {
+        helper.createDatabase(TEST_DB, 6).use { db ->
+            db.execSQL(
+                """
+                INSERT INTO drafts (id, accountId, content, mediaIds, visibility, sensitive, spoilerText,
+                    inReplyToId, createdAt, updatedAt)
+                VALUES (1, 'acc-1', 'draft', '["m1"]', 'public', 0, NULL, NULL, 0, 0)
+                """.trimIndent()
+            )
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 7, true, TootsieDatabase.MIGRATION_6_7).use { db ->
+            db.query("SELECT content, mediaIds, pollJson, language FROM drafts").use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals("draft", cursor.getString(0))
+                assertEquals("[\"m1\"]", cursor.getString(1))
+                assertTrue(cursor.isNull(2))
+                assertTrue(cursor.isNull(3))
+            }
+        }
+    }
+
+    @Test
     fun migrateAll_opensWithCurrentSchema() {
         helper.createDatabase(TEST_DB, 2).use { db ->
             insertAccount(db, "acc-active", isActive = true)

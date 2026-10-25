@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pfitzer.tootsie.data.local.entities.DraftEntity
+import com.pfitzer.tootsie.data.local.entities.DraftPoll
 import com.pfitzer.tootsie.domain.model.InstanceLimits
 import com.pfitzer.tootsie.domain.model.MediaAttachment
 import com.pfitzer.tootsie.domain.repository.DraftRepository
@@ -411,7 +412,8 @@ class ComposeViewModel @Inject constructor(
     }
 
     /**
-     * Update alt text description for a media attachment.
+     * Update alt text description for a media attachment. It is stored on the server
+     * right away, so it is part of the post and of drafts.
      */
     private fun updateMediaDescription(attachmentId: String, description: String) {
         _uiState.update {
@@ -424,6 +426,12 @@ class ComposeViewModel @Inject constructor(
                     }
                 }
             )
+        }
+        viewModelScope.launch {
+            val result = statusRepository.updateMediaDescription(attachmentId, description)
+            if (result is Result.Error) {
+                _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_update_alt_text)) }
+            }
         }
     }
 
@@ -593,7 +601,9 @@ class ComposeViewModel @Inject constructor(
             spoilerText = state.contentWarning.takeIf { it.isNotBlank() },
             inReplyToId = state.replyToId,
             createdAt = state.currentDraftId?.let { state.lastDraftSavedAt } ?: System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis()
+            updatedAt = System.currentTimeMillis(),
+            pollJson = state.pollConfig?.let { Json.encodeToString(DraftPoll.from(it)) },
+            language = state.language
         )
 
         when (val result = draftRepository.saveDraft(draft)) {
@@ -632,8 +642,9 @@ class ComposeViewModel @Inject constructor(
                         }
                     } ?: emptyList()
 
-                    // TODO: Load media attachments from IDs
-                    // For now, we'll just load the text content
+                    val poll = draft.pollJson?.let {
+                        runCatching { Json.decodeFromString<DraftPoll>(it).toPollConfig() }.getOrNull()
+                    }
 
                     _uiState.update {
                         it.copy(
@@ -642,10 +653,13 @@ class ComposeViewModel @Inject constructor(
                                 ?: StatusVisibility.PUBLIC,
                             contentWarning = draft.spoilerText ?: "",
                             showContentWarning = draft.spoilerText != null,
+                            pollConfig = poll,
+                            language = draft.language ?: it.language,
                             currentDraftId = draft.id,
                             lastDraftSavedAt = draft.updatedAt
                         )
                     }
+                    loadDraftMedia(mediaIds)
                 }
                 is Result.Error -> {
                     _uiState.update { it.copy(errorMessage = UiText.of(R.string.error_load_draft)) }
@@ -653,6 +667,31 @@ class ComposeViewModel @Inject constructor(
                 is Result.Loading -> Unit
             }
         }
+    }
+
+    /**
+     * Load the media attachments of a draft from the server. Unattached media is cleaned
+     * up by the server after a while; missing attachments are dropped with a hint.
+     */
+    private suspend fun loadDraftMedia(mediaIds: List<String>) {
+        if (mediaIds.isEmpty()) return
+        _uiState.update { it.copy(isUploadingMedia = true) }
+
+        val results = mediaIds.map { statusRepository.getMedia(it) }
+        val attachments = results.mapNotNull { (it as? Result.Success)?.data }
+        _uiState.update {
+            it.copy(
+                isUploadingMedia = false,
+                mediaAttachments = attachments,
+                errorMessage = if (attachments.size < mediaIds.size) {
+                    UiText.of(R.string.error_draft_media_missing)
+                } else {
+                    it.errorMessage
+                }
+            )
+        }
+        // The draft now refers only to the media that still exists
+        if (attachments.size < mediaIds.size) scheduleAutoSave()
     }
 
     /**
