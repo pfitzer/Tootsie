@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.local.datastore
 
+import com.pfitzer.tootsie.domain.util.MastodonIds
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -550,11 +551,15 @@ class PreferencesManager @Inject constructor(
     }
 
     /**
-     * Save the ID of the last notification shown to the user.
+     * Save the ID of the last notification shown to the user (by polling or push).
+     * Kept if it is older than the saved one, so polling and push can't move it back.
      */
     suspend fun saveLastNotificationId(accountId: String, notificationId: String) {
         dataStore.edit { preferences ->
-            preferences[lastNotificationIdKey(accountId)] = notificationId
+            val current = preferences[lastNotificationIdKey(accountId)]
+            if (current == null || MastodonIds.isNewer(notificationId, current)) {
+                preferences[lastNotificationIdKey(accountId)] = notificationId
+            }
         }
     }
 

@@ -277,7 +277,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 2. UnifiedPush calls `handleRegistrationFailed()`
 3. Update status=POLLING, save to DataStore
 4. Schedule WorkManager periodic worker (15-minute interval)
-5. Worker fetches recent notifications from Mastodon API
+5. Worker fetches notifications newer than the last shown one (`last_notification_id_{accountId}`, also updated by push messages; it never moves back), the first poll only stores where to start
 6. Display notifications for each new item
 
 **Disable Push:**
@@ -304,8 +304,7 @@ Tootsie implements **100% FOSS push notifications** using UnifiedPush - NO Googl
 ### Known Limitations
 1. **Encryption**: Only standard RFC 8291 `aes128gcm` is supported (subscriptions are created with `standard: true`, Mastodon >= 4.4). UnifiedPush forwards no HTTP headers, so the legacy `aesgcm` scheme can not be decrypted; legacy subscriptions are re-created automatically on the first undecryptable message
 2. **Distributor Detection**: Uses `getSavedDistributor()` (requires user to select distributor)
-3. **Polling Deduplication**: No tracking of shown notifications (may show duplicates)
-4. **Notification Persistence**: Notifications cleared on tap (no inbox storage)
+3. **Notification Persistence**: Notifications cleared on tap (no inbox storage)
 
 ---
 

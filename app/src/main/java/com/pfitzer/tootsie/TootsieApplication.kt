@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie
 
+import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import android.app.Application
 import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
@@ -33,6 +34,7 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
     @Inject lateinit var pushRepository: PushRepository
     @Inject lateinit var pushDecryptor: PushDecryptor
     @Inject lateinit var notificationHelper: NotificationHelper
+    @Inject lateinit var preferencesManager: PreferencesManager
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -106,6 +108,8 @@ class TootsieApplication : Application(), UnifiedPushHandler, Configuration.Prov
 
                 if (payload != null) {
                     notificationHelper.showPushNotification(payload, accountId)
+                    // If polling takes over later, it starts after this notification
+                    payload.notification_id?.let { preferencesManager.saveLastNotificationId(accountId, it) }
                 } else if (!pushRepository.isStandardSubscription(accountId)) {
                     // Subscriptions created before standard encryption was requested use the
                     // legacy scheme, which can't be decrypted via UnifiedPush. Subscribe again
