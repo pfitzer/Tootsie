@@ -3,6 +3,7 @@ package com.pfitzer.tootsie.presentation.navigation
 import com.pfitzer.tootsie.presentation.components.status.StatusTranslations
 import com.pfitzer.tootsie.presentation.components.status.LocalStatusTranslations
 import com.pfitzer.tootsie.presentation.TranslationViewModel
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -148,6 +149,9 @@ fun TootsieNavHost(
                 )
             }
         },
+        // The screens' own Scaffolds and top bars handle the system bars; here only the
+        // bottom navigation's height is reserved (otherwise the status bar is added twice)
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier
     ) { paddingValues ->
         // Lets every status card offer "Quote" without passing a callback through each screen
