@@ -114,7 +114,7 @@ class HomeViewModel @Inject constructor(
             }
         }
         .cachedIn(viewModelScope)
-        .applyInteractions(statusInteractionStore)
+        .applyInteractions(statusInteractionStore, viewModelScope)
 
     /**
      * Handle user actions.
