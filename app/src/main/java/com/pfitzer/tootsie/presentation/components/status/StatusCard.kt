@@ -68,6 +68,9 @@ fun StatusCard(
     onVoteClick: (String, List<Int>) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
+    val activeAccountId = LocalActiveAccountId.current
+    val onEdit = LocalOnEditStatus.current
+    val onShowEditHistory = LocalOnShowEditHistory.current
     // If this is a boost/reblog, show the boosted status
     val displayStatus = status.reblog ?: status
     val isReblog = status.reblog != null
@@ -119,6 +122,8 @@ fun StatusCard(
                     account = displayStatus.account,
                     timestamp = displayStatus.createdAt,
                     isPinned = displayStatus.pinned,
+                    isEdited = displayStatus.editedAt != null,
+                    onEditedClick = onShowEditHistory?.let { { it(displayStatus) } },
                     onAvatarClick = { onAvatarClick(displayStatus.account.id) },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
@@ -188,7 +193,9 @@ fun StatusCard(
                     onBookmarkClick = { onBookmarkClick(displayStatus) },
                     onShareClick = { onShareClick(displayStatus) },
                     onPinClick = onPinClick?.let { { it(displayStatus) } },
-                    onReportClick = onReportClick?.let { { it(displayStatus) } }
+                    onReportClick = onReportClick?.let { { it(displayStatus) } },
+                    onEditClick = onEdit?.takeIf { displayStatus.account.id == activeAccountId }
+                        ?.let { { it(displayStatus) } }
                 )
             }
         }
@@ -232,6 +239,8 @@ private fun StatusHeader(
     account: com.pfitzer.tootsie.domain.model.Account,
     timestamp: String,
     isPinned: Boolean = false,
+    isEdited: Boolean = false,
+    onEditedClick: (() -> Unit)? = null,
     onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -279,11 +288,28 @@ private fun StatusHeader(
             Spacer(modifier = Modifier.width(4.dp))
         }
 
-        Text(
-            text = LocaleAwareDateFormatter.formatRelativeTime(LocalContext.current, timestamp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = LocaleAwareDateFormatter.formatRelativeTime(LocalContext.current, timestamp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (isEdited) {
+                Text(
+                    text = stringResource(R.string.status_edited),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = if (onEditedClick != null) {
+                        Modifier.clickable(
+                            onClickLabel = stringResource(R.string.edit_history_title),
+                            onClick = onEditedClick
+                        )
+                    } else {
+                        Modifier
+                    }
+                )
+            }
+        }
     }
 }
 

@@ -35,7 +35,10 @@ import com.pfitzer.tootsie.presentation.screens.editprofile.EditProfileScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.CompositionLocalProvider
 import com.pfitzer.tootsie.domain.model.Status
+import com.pfitzer.tootsie.presentation.components.status.LocalActiveAccountId
+import com.pfitzer.tootsie.presentation.components.status.LocalOnEditStatus
 import com.pfitzer.tootsie.presentation.components.status.LocalOnQuoteStatus
+import com.pfitzer.tootsie.presentation.components.status.LocalOnShowEditHistory
 
 /**
  * Main navigation host for the Tootsie app.
@@ -123,6 +126,13 @@ fun TootsieNavHost(
         CompositionLocalProvider(
             LocalOnQuoteStatus provides { status: Status ->
                 navController.navigate(TootsieDestinations.Compose.createRoute(quoteId = status.id))
+            },
+            LocalActiveAccountId provides activeAccount?.id,
+            LocalOnEditStatus provides { status: Status ->
+                navController.navigate(TootsieDestinations.Compose.createRoute(editId = status.id))
+            },
+            LocalOnShowEditHistory provides { status: Status ->
+                navController.navigate(TootsieDestinations.EditHistory.createRoute(status.id))
             }
         ) {
         NavHost(
@@ -257,6 +267,11 @@ fun TootsieNavHost(
                     defaultValue = null
                 },
                 navArgument(TootsieDestinations.Compose.ARG_SCHEDULED_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(TootsieDestinations.Compose.ARG_EDIT_ID) {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -459,6 +474,20 @@ fun TootsieNavHost(
                 },
                 onNavigateToReply = { statusId ->
                     navController.navigate(TootsieDestinations.Compose.createRoute(replyToId = statusId))
+                }
+            )
+        }
+
+        // Edit history of a status
+        composable(
+            route = TootsieDestinations.EditHistory.route,
+            arguments = listOf(
+                navArgument(TootsieDestinations.EditHistory.ARG_STATUS_ID) { type = NavType.StringType }
+            )
+        ) {
+            com.pfitzer.tootsie.presentation.screens.edithistory.EditHistoryScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

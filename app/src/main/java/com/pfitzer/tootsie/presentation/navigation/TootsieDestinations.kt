@@ -35,21 +35,24 @@ sealed class TootsieDestinations(val route: String) {
      * Optionally takes replyToId parameter for replying to a status.
      * Optionally takes draftId parameter for resuming a draft.
  * Optionally takes scheduledId parameter for editing a scheduled post.
+ * Optionally takes editId parameter for editing an own published post.
      */
     data object Compose : TootsieDestinations(
-        "compose?replyToId={replyToId}&draftId={draftId}&quoteId={quoteId}&scheduledId={scheduledId}"
+        "compose?replyToId={replyToId}&draftId={draftId}&quoteId={quoteId}&scheduledId={scheduledId}&editId={editId}"
     ) {
         fun createRoute(
             replyToId: String? = null,
             draftId: Long? = null,
             quoteId: String? = null,
-            scheduledId: String? = null
+            scheduledId: String? = null,
+            editId: String? = null
         ): String {
             val params = buildList {
                 if (replyToId != null) add("replyToId=$replyToId")
                 if (draftId != null) add("draftId=$draftId")
                 if (quoteId != null) add("quoteId=$quoteId")
                 if (scheduledId != null) add("scheduledId=$scheduledId")
+                if (editId != null) add("editId=$editId")
             }
             return if (params.isEmpty()) {
                 "compose"
@@ -61,6 +64,7 @@ sealed class TootsieDestinations(val route: String) {
         const val ARG_DRAFT_ID = "draftId"
         const val ARG_QUOTE_ID = "quoteId"
         const val ARG_SCHEDULED_ID = "scheduledId"
+        const val ARG_EDIT_ID = "editId"
     }
 
     /**
@@ -121,6 +125,14 @@ sealed class TootsieDestinations(val route: String) {
      * Scheduled Posts screen - view and manage scheduled posts.
      */
     data object ScheduledPosts : TootsieDestinations("scheduled_posts")
+
+    /**
+     * Edit history of a status.
+     */
+    data object EditHistory : TootsieDestinations("status/{statusId}/history") {
+        fun createRoute(statusId: String): String = "status/$statusId/history"
+        const val ARG_STATUS_ID = "statusId"
+    }
 
     /**
      * Settings screen - app settings and preferences.

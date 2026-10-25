@@ -220,6 +220,7 @@ fun ComposeScreen(
                 title = {
                     Text(stringResource(
                         when {
+                            uiState.isEditingStatus -> R.string.compose_title_edit
                             uiState.isEditingScheduled -> R.string.compose_title_edit_scheduled
                             uiState.isReply -> R.string.compose_title_reply
                             uiState.isQuote -> R.string.compose_title_quote
@@ -244,6 +245,7 @@ fun ComposeScreen(
                             stringResource(
                                 when {
                                     uiState.isPosting -> R.string.compose_button_posting
+                                    uiState.isEditingStatus -> R.string.save
                                     uiState.isScheduled -> R.string.compose_button_schedule
                                     else -> R.string.compose_button_post
                                 }
@@ -281,6 +283,7 @@ fun ComposeScreen(
                 canSwitchAccount = uiState.canSwitchAccount,
                 onSwitchAccount = { viewModel.onAction(ComposeAction.SwitchAccount(it)) },
                 visibility = uiState.visibility,
+                canChangeVisibility = uiState.canChangeVisibility,
                 onVisibilitySelected = { viewModel.onAction(ComposeAction.UpdateVisibility(it)) }
             )
 
@@ -544,6 +547,7 @@ private fun ComposeHeader(
     canSwitchAccount: Boolean,
     onSwitchAccount: (String) -> Unit,
     visibility: StatusVisibility,
+    canChangeVisibility: Boolean,
     onVisibilitySelected: (StatusVisibility) -> Unit
 ) {
     var showAccounts by remember { mutableStateOf(false) }
@@ -610,7 +614,7 @@ private fun ComposeHeader(
         }
 
         Spacer(modifier = Modifier.width(8.dp))
-        VisibilityChip(selected = visibility, onSelected = onVisibilitySelected)
+        VisibilityChip(selected = visibility, enabled = canChangeVisibility, onSelected = onVisibilitySelected)
     }
 }
 
@@ -620,6 +624,7 @@ private fun ComposeHeader(
 @Composable
 private fun VisibilityChip(
     selected: StatusVisibility,
+    enabled: Boolean,
     onSelected: (StatusVisibility) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -627,6 +632,7 @@ private fun VisibilityChip(
     Box {
         AssistChip(
             onClick = { expanded = true },
+            enabled = enabled,
             label = { Text(stringResource(selected.labelRes)) },
             leadingIcon = {
                 Icon(
@@ -698,7 +704,7 @@ private fun ComposeToolbar(
         IconButton(onClick = onEmoji) {
             Icon(Icons.Outlined.EmojiEmotions, contentDescription = stringResource(R.string.cd_custom_emoji))
         }
-        IconToggleButton(checked = uiState.isScheduled, onCheckedChange = { onSchedule() }) {
+        IconToggleButton(checked = uiState.isScheduled, onCheckedChange = { onSchedule() }, enabled = uiState.canSchedule) {
             Icon(Icons.Outlined.Schedule, contentDescription = stringResource(R.string.compose_schedule))
         }
         val languageName = uiState.language?.let { languageDisplayName(it) }.orEmpty()
