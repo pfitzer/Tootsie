@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.local.dao
 
+import androidx.room.Transaction
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -41,6 +42,27 @@ interface AccountDao {
      */
     @Delete
     suspend fun deleteAccount(account: AccountEntity)
+
+    @Query("DELETE FROM statuses WHERE ownerAccountId = :accountId")
+    suspend fun deleteStatusesOfAccount(accountId: String)
+
+    @Query("DELETE FROM drafts WHERE accountId = :accountId")
+    suspend fun deleteDraftsOfAccount(accountId: String)
+
+    @Query("DELETE FROM filters WHERE ownerAccountId = :accountId")
+    suspend fun deleteFiltersOfAccount(accountId: String)
+
+    /**
+     * Delete an account together with everything cached for it (timeline cache, drafts,
+     * filters), in one transaction so no data of a removed account is left behind.
+     */
+    @Transaction
+    suspend fun deleteAccountWithData(account: AccountEntity) {
+        deleteStatusesOfAccount(account.id)
+        deleteDraftsOfAccount(account.id)
+        deleteFiltersOfAccount(account.id)
+        deleteAccount(account)
+    }
 
     /**
      * Get account by ID.
