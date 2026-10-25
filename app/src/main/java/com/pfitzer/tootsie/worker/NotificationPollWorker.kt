@@ -7,10 +7,12 @@ import androidx.work.*
 import com.pfitzer.tootsie.data.local.dao.AccountDao
 import com.pfitzer.tootsie.data.local.datastore.PreferencesManager
 import com.pfitzer.tootsie.data.repository.AuthRepositoryImpl
+import com.pfitzer.tootsie.domain.model.Notification
 import com.pfitzer.tootsie.domain.model.NotificationType
 import com.pfitzer.tootsie.domain.model.PushAlerts
 import com.pfitzer.tootsie.domain.model.PushStatus
 import com.pfitzer.tootsie.domain.repository.NotificationRepository
+import com.pfitzer.tootsie.domain.util.MastodonIds
 import com.pfitzer.tootsie.push.NotificationHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -21,6 +23,16 @@ import com.pfitzer.tootsie.util.Result as DomainResult
 private const val TAG = "NotificationPollWorker"
 
 internal enum class PollOutcome { SUCCESS, RETRY, AUTH_FAILED }
+
+/**
+ * The fetched notifications to show: only those newer than [lastId] (servers may ignore
+ * `since_id`), and nothing on the first poll ([lastId] null), which only marks where
+ * polling starts instead of showing old notifications.
+ */
+internal fun notificationsToShow(lastId: String?, fetched: List<Notification>): List<Notification> {
+    if (lastId == null) return emptyList()
+    return fetched.filter { MastodonIds.isNewer(it.id, lastId) }
+}
 
 /**
  * 401/403 mean the account's token was rejected and retrying can't help. Everything else
@@ -86,20 +98,22 @@ class NotificationPollWorker @AssistedInject constructor(
     private suspend fun pollAccount(accountId: String): PollOutcome {
         val sinceId = preferencesManager.getLastNotificationId(accountId)
         return when (val result = notificationRepository.fetchRecentNotifications(
+            // The first poll only needs the newest notification to know where to start
+            limit = if (sinceId == null) 1 else FETCH_LIMIT,
             sinceId = sinceId,
             accountId = accountId
         )) {
             is DomainResult.Success -> {
                 val notifications = result.data
-                if (notifications.isNotEmpty()) {
-                    // Only the notification types enabled in the push settings
-                    val alerts = preferencesManager.getPushConfig(accountId).alerts
-                    notifications.filter { alerts.isEnabled(it.type) }.forEach { notification ->
-                        notificationHelper.showNotification(notification, accountId)
-                    }
-                    // The first notification in the list is the most recent from Mastodon API
-                    preferencesManager.saveLastNotificationId(accountId, notifications.first().id)
-                }
+                // Only the notification types enabled in the push settings
+                val alerts = preferencesManager.getPushConfig(accountId).alerts
+                notificationsToShow(sinceId, notifications)
+                    .filter { alerts.isEnabled(it.type) }
+                    .forEach { notificationHelper.showNotification(it, accountId) }
+                // Start the next poll after the newest one; the saved ID never moves back
+                notifications.map { it.id }
+                    .reduceOrNull { a, b -> if (MastodonIds.isNewer(a, b)) a else b }
+                    ?.let { preferencesManager.saveLastNotificationId(accountId, it) }
                 PollOutcome.SUCCESS
             }
             is DomainResult.Error -> {
@@ -121,6 +135,9 @@ class NotificationPollWorker @AssistedInject constructor(
     companion object {
         private const val WORK_NAME = "notification_poll"
         private const val POLL_INTERVAL_MINUTES = 15L
+
+        /** Notifications fetched per poll (Mastodon's default page size). */
+        private const val FETCH_LIMIT = 20
 
         /**
          * Schedule periodic notification polling.
