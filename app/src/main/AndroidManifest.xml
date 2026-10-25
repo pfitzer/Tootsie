@@ -7,6 +7,17 @@
     <!-- Required to show notifications on Android 13+ (requested in the push settings) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Translator apps, offered when the server can't translate a post -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TRANSLATE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+
     <application
         android:name=".TootsieApplication"
         android:allowBackup="true"

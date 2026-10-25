@@ -22,6 +22,7 @@ class InstanceRepositoryImpl @Inject constructor(
 ) : InstanceRepository {
 
     private val limitsByInstance = ConcurrentHashMap<String, InstanceLimits>()
+    private val translationByInstance = ConcurrentHashMap<String, Boolean>()
 
     override suspend fun getLimits(): InstanceLimits {
         val instance = instanceUrlProvider.getInstanceUrlSync()
@@ -44,6 +45,22 @@ class InstanceRepositoryImpl @Inject constructor(
             // Not cached, so the next compose screen tries again
             Log.w(TAG, "Failed to load instance limits, using defaults", e)
             InstanceLimits()
+        }
+    }
+
+    override suspend fun isTranslationAvailable(): Boolean {
+        val instance = instanceUrlProvider.getInstanceUrlSync()
+        instance?.let { translationByInstance[it] }?.let { return it }
+
+        return try {
+            val available = mastodonApi.getInstanceV2().configuration?.translation?.enabled == true
+            instance?.let { translationByInstance[it] = available }
+            available
+        } catch (e: Exception) {
+            // Servers without /api/v2/instance (Mastodon < 4.0, some forks) can't translate;
+            // not cached, so a network error is retried later
+            Log.w(TAG, "Failed to load translation support", e)
+            false
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.pfitzer.tootsie.data.repository
 
+import com.pfitzer.tootsie.domain.model.Translation
 import com.pfitzer.tootsie.domain.model.DeletedStatus
 import com.pfitzer.tootsie.data.remote.StatusEditForm
 import com.pfitzer.tootsie.domain.model.NewStatus
@@ -176,6 +177,26 @@ class StatusRepositoryImpl @Inject constructor(
             Result.Success(recordInteraction(statusDto.toDomain()))
         } catch (e: Exception) {
             Result.Error(e.message ?: "Failed to unpin status")
+        }
+    }
+
+    override suspend fun translateStatus(statusId: String, language: String): Result<Translation> {
+        return try {
+            val dto = mastodonApi.translateStatus(statusId, language)
+            Result.Success(
+                Translation(
+                    content = dto.content,
+                    spoilerText = dto.spoilerText,
+                    pollOptions = dto.poll?.options.orEmpty().map { it.title },
+                    mediaDescriptions = dto.mediaAttachments
+                        .mapNotNull { media -> media.description?.let { media.id to it } }
+                        .toMap(),
+                    detectedSourceLanguage = dto.detectedSourceLanguage,
+                    provider = dto.provider
+                )
+            )
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Failed to translate status", e)
         }
     }
 

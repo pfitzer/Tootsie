@@ -682,6 +682,13 @@
     <string name="error_toggle_notify">Benachrichtigungen für dieses Konto konnten nicht geändert werden</string>
     <string name="error_save_note">Die Notiz konnte nicht gespeichert werden</string>
 
+    <!-- Translation -->
+    <string name="translate">Übersetzen</string>
+    <string name="translate_show_original">Original anzeigen</string>
+    <string name="translate_retry">Übersetzung fehlgeschlagen, erneut versuchen</string>
+    <string name="translated_from">Übersetzt aus %1$s</string>
+    <string name="translated_from_with">Übersetzt aus %1$s mit %2$s</string>
+
     <!-- Favourited / boosted by -->
     <string name="favourited_by_title">Favorisiert von</string>
     <string name="reblogged_by_title">Geboostet von</string>

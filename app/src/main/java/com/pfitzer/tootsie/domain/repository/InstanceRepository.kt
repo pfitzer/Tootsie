@@ -12,4 +12,9 @@ interface InstanceRepository {
      * if the instance can't be reached.
      */
     suspend fun getLimits(): InstanceLimits
+
+    /**
+     * Whether the active account's instance can translate statuses (false if unknown).
+     */
+    suspend fun isTranslationAvailable(): Boolean
 }

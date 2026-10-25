@@ -1,5 +1,7 @@
 package com.pfitzer.tootsie.presentation.components.status
 
+import com.pfitzer.tootsie.presentation.TranslationState
+import com.pfitzer.tootsie.domain.model.withTranslation
 import com.pfitzer.tootsie.presentation.components.common.EmojiText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -75,6 +77,12 @@ fun StatusCard(
     // If this is a boost/reblog, show the boosted status
     val displayStatus = status.reblog ?: status
     val isOwn = activeAccountId != null && displayStatus.account.id == activeAccountId
+
+    // Translated text, content warning, poll and alt texts while the translation is shown
+    val translations = LocalStatusTranslations.current
+    val translation = (translations?.states?.get(displayStatus.id) as? TranslationState.Shown)?.translation
+    val shownStatus = translation?.let { displayStatus.withTranslation(it) } ?: displayStatus
+    val canTranslate = translations != null && displayStatus.isTranslatable(appLanguage())
     val isReblog = status.reblog != null
 
     // Track if user has clicked to show filtered content
@@ -133,7 +141,7 @@ fun StatusCard(
                 // Content warning
                 if (hasContentWarning) {
                     ContentWarning(
-                        text = displayStatus.spoilerText,
+                        text = shownStatus.spoilerText,
                         emojis = displayStatus.emojis,
                         expanded = showContentBehindWarning,
                         onToggle = { showContentBehindWarning = !showContentBehindWarning },
@@ -144,7 +152,7 @@ fun StatusCard(
                 // Status content
                 if (showBody) {
                     StatusContent(
-                        content = displayStatus.content,
+                        content = shownStatus.content,
                         mentions = displayStatus.mentions,
                         tags = displayStatus.tags,
                         emojis = displayStatus.emojis,
@@ -152,14 +160,21 @@ fun StatusCard(
                         onHashtagClick = onHashtagClick,
                         onLinkClick = onLinkClick,
                         onStatusClick = { onStatusClick(displayStatus.id) },
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = if (canTranslate) 0.dp else 12.dp)
                     )
+                    if (canTranslate && translations != null) {
+                        TranslateButton(
+                            status = displayStatus,
+                            translations = translations,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
                 }
 
                 // Media attachments
                 if (showBody && displayStatus.mediaAttachments.isNotEmpty()) {
                     MediaAttachmentGrid(
-                        attachments = displayStatus.mediaAttachments,
+                        attachments = shownStatus.mediaAttachments,
                         sensitive = displayStatus.sensitive,
                         onImageClick = onImageClick,
                         onVideoClick = onVideoClick,
@@ -168,7 +183,7 @@ fun StatusCard(
                 }
 
                 // Poll
-                displayStatus.poll?.takeIf { showBody }?.let { poll ->
+                shownStatus.poll?.takeIf { showBody }?.let { poll ->
                     PollComponent(
                         poll = poll,
                         emojis = displayStatus.emojis,
