@@ -129,6 +129,7 @@ class ComposeViewModel @Inject constructor(
                 it.copy(
                     editingStatusId = status.id,
                     content = source.text,
+                    contentRevision = it.contentRevision + 1,
                     contentWarning = source.spoilerText,
                     showContentWarning = source.spoilerText.isNotEmpty(),
                     visibility = StatusVisibility.entries.find { v -> v.name == status.visibility.name }
@@ -164,6 +165,7 @@ class ComposeViewModel @Inject constructor(
                             editingScheduledId = scheduled.id,
                             scheduledAt = scheduled.scheduledAt,
                             content = scheduled.text,
+                            contentRevision = it.contentRevision + 1,
                             contentWarning = scheduled.spoilerText.orEmpty(),
                             showContentWarning = scheduled.spoilerText != null,
                             visibility = StatusVisibility.entries.find { v -> v.value == scheduled.visibility }
@@ -717,6 +719,7 @@ class ComposeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             content = draft.content,
+                            contentRevision = it.contentRevision + 1,
                             visibility = StatusVisibility.entries.find { v -> v.value == draft.visibility }
                                 ?: StatusVisibility.PUBLIC,
                             contentWarning = draft.spoilerText ?: "",
@@ -933,7 +936,12 @@ data class ComposeUiState(
     /** The user marked the media as sensitive. */
     val sensitive: Boolean = false,
     /** ID of the own published post being edited. */
-    val editingStatusId: String? = null
+    val editingStatusId: String? = null,
+    /**
+     * Incremented when the ViewModel sets [content] itself (draft, scheduled or edited post
+     * loaded), so the text field takes it over; typed text only flows the other way.
+     */
+    val contentRevision: Int = 0
 ) {
     /** Length as Mastodon counts it (URLs, mentions, content warning). */
     val characterCount: Int by lazy {

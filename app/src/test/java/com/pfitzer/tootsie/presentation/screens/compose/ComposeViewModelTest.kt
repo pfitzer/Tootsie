@@ -291,6 +291,20 @@ class ComposeViewModelTest {
     }
 
     @Test
+    fun `only loaded text replaces the text field, typed text doesn't`() = runTest {
+        coEvery { draftRepository.getDraft(7L) } returns Result.Success(
+            DraftEntity(id = 7L, content = "From the draft", createdAt = 0L, updatedAt = 0L)
+        )
+        val viewModel = viewModel(SavedStateHandle(mapOf("draftId" to "7")))
+        assertEquals(1, viewModel.uiState.value.contentRevision)
+
+        viewModel.onAction(ComposeAction.UpdateContent("From the draft, edited"))
+
+        assertEquals(1, viewModel.uiState.value.contentRevision)
+        assertEquals("From the draft, edited", viewModel.uiState.value.content)
+    }
+
+    @Test
     fun `alt text is saved on the server`() = runTest {
         coEvery { draftRepository.getDraft(7L) } returns Result.Success(
             DraftEntity(id = 7L, content = "", mediaIds = "[\"m1\"]", createdAt = 0L, updatedAt = 0L)
