@@ -32,9 +32,9 @@ compose-googlefonts = "1.11.4"
 errorprone-annotations = "2.51.0"
 # Build tooling only: minimum versions for vulnerable transitive dependencies of AGP and
 # its lint tool (applied as constraints, so newer versions requested by AGP still win)
-build-jose4j = "0.9.6"
+build-jose4j = "0.9.7"
 build-jdom2 = "2.0.6.1"
-build-commons-lang3 = "3.18.0"
+build-commons-lang3 = "3.21.0"
 build-httpclient = "4.5.14"
 mockk = "1.14.11"
 
