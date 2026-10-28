@@ -159,6 +159,8 @@ app/
 
 ## ⚠️ Critical Development Guidelines
 
+Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 When contributing to Tootsie, please adhere to these architectural guardrails (details in [CLAUDE.md](CLAUDE.md)):
 
 1. **DataStore Reads**: Never use `.collect {}` on `DataStore.data` for one-time reads as it is a hot flow and will block infinitely. Always use `.first()`.
