@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an idea or an improvement for Tootsie
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your idea! Please check the [open feature requests](https://github.com/pfitzer/Tootsie/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What would you like to do that Tootsie doesn't support (well) yet?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should it work? Mockups or examples from other clients are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other solutions or workarounds you have considered
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: e.g. the Mastodon API endpoint or the minimum Mastodon version the feature needs
