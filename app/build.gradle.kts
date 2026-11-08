@@ -98,6 +98,16 @@ configurations.configureEach {
             because("BouncyCastle < 1.85 is affected by GHSA-9pwp-9qqc-pr26 and GHSA-qp49-qgx5-5m26")
         }
     }
+    // Guava comes in transitively: Media3 (in the APK), lint, KSP and the Hilt processors.
+    // GHSA-xxph-c9ww-hj94 is fixed in 33.7.2. A constraint only raises the version, newer
+    // requested versions still win.
+    if (isCanBeResolved) {
+        dependencyConstraints.add(
+            project.dependencies.constraints.create(libs.guava.get()) {
+                because("Guava <= 33.7.1 is affected by GHSA-xxph-c9ww-hj94")
+            }
+        )
+    }
 }
 
 // The lint tool classpath has the same vulnerable transitive dependencies as the build
