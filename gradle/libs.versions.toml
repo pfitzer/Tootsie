@@ -36,6 +36,9 @@ build-jose4j = "0.9.7"
 build-jdom2 = "2.0.6.1"
 build-commons-lang3 = "3.21.0"
 build-httpclient = "4.5.14"
+# Minimum Guava version (GHSA-xxph-c9ww-hj94), for the app (via Media3) and the build tooling.
+# The -jre version also provides the Android variant, Gradle picks it by attributes.
+guava = "33.7.2-jre"
 mockk = "1.14.11"
 
 [libraries]
@@ -140,6 +143,7 @@ build-jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "bu
 build-jdom2 = { group = "org.jdom", name = "jdom2", version.ref = "build-jdom2" }
 build-commons-lang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "build-commons-lang3" }
 build-httpclient = { group = "org.apache.httpcomponents", name = "httpclient", version.ref = "build-httpclient" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
